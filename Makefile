@@ -14,3 +14,4 @@ sprites:
 
 deploy:
 	cp build/isaac.sna /services/web/dev.spicausis.lv/isaac/
+	scp build/isaac.sna spicausis.lv:spicausis.lv/isaac/
