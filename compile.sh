@@ -4,4 +4,5 @@ $compiler \
   --outprefix=build/ \
   --nologo \
   --lst=build/source.lst \
+  --raw=build/build.raw \
   src/main.asm

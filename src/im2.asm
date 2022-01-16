@@ -1,36 +1,44 @@
-im2_table_base equ 0xd000
-
                 module im2
+                ; DE - handler routine
 
-Setup:          ; DE - handler routine
-                ld a, e
-                ld (smc + 1), a
-                ld a, d
-                ld (smc + 2), a
+jumpspace equ 0xfdfd
+table_base equ 0xfe00
 
+Setup:
                 di
-                ld hl, im2_table_base
+                pop hl
+                ld sp, jumpspace - 1
+                push hl
+
+                ld hl, jumpspace
+                xor a
+
+cleanup         ld (hl), a
+                inc hl
+                cp h
+                jr nz, cleanup
+
+                ld hl, jumpspace
+                ld (hl), 0xc3
+                inc hl
+                ld (hl), e
+                inc hl
+                ld (hl), d
+
+                ld hl, table_base
                 ld b, 129
 
                 ld a, h
                 ld i, a ; interrupt register hi
 
-.loop           ld (hl), 0xd1
+.loop           ld (hl), 0xfd
                 inc hl
-                ld (hl), 0xd1
+                ld (hl), 0xfd
                 inc hl
                 djnz .loop
 
                 im 2
                 ei
                 ret
-
-
-                ; interrupt table
-                org im2_table_base
-                defs 256
-
-                org 0xd1d1
-smc:            jp $0
 
                 endmodule

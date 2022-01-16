@@ -3,12 +3,14 @@
                 org 8000h
 
 Start:
-1               ld a, 0b110
-                out (254), a
-
                 ld de, InterruptRoutine
                 call im2.Setup
 
+                xor a
+                ld (The.timer), a
+
+                ld a, 0b110
+                out (254), a
 
                 ld hl, 0x4000
                 ld de, 182 * 32
@@ -26,21 +28,99 @@ Start:
                 inc e
                 jr nz, .loop
 
-                ld b, 64
-                ld c, 15
-
-aga:
-                ;ld hl, isaac_x
-                ;inc (hl)
-
-                ;inc c
-                ld a, (isaac_x)
+.again          
+                ld a, (The.isaac_x)
                 ld c, a
-                ld a, (isaac_y)
+                ld a, (The.isaac_y)
                 ld b, a
                 call Isaac
 
-                jr aga
+                ld a, (The.isaac_x)
+                add 18
+                ld c, a
+                ld a, (The.isaac_y)
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                add 36
+                ld c, a
+                ld a, (The.isaac_y)
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                ld c, a
+                ld a, (The.isaac_y)
+                add 24
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                add 18
+                ld c, a
+                ld a, (The.isaac_y)
+                add 24
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                add 36
+                ld c, a
+                ld a, (The.isaac_y)
+                add 24
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                ld c, a
+                ld a, (The.isaac_y)
+                add 48
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                add 18
+                ld c, a
+                ld a, (The.isaac_y)
+                add 48
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                add 36
+                ld c, a
+                ld a, (The.isaac_y)
+                add 48
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                ld c, a
+                ld a, (The.isaac_y)
+                add 64
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                add 18
+                ld c, a
+                ld a, (The.isaac_y)
+                add 64
+                ld b, a
+                call Isaac
+
+                ld a, (The.isaac_x)
+                add 36
+                ld c, a
+                ld a, (The.isaac_y)
+                add 64
+                ld b, a
+                call Isaac
+
+                call wait_vsync
+
+                jp .again
 
 
 InterruptRoutine:
@@ -51,32 +131,38 @@ InterruptRoutine:
                 push ix
                 push iy
 
+                ld hl, The.timer
+                inc (hl)
+
                 call keyboard.Read
                 ld a, (keyboard.movement)
                 bit keyboard.BIT_UP, a
                 jr z, no_up
 
-                ld hl, isaac_y
+                ld hl, The.isaac_y
                 dec (hl)
 no_up:
                 bit keyboard.BIT_DOWN, a
                 jr z, no_down
 
-                ld hl, isaac_y
+                ld hl, The.isaac_y
                 inc (hl)
 no_down:
                 bit keyboard.BIT_LEFT, a
                 jr z, no_left
 
-                ld hl, isaac_x
+                ld hl, The.isaac_x
                 dec (hl)
 no_left:
                 bit keyboard.BIT_RIGHT, a
                 jr z, no_right
 
-                ld hl, isaac_x
+                ld hl, The.isaac_x
                 inc (hl)
 no_right:
+
+                xor a
+                ld (vsync), a
 
                 pop iy
                 pop ix
@@ -87,8 +173,22 @@ no_right:
 
                 ei
                 reti
-isaac_x db 40
-isaac_y db 40
+vsync db 0
+
+wait_vsync:     ld a, 1
+                ld (vsync), a
+
+                ld a, 0b101
+                out (254), a
+
+k:              ld a, (vsync)
+                or a
+                jr nz, k
+
+                ld a, 0b110
+                out (254), a
+
+                ret
 
 
                 include "sprites.asm"
@@ -99,6 +199,8 @@ isaac_y db 40
                 ; do not put anything after this line
                 ; ----------------------------
                 include "im2.asm"
+
+                include "the.asm"
 
 	savesna "isaac.sna", Start
 

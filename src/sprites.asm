@@ -82,7 +82,7 @@ sprite_1ch:     ld a, c
                 ld (again+1), a
 again:          jr $
                 ; jump table to unwrapped implementations
-                jp s1_0 ; unused
+                jp s1_0
                 jp s1_1
                 jp s1_2
                 jp s1_3

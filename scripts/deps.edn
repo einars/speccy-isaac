@@ -1,0 +1,5 @@
+{ :deps  {
+          org.clojure/tools.trace {:mvn/version "0.7.11"}
+          }}
+
+

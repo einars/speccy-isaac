@@ -1,2 +1,5 @@
 /tools/
+/build/
 /sjasmplus
+/scripts/.cpcache/
+/scripts/.nrepl-port
