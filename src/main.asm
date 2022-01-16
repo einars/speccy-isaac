@@ -2,8 +2,15 @@
 
                 org 5f00h
 
-Start:
-                ld de, InterruptRoutine
+Start:          jr 1f
+
+                Ei
+                Di
+                rst 0
+                ; made in Latvia
+
+
+1               ld de, InterruptRoutine
                 call im2.Setup
 
                 xor a
