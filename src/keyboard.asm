@@ -37,28 +37,23 @@ done:           ld a, d
 movement db 0
 fire     db 0
 
-BIT_UP    equ 0
-BIT_LEFT  equ 1
-BIT_DOWN  equ 2
-BIT_RIGHT equ 3
-
-UP    equ 1 << BIT_UP
-LEFT  equ 1 << BIT_LEFT
-DOWN  equ 1 << BIT_DOWN
-RIGHT equ 1 << BIT_RIGHT
+MASK_UP    equ 1 << UP
+MASK_LEFT  equ 1 << LEFT
+MASK_DOWN  equ 1 << DOWN
+MASK_RIGHT equ 1 << RIGHT
 
 
 keymap          
-                db 0xfb, 0b00000010, UP ; W
-                db 0xfd, 0b00000001, LEFT ; A
-                db 0xfd, 0b00000010, DOWN ; S
-                db 0xfd, 0b00000100, RIGHT ; D
+                db 0xfb, 0b00000010, MASK_UP ; W
+                db 0xfd, 0b00000001, MASK_LEFT ; A
+                db 0xfd, 0b00000010, MASK_DOWN ; S
+                db 0xfd, 0b00000100, MASK_RIGHT ; D
 
                 ; cursor joystick
-                db 0xf7, 0b00010000, LEFT
-                db 0xef, 0b00010000, DOWN
-                db 0xef, 0b00000100, RIGHT
-                db 0xef, 0b00001000, UP
+                db 0xf7, 0b00010000, MASK_LEFT
+                db 0xef, 0b00010000, MASK_DOWN
+                db 0xef, 0b00000100, MASK_RIGHT
+                db 0xef, 0b00001000, MASK_UP
 
                 db 0
 

@@ -17,7 +17,3 @@ LineInc_DE      macro
 .q:
 
                 endm
-
-
-
-; vim: set sw=16 :

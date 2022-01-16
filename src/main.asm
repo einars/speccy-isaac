@@ -1,6 +1,6 @@
                 device zxspectrum48
 
-                org 8000h
+                org 5f00h
 
 Start:
                 ld de, InterruptRoutine
@@ -13,20 +13,16 @@ Start:
                 out (254), a
 
                 ld hl, 0x4000
-                ld de, 182 * 32
-                xor a
-.loop 
+                ld de, 0x4001
+                ld bc, 192 * 32 - 1
+                ld a, 0b10001000
                 ld (hl), a
-                inc hl
-                dec de
+                ldir
+                ld bc, 798 - 1
+                ld a, Color.white + Bg.blue + Color.bright
+                ld (hl), a
+                ldir
 
-                dec d
-                inc d
-                jr nz, .loop
-
-                dec e
-                inc e
-                jr nz, .loop
 
 .again          
                 ld a, (The.isaac_x)
@@ -35,90 +31,7 @@ Start:
                 ld b, a
                 call Isaac
 
-                ld a, (The.isaac_x)
-                add 18
-                ld c, a
-                ld a, (The.isaac_y)
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                add 36
-                ld c, a
-                ld a, (The.isaac_y)
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                ld c, a
-                ld a, (The.isaac_y)
-                add 24
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                add 18
-                ld c, a
-                ld a, (The.isaac_y)
-                add 24
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                add 36
-                ld c, a
-                ld a, (The.isaac_y)
-                add 24
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                ld c, a
-                ld a, (The.isaac_y)
-                add 48
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                add 18
-                ld c, a
-                ld a, (The.isaac_y)
-                add 48
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                add 36
-                ld c, a
-                ld a, (The.isaac_y)
-                add 48
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                ld c, a
-                ld a, (The.isaac_y)
-                add 64
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                add 18
-                ld c, a
-                ld a, (The.isaac_y)
-                add 64
-                ld b, a
-                call Isaac
-
-                ld a, (The.isaac_x)
-                add 36
-                ld c, a
-                ld a, (The.isaac_y)
-                add 64
-                ld b, a
-                call Isaac
-
-                call wait_vsync
+                halt
 
                 jp .again
 
@@ -136,29 +49,38 @@ InterruptRoutine:
 
                 call keyboard.Read
                 ld a, (keyboard.movement)
-                bit keyboard.BIT_UP, a
+                bit UP, a
                 jr z, no_up
 
                 ld hl, The.isaac_y
                 dec (hl)
+                ld hl, The.isaac_moving
+                ld (hl), UP
 no_up:
-                bit keyboard.BIT_DOWN, a
+                bit DOWN, a
                 jr z, no_down
 
                 ld hl, The.isaac_y
                 inc (hl)
+                ld hl, The.isaac_moving
+                ld (hl), DOWN
 no_down:
-                bit keyboard.BIT_LEFT, a
+                bit LEFT, a
                 jr z, no_left
 
                 ld hl, The.isaac_x
                 dec (hl)
+                ld hl, The.isaac_moving
+                ld (hl), LEFT
 no_left:
-                bit keyboard.BIT_RIGHT, a
+                bit RIGHT, a
                 jr z, no_right
 
                 ld hl, The.isaac_x
                 inc (hl)
+                ld hl, The.isaac_moving
+                ld (hl), RIGHT
+
 no_right:
 
                 xor a
@@ -191,8 +113,12 @@ k:              ld a, (vsync)
                 ret
 
 
-                include "sprites.asm"
+                include "the.asm"
+
+                include "draw.asm"
                 include "keyboard.asm"
+
+                include "generated-sprites.asm"
 
 
 
@@ -200,7 +126,6 @@ k:              ld a, (vsync)
                 ; ----------------------------
                 include "im2.asm"
 
-                include "the.asm"
 
 	savesna "isaac.sna", Start
 

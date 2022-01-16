@@ -46,21 +46,26 @@
 (defn binary-s [bs]
   (format "0b%s" (str/join "" bs)))
 
-(defn column-to-string [label n pix-col mask-col]
-  (str/join "\n"
+(defn column-to-string [pix-col mask-col]
+  (str/join
+    "\n"
     (concat
-      [(format "%s_%s:" (str/replace label "." "_") n)]
-      (map
-        (fn [[pix mask]]
-          (format "                db %s, %s" (binary-s mask) (binary-s pix)))
-        (partition-all 2 (interleave pix-col mask-col))))))
+      [(format "                db %d" (count pix-col))]
+      (map (fn [[pix mask]]
+             (format "                db %s, %s" (binary-s mask) (binary-s pix)))
+           (partition-all 2 (interleave pix-col mask-col)))
+      )))
 
-(defn sprite-to-string [{:keys [label pixels masks height-pixels]}]
-  (str/join "\n"
-    (mapv
-      (fn [[pix mask] n] (column-to-string label n pix mask))
-      (partition-all 2 (interleave pixels masks))
-      (range))))
+(defn sprite-to-string [{:keys [label pixels masks width-chars height-pixels]}]
+  (let [label (str/replace label "." "_")
+        asm (if (= 1 width-chars)
+              (column-to-string (first pixels) (first masks))
+              (str/join "\n\n"
+                        (mapv
+                          (fn [[pix mask]] (column-to-string pix mask))
+                          (partition-all 2 (interleave pixels masks))
+                          )))]
+    (format "%s:\n%s\n                db 0" label asm))) ; end flag
 
 
 

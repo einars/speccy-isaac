@@ -8,3 +8,6 @@ run:
 
 watch:
 	watchexec -W -w src ./compile.sh
+
+sprites:
+	cd scripts && clj parse-sprites.clj
