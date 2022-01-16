@@ -1,0 +1,688 @@
+# file opened: src/main.asm
+  1   0000                              device zxspectrum48
+  2   0000
+  3   0000                              org 8500h
+  4   8500
+  5   8500              ScreenBase equ 4000h
+  6   8500              ScreenLines equ 182
+  7   8500              ScreenCharsPerLine equ 32
+  8   8500
+  9   8500              start:
+ 10   8500 F3                           di
+ 11   8501
+ 12   8501 3E 06                        ld a, 0b110
+ 13   8503 D3 FE                        out (254), a
+ 14   8505
+ 15   8505
+ 16   8505 21 00 40                     ld hl, ScreenBase
+ 17   8508 11 C0 16                     ld de, ScreenLines * ScreenCharsPerLine
+ 18   850B 3E 00                        ld a, 0
+ 19   850D              .loop:
+ 20   850D 77                           ld (hl), a
+ 21   850E 23                           inc hl
+ 22   850F 1B                           dec de
+ 23   8510
+ 24   8510 15                           dec d
+ 25   8511 14                           inc d
+ 26   8512 20 F9                        jr nz, .loop
+ 27   8514
+ 28   8514 1D                           dec e
+ 29   8515 1C                           inc e
+ 30   8516 20 F5                        jr nz, .loop
+ 31   8518
+ 32   8518 06 40                        ld b, 64
+ 33   851A 0E 0F                        ld c, 15
+ 34   851C
+ 35   851C              aga:
+ 36   851C                              ;inc c
+ 37   851C 79                           ld a, c
+ 38   851D FE F0                        cp 240
+ 39   851F 38 02                        jr c, 1f
+ 40   8521 3E 0F                        ld a, 15
+ 41   8523 4F           1:              ld c, a
+ 42   8524 C5                           push bc
+ 43   8525 CD 65 85                     call Isaac
+ 44   8528 C1                           pop bc
+ 45   8529
+ 46   8529 C5                           push bc
+ 47   852A 78                           ld a, b
+ 48   852B 80 C6 1E                     add b, 30
+ 49   852E 47                           ld b, a
+ 50   852F CD 65 85                     call Isaac
+ 51   8532 C1                           pop bc
+ 52   8533
+ 53   8533 C5                           push bc
+ 54   8534 78                           ld a, b
+ 55   8535 80 C6 3C                     add b, 60
+ 56   8538 47                           ld b, a
+ 57   8539 CD 65 85                     call Isaac
+ 58   853C C1                           pop bc
+ 59   853D
+ 60   853D 18 DD                        jr aga
+ 61   853F
+ 62   853F                              ;ld de, 4004h
+ 63   853F                              ;ld c, 0
+ 64   853F                              ;call Isaac
+ 65   853F
+ 66   853F                              ;ld de, 4008h
+ 67   853F                              ;ld c, 5
+ 68   853F                              ;call Isaac
+ 69   853F
+ 70   853F 76                           halt
+ 71   8540
+ 72   8540                              include "sprites.asm"
+# file opened: src/sprites.asm
+  1+  8540                              include "utils.asm"
+# file opened: src/utils.asm
+  1++ 8540              LineInc_DE      macro
+  2++ 8540 ~
+  3++ 8540 ~                            ; move down a pixel line
+  4++ 8540 ~                            ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+  5++ 8540 ~
+  6++ 8540 ~                            inc d
+  7++ 8540 ~                            ld a, d
+  8++ 8540 ~                            and 7
+  9++ 8540 ~                            jr nz, .q
+ 10++ 8540 ~                            ld a, e
+ 11++ 8540 ~                            add a, 32
+ 12++ 8540 ~                            ld e, a
+ 13++ 8540 ~                            jr c, .q
+ 14++ 8540 ~                            ld a, d
+ 15++ 8540 ~                            sub 8
+ 16++ 8540 ~                            ld d, a
+ 17++ 8540 ~            .q:
+ 18++ 8540 ~
+ 19++ 8540                              endm
+ 20++ 8540
+ 21++ 8540
+ 22++ 8540
+ 23++ 8540              ; vim: set sw=16 :
+ 24++ 8540
+# file closed: src/utils.asm
+  2+  8540
+  3+  8540                              include "sprite-isaac.asm"
+# file opened: src/sprite-isaac.asm
+  1++ 8540              head_c1:
+  2++ 8540 FF                           db 0b11111111
+  3++ 8541 FF                           db 0b11111111
+  4++ 8542 FC                           db 0b11111100
+  5++ 8543 F0                           db 0b11110000
+  6++ 8544 E0                           db 0b11100000
+  7++ 8545 C0                           db 0b11000000
+  8++ 8546 C0                           db 0b11000000
+  9++ 8547 98                           db 0b10011000
+ 10++ 8548
+ 11++ 8548 B4                           db 0b10110100
+ 12++ 8549 BC                           db 0b10111100
+ 13++ 854A 98                           db 0b10011000
+ 14++ 854B C3                           db 0b11000011
+ 15++ 854C C2                           db 0b11000010
+ 16++ 854D E1                           db 0b11100001
+ 17++ 854E F0                           db 0b11110000
+ 18++ 854F FC                           db 0b11111100
+ 19++ 8550
+ 20++ 8550              head_c2:
+ 21++ 8550 FF                           db 0b11111111
+ 22++ 8551 FF                           db 0b11111111
+ 23++ 8552 3F                           db 0b00111111
+ 24++ 8553 0F                           db 0b00001111
+ 25++ 8554 07                           db 0b00000111
+ 26++ 8555 03                           db 0b00000011
+ 27++ 8556 03                           db 0b00000011
+ 28++ 8557 19                           db 0b00011001
+ 29++ 8558
+ 30++ 8558 35                           db 0b00110101
+ 31++ 8559 3D                           db 0b00111101
+ 32++ 855A 19                           db 0b00011001
+ 33++ 855B C3                           db 0b11000011
+ 34++ 855C 43                           db 0b01000011
+ 35++ 855D 87                           db 0b10000111
+ 36++ 855E 0F                           db 0b00001111
+ 37++ 855F 3F                           db 0b00111111
+ 38++ 8560
+ 39++ 8560              body:
+ 40++ 8560 3C                           db 0b00111100
+ 41++ 8561 A1                           db 0b10100001
+ 42++ 8562 A1                           db 0b10100001
+ 43++ 8563 CB                           db 0b11001011
+ 44++ 8564 CB                           db 0b11001011
+ 45++ 8565
+ 46++ 8565              ; vim: set sw=16 ts=16 :
+ 47++ 8565
+# file closed: src/sprite-isaac.asm
+  4+  8565              Isaac:
+  5+  8565                              ; BC: x, y; base of the legs
+  6+  8565
+  7+  8565 C5                           push bc
+  8+  8566 79                           ld a, c
+  9+  8567 D6 08                        sub 8
+ 10+  8569 4F                           ld c, a
+ 11+  856A 78                           ld a, b
+ 12+  856B D6 15                        sub 21
+ 13+  856D 47                           ld b, a
+ 14+  856E CD 9D 85                     call xy_to_pos
+ 15+  8571 4F                           ld c, a
+ 16+  8572 EB                           ex hl, de
+ 17+  8573
+ 18+  8573 D5                           push de
+ 19+  8574
+ 20+  8574 21 40 85                     ld hl, head_c1
+ 21+  8577 06 10                        ld b, 16
+ 22+  8579 CD B7 85                     call sprite_1ch
+ 23+  857C
+ 24+  857C D1                           pop de
+ 25+  857D 13                           inc de
+ 26+  857E
+ 27+  857E 21 50 85                     ld hl, head_c2
+ 28+  8581 06 10                        ld b, 16
+ 29+  8583 CD BD 85                     call again
+ 30+  8586
+ 31+  8586 C1                           pop bc
+ 32+  8587 79                           ld a, c
+ 33+  8588 D6 04                        sub 4
+ 34+  858A 4F                           ld c, a
+ 35+  858B 78                           ld a, b
+ 36+  858C D6 05                        sub 5
+ 37+  858E 47                           ld b, a
+ 38+  858F CD 9D 85                     call xy_to_pos
+ 39+  8592 4F                           ld c, a
+ 40+  8593 EB                           ex hl, de
+ 41+  8594
+ 42+  8594 21 60 85                     ld hl, body
+ 43+  8597 06 05                        ld b, 5
+ 44+  8599 CD B7 85                     call sprite_1ch
+ 45+  859C
+ 46+  859C C9                           ret
+ 47+  859D
+ 48+  859D
+ 49+  859D              xy_to_pos:      ; b = y (0..191)
+ 50+  859D                              ; c = x (0..255)
+ 51+  859D                              ; out:
+ 52+  859D                              ; HL - screen address
+ 53+  859D                              ; A - scroll offset
+ 54+  859D
+ 55+  859D 26 00                        ld  h, 0
+ 56+  859F 68                           ld  l, b            ; hl = row
+ 57+  85A0 29                           add hl, hl          ; hl = row number * 2
+ 58+  85A1 11 00 87                     ld  de, screen_map  ; de = screen map
+ 59+  85A4 19                           add hl, de          ; de = screen_map + (row * 2)
+ 60+  85A5 7E                           ld  a, (hl)         ; ld hl, (hl)
+ 61+  85A6 23                           inc hl
+ 62+  85A7 66                           ld  h, (hl)
+ 63+  85A8 6F                           ld  l, a            ; hl = address of first pixel in screen map
+ 64+  85A9
+ 65+  85A9 16 00                        ld  d, 0
+ 66+  85AB 79                           ld  a, c
+ 67+  85AC 0F                           rrca
+ 68+  85AD 0F                           rrca
+ 69+  85AE 0F                           rrca
+ 70+  85AF E6 1F                        and 0b00011111
+ 71+  85B1 5F                           ld e, a             ; de = X (character based)
+ 72+  85B2 19                           add hl, de          ; hl = screen addr + 32
+ 73+  85B3 79                           ld a, c
+ 74+  85B4 E6 07                        and 7
+ 75+  85B6 C9                           ret
+ 76+  85B7
+ 77+  85B7
+ 78+  85B7                              ; kills hl, bc, de
+ 79+  85B7 79           sprite_1ch:     ld a, c
+ 80+  85B8 81                           add a, c
+ 81+  85B9 81                           add a, c
+ 82+  85BA 32 BE 85                     ld (again+1), a
+ 83+  85BD 18 FE        again:          jr $
+ 84+  85BF                              ; jump table to unwrapped implementations
+ 85+  85BF C3 D7 85                     jp s1_0 ; unused
+ 86+  85C2 C3 ED 85                     jp s1_1
+ 87+  85C5 C3 13 86                     jp s1_2
+ 88+  85C8 C3 3A 86                     jp s1_3
+ 89+  85CB C3 62 86                     jp s1_4
+ 90+  85CE C3 8B 86                     jp s1_5
+ 91+  85D1 C3 B3 86                     jp s1_6
+ 92+  85D4 C3 DA 86                     jp s1_7
+ 93+  85D7
+ 94+  85D7              s1_0:
+ 95+  85D7 7E                           ld a, (hl)
+ 96+  85D8 12                           ld (de), a
+ 97+  85D9
+ 98+  85D9                              LineInc_DE
+ 98+  85D9             >
+ 98+  85D9             >                ; move down a pixel line
+ 98+  85D9             >                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+ 98+  85D9             >
+ 98+  85D9 14          >                inc d
+ 98+  85DA 7A          >                ld a, d
+ 98+  85DB E6 07       >                and 7
+ 98+  85DD 20 0A       >                jr nz, .q
+ 98+  85DF 7B          >                ld a, e
+ 98+  85E0 C6 20       >                add a, 32
+ 98+  85E2 5F          >                ld e, a
+ 98+  85E3 38 04       >                jr c, .q
+ 98+  85E5 7A          >                ld a, d
+ 98+  85E6 D6 08       >                sub 8
+ 98+  85E8 57          >                ld d, a
+ 98+  85E9             >.q:
+ 98+  85E9             >
+ 99+  85E9
+100+  85E9 23                           inc hl
+101+  85EA 10 EB                        djnz s1_0
+102+  85EC C9                           ret
+103+  85ED
+104+  85ED 7E           s1_1:           ld a, (hl)
+105+  85EE 0F                           rrca
+106+  85EF 4F                           ld c, a
+107+  85F0 E6 7F                        and 0b01111111
+108+  85F2 EB                           ex hl, de
+109+  85F3 B6                           or (hl)
+110+  85F4 EB                           ex hl, de
+111+  85F5 12                           ld (de), a
+112+  85F6
+113+  85F6 13                           inc de
+114+  85F7
+115+  85F7 79                           ld a, c
+116+  85F8 E6 80                        and 0b10000000
+117+  85FA EB                           ex hl, de
+118+  85FB B6                           or (hl)
+119+  85FC EB                           ex hl, de
+120+  85FD 12                           ld (de), a
+121+  85FE
+122+  85FE 1B                           dec de
+123+  85FF
+124+  85FF                              LineInc_DE
+124+  85FF             >
+124+  85FF             >                ; move down a pixel line
+124+  85FF             >                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+124+  85FF             >
+124+  85FF 14          >                inc d
+124+  8600 7A          >                ld a, d
+124+  8601 E6 07       >                and 7
+124+  8603 20 0A       >                jr nz, .q
+124+  8605 7B          >                ld a, e
+124+  8606 C6 20       >                add a, 32
+124+  8608 5F          >                ld e, a
+124+  8609 38 04       >                jr c, .q
+124+  860B 7A          >                ld a, d
+124+  860C D6 08       >                sub 8
+124+  860E 57          >                ld d, a
+124+  860F             >.q:
+124+  860F             >
+125+  860F 23                           inc hl
+126+  8610
+127+  8610 10 DB                        djnz s1_1
+128+  8612 C9                           ret
+129+  8613
+130+  8613 7E           s1_2:           ld a, (hl)
+131+  8614 0F                           rrca
+132+  8615 0F                           rrca
+133+  8616 4F                           ld c, a
+134+  8617 E6 3F                        and 0b00111111
+135+  8619 EB                           ex hl, de
+136+  861A B6                           or (hl)
+137+  861B EB                           ex hl, de
+138+  861C 12                           ld (de), a
+139+  861D
+140+  861D 13                           inc de
+141+  861E
+142+  861E 79                           ld a, c
+143+  861F E6 C0                        and 0b11000000
+144+  8621 EB                           ex hl, de
+145+  8622 B6                           or (hl)
+146+  8623 EB                           ex hl, de
+147+  8624 12                           ld (de), a
+148+  8625
+149+  8625 1B                           dec de
+150+  8626
+151+  8626                              LineInc_DE
+151+  8626             >
+151+  8626             >                ; move down a pixel line
+151+  8626             >                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+151+  8626             >
+151+  8626 14          >                inc d
+151+  8627 7A          >                ld a, d
+151+  8628 E6 07       >                and 7
+151+  862A 20 0A       >                jr nz, .q
+151+  862C 7B          >                ld a, e
+151+  862D C6 20       >                add a, 32
+151+  862F 5F          >                ld e, a
+151+  8630 38 04       >                jr c, .q
+151+  8632 7A          >                ld a, d
+151+  8633 D6 08       >                sub 8
+151+  8635 57          >                ld d, a
+151+  8636             >.q:
+151+  8636             >
+152+  8636 23                           inc hl
+153+  8637
+154+  8637 10 DA                        djnz s1_2
+155+  8639 C9                           ret
+156+  863A
+157+  863A 7E           s1_3:           ld a, (hl)
+158+  863B 0F                           rrca
+159+  863C 0F                           rrca
+160+  863D 0F                           rrca
+161+  863E 4F                           ld c, a
+162+  863F E6 1F                        and 0b00011111
+163+  8641 EB                           ex hl, de
+164+  8642 B6                           or (hl)
+165+  8643 EB                           ex hl, de
+166+  8644 12                           ld (de), a
+167+  8645
+168+  8645 13                           inc de
+169+  8646
+170+  8646 79                           ld a, c
+171+  8647 E6 E0                        and 0b11100000
+172+  8649 EB                           ex hl, de
+173+  864A B6                           or (hl)
+174+  864B EB                           ex hl, de
+175+  864C 12                           ld (de), a
+176+  864D
+177+  864D 1B                           dec de
+178+  864E
+179+  864E                              LineInc_DE
+179+  864E             >
+179+  864E             >                ; move down a pixel line
+179+  864E             >                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+179+  864E             >
+179+  864E 14          >                inc d
+179+  864F 7A          >                ld a, d
+179+  8650 E6 07       >                and 7
+179+  8652 20 0A       >                jr nz, .q
+179+  8654 7B          >                ld a, e
+179+  8655 C6 20       >                add a, 32
+179+  8657 5F          >                ld e, a
+179+  8658 38 04       >                jr c, .q
+179+  865A 7A          >                ld a, d
+179+  865B D6 08       >                sub 8
+179+  865D 57          >                ld d, a
+179+  865E             >.q:
+179+  865E             >
+180+  865E 23                           inc hl
+181+  865F
+182+  865F 10 D9                        djnz s1_3
+183+  8661 C9                           ret
+184+  8662
+185+  8662 7E           s1_4:           ld a, (hl)
+186+  8663 0F                           rrca
+187+  8664 0F                           rrca
+188+  8665 0F                           rrca
+189+  8666 0F                           rrca
+190+  8667 4F                           ld c, a
+191+  8668 E6 0F                        and 0b00001111
+192+  866A EB                           ex hl, de
+193+  866B B6                           or (hl)
+194+  866C EB                           ex hl, de
+195+  866D 12                           ld (de), a
+196+  866E
+197+  866E 13                           inc de
+198+  866F
+199+  866F 79                           ld a, c
+200+  8670 E6 F0                        and 0b11110000
+201+  8672 EB                           ex hl, de
+202+  8673 B6                           or (hl)
+203+  8674 EB                           ex hl, de
+204+  8675 12                           ld (de), a
+205+  8676
+206+  8676 1B                           dec de
+207+  8677
+208+  8677                              LineInc_DE
+208+  8677             >
+208+  8677             >                ; move down a pixel line
+208+  8677             >                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+208+  8677             >
+208+  8677 14          >                inc d
+208+  8678 7A          >                ld a, d
+208+  8679 E6 07       >                and 7
+208+  867B 20 0A       >                jr nz, .q
+208+  867D 7B          >                ld a, e
+208+  867E C6 20       >                add a, 32
+208+  8680 5F          >                ld e, a
+208+  8681 38 04       >                jr c, .q
+208+  8683 7A          >                ld a, d
+208+  8684 D6 08       >                sub 8
+208+  8686 57          >                ld d, a
+208+  8687             >.q:
+208+  8687             >
+209+  8687 23                           inc hl
+210+  8688
+211+  8688 10 D8                        djnz s1_4
+212+  868A C9                           ret
+213+  868B
+214+  868B
+215+  868B 7E           s1_5:           ld a, (hl)
+216+  868C 07                           rlca
+217+  868D 07                           rlca
+218+  868E 07                           rlca
+219+  868F 4F                           ld c, a
+220+  8690 E6 07                        and 0b00000111
+221+  8692 EB                           ex hl, de
+222+  8693 B6                           or (hl)
+223+  8694 EB                           ex hl, de
+224+  8695 12                           ld (de), a
+225+  8696
+226+  8696 13                           inc de
+227+  8697
+228+  8697 79                           ld a, c
+229+  8698 E6 F8                        and 0b11111000
+230+  869A EB                           ex hl, de
+231+  869B B6                           or (hl)
+232+  869C EB                           ex hl, de
+233+  869D 12                           ld (de), a
+234+  869E
+235+  869E 1B                           dec de
+236+  869F
+237+  869F                              LineInc_DE
+237+  869F             >
+237+  869F             >                ; move down a pixel line
+237+  869F             >                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+237+  869F             >
+237+  869F 14          >                inc d
+237+  86A0 7A          >                ld a, d
+237+  86A1 E6 07       >                and 7
+237+  86A3 20 0A       >                jr nz, .q
+237+  86A5 7B          >                ld a, e
+237+  86A6 C6 20       >                add a, 32
+237+  86A8 5F          >                ld e, a
+237+  86A9 38 04       >                jr c, .q
+237+  86AB 7A          >                ld a, d
+237+  86AC D6 08       >                sub 8
+237+  86AE 57          >                ld d, a
+237+  86AF             >.q:
+237+  86AF             >
+238+  86AF 23                           inc hl
+239+  86B0
+240+  86B0 10 D9                        djnz s1_5
+241+  86B2 C9                           ret
+242+  86B3
+243+  86B3 7E           s1_6:           ld a, (hl)
+244+  86B4 07                           rlca
+245+  86B5 07                           rlca
+246+  86B6 4F                           ld c, a
+247+  86B7 E6 03                        and 0b00000011
+248+  86B9 EB                           ex hl, de
+249+  86BA B6                           or (hl)
+250+  86BB EB                           ex hl, de
+251+  86BC 12                           ld (de), a
+252+  86BD
+253+  86BD 13                           inc de
+254+  86BE
+255+  86BE 79                           ld a, c
+256+  86BF E6 FC                        and 0b11111100
+257+  86C1 EB                           ex hl, de
+258+  86C2 B6                           or (hl)
+259+  86C3 EB                           ex hl, de
+260+  86C4 12                           ld (de), a
+261+  86C5
+262+  86C5 1B                           dec de
+263+  86C6
+264+  86C6                              LineInc_DE
+264+  86C6             >
+264+  86C6             >                ; move down a pixel line
+264+  86C6             >                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+264+  86C6             >
+264+  86C6 14          >                inc d
+264+  86C7 7A          >                ld a, d
+264+  86C8 E6 07       >                and 7
+264+  86CA 20 0A       >                jr nz, .q
+264+  86CC 7B          >                ld a, e
+264+  86CD C6 20       >                add a, 32
+264+  86CF 5F          >                ld e, a
+264+  86D0 38 04       >                jr c, .q
+264+  86D2 7A          >                ld a, d
+264+  86D3 D6 08       >                sub 8
+264+  86D5 57          >                ld d, a
+264+  86D6             >.q:
+264+  86D6             >
+265+  86D6 23                           inc hl
+266+  86D7
+267+  86D7 10 DA                        djnz s1_6
+268+  86D9 C9                           ret
+269+  86DA
+270+  86DA 7E           s1_7:           ld a, (hl)
+271+  86DB 07                           rlca
+272+  86DC 4F                           ld c, a
+273+  86DD E6 01                        and 0b00000001
+274+  86DF EB                           ex hl, de
+275+  86E0 B6                           or (hl)
+276+  86E1 EB                           ex hl, de
+277+  86E2 12                           ld (de), a
+278+  86E3
+279+  86E3 13                           inc de
+280+  86E4
+281+  86E4 79                           ld a, c
+282+  86E5 E6 FE                        and 0b11111110
+283+  86E7 EB                           ex hl, de
+284+  86E8 B6                           or (hl)
+285+  86E9 EB                           ex hl, de
+286+  86EA 12                           ld (de), a
+287+  86EB
+288+  86EB 1B                           dec de
+289+  86EC
+290+  86EC                              LineInc_DE
+290+  86EC             >
+290+  86EC             >                ; move down a pixel line
+290+  86EC             >                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+290+  86EC             >
+290+  86EC 14          >                inc d
+290+  86ED 7A          >                ld a, d
+290+  86EE E6 07       >                and 7
+290+  86F0 20 0A       >                jr nz, .q
+290+  86F2 7B          >                ld a, e
+290+  86F3 C6 20       >                add a, 32
+290+  86F5 5F          >                ld e, a
+290+  86F6 38 04       >                jr c, .q
+290+  86F8 7A          >                ld a, d
+290+  86F9 D6 08       >                sub 8
+290+  86FB 57          >                ld d, a
+290+  86FC             >.q:
+290+  86FC             >
+291+  86FC 23                           inc hl
+292+  86FD
+293+  86FD 10 DB                        djnz s1_7
+294+  86FF C9                           ret
+295+  8700
+296+  8700              screen_map:
+297+  8700 00 40 00 41                  dw 4000h, 4100h, 4200h, 4300h
+297+  8704 00 42 00 43
+298+  8708 00 44 00 45                  dw 4400h, 4500h, 4600h, 4700h
+298+  870C 00 46 00 47
+299+  8710 20 40 20 41                  dw 4020h, 4120h, 4220h, 4320h
+299+  8714 20 42 20 43
+300+  8718 20 44 20 45                  dw 4420h, 4520h, 4620h, 4720h
+300+  871C 20 46 20 47
+301+  8720 40 40 40 41                  dw 4040h, 4140h, 4240h, 4340h
+301+  8724 40 42 40 43
+302+  8728 40 44 40 45                  dw 4440h, 4540h, 4640h, 4740h
+302+  872C 40 46 40 47
+303+  8730 60 40 60 41                  dw 4060h, 4160h, 4260h, 4360h
+303+  8734 60 42 60 43
+304+  8738 60 44 60 45                  dw 4460h, 4560h, 4660h, 4760h
+304+  873C 60 46 60 47
+305+  8740 80 40 80 41                  dw 4080h, 4180h, 4280h, 4380h
+305+  8744 80 42 80 43
+306+  8748 80 44 80 45                  dw 4480h, 4580h, 4680h, 4780h
+306+  874C 80 46 80 47
+307+  8750 A0 40 A0 41                  dw 40A0h, 41A0h, 42A0h, 43A0h
+307+  8754 A0 42 A0 43
+308+  8758 A0 44 A0 45                  dw 44A0h, 45A0h, 46A0h, 47A0h
+308+  875C A0 46 A0 47
+309+  8760 C0 40 C0 41                  dw 40C0h, 41C0h, 42C0h, 43C0h
+309+  8764 C0 42 C0 43
+310+  8768 C0 44 C0 45                  dw 44C0h, 45C0h, 46C0h, 47C0h
+310+  876C C0 46 C0 47
+311+  8770 E0 40 E0 41                  dw 40E0h, 41E0h, 42E0h, 43E0h
+311+  8774 E0 42 E0 43
+312+  8778 E0 44 E0 45                  dw 44E0h, 45E0h, 46E0h, 47E0h
+312+  877C E0 46 E0 47
+313+  8780 00 48 00 49                  dw 4800h, 4900h, 4A00h, 4B00h
+313+  8784 00 4A 00 4B
+314+  8788 00 4C 00 4D                  dw 4C00h, 4D00h, 4E00h, 4F00h
+314+  878C 00 4E 00 4F
+315+  8790 20 48 20 49                  dw 4820h, 4920h, 4A20h, 4B20h
+315+  8794 20 4A 20 4B
+316+  8798 20 4C 20 4D                  dw 4C20h, 4D20h, 4E20h, 4F20h
+316+  879C 20 4E 20 4F
+317+  87A0 40 48 40 49                  dw 4840h, 4940h, 4A40h, 4B40h
+317+  87A4 40 4A 40 4B
+318+  87A8 40 4C 40 4D                  dw 4C40h, 4D40h, 4E40h, 4F40h
+318+  87AC 40 4E 40 4F
+319+  87B0 60 48 60 49                  dw 4860h, 4960h, 4A60h, 4B60h
+319+  87B4 60 4A 60 4B
+320+  87B8 60 4C 60 4D                  dw 4C60h, 4D60h, 4E60h, 4F60h
+320+  87BC 60 4E 60 4F
+321+  87C0 80 48 80 49                  dw 4880h, 4980h, 4A80h, 4B80h
+321+  87C4 80 4A 80 4B
+322+  87C8 80 4C 80 4D                  dw 4C80h, 4D80h, 4E80h, 4F80h
+322+  87CC 80 4E 80 4F
+323+  87D0 A0 48 A0 49                  dw 48A0h, 49A0h, 4AA0h, 4BA0h
+323+  87D4 A0 4A A0 4B
+324+  87D8 A0 4C A0 4D                  dw 4CA0h, 4DA0h, 4EA0h, 4FA0h
+324+  87DC A0 4E A0 4F
+325+  87E0 C0 48 C0 49                  dw 48C0h, 49C0h, 4AC0h, 4BC0h
+325+  87E4 C0 4A C0 4B
+326+  87E8 C0 4C C0 4D                  dw 4CC0h, 4DC0h, 4EC0h, 4FC0h
+326+  87EC C0 4E C0 4F
+327+  87F0 E0 48 E0 49                  dw 48E0h, 49E0h, 4AE0h, 4BE0h
+327+  87F4 E0 4A E0 4B
+328+  87F8 E0 4C E0 4D                  dw 4CE0h, 4DE0h, 4EE0h, 4FE0h
+328+  87FC E0 4E E0 4F
+329+  8800 00 50 00 51                  dw 5000h, 5100h, 5200h, 5300h
+329+  8804 00 52 00 53
+330+  8808 00 54 00 55                  dw 5400h, 5500h, 5600h, 5700h
+330+  880C 00 56 00 57
+331+  8810 20 50 20 51                  dw 5020h, 5120h, 5220h, 5320h
+331+  8814 20 52 20 53
+332+  8818 20 54 20 55                  dw 5420h, 5520h, 5620h, 5720h
+332+  881C 20 56 20 57
+333+  8820 40 50 40 51                  dw 5040h, 5140h, 5240h, 5340h
+333+  8824 40 52 40 53
+334+  8828 40 54 40 55                  dw 5440h, 5540h, 5640h, 5740h
+334+  882C 40 56 40 57
+335+  8830 60 50 60 51                  dw 5060h, 5160h, 5260h, 5360h
+335+  8834 60 52 60 53
+336+  8838 60 54 60 55                  dw 5460h, 5560h, 5660h, 5760h
+336+  883C 60 56 60 57
+337+  8840 80 50 80 51                  dw 5080h, 5180h, 5280h, 5380h
+337+  8844 80 52 80 53
+338+  8848 80 54 80 55                  dw 5480h, 5580h, 5680h, 5780h
+338+  884C 80 56 80 57
+339+  8850 A0 50 A0 51                  dw 50A0h, 51A0h, 52A0h, 53A0h
+339+  8854 A0 52 A0 53
+340+  8858 A0 54 A0 55                  dw 54A0h, 55A0h, 56A0h, 57A0h
+340+  885C A0 56 A0 57
+341+  8860 C0 50 C0 51                  dw 50C0h, 51C0h, 52C0h, 53C0h
+341+  8864 C0 52 C0 53
+342+  8868 C0 54 C0 55                  dw 54C0h, 55C0h, 56C0h, 57C0h
+342+  886C C0 56 C0 57
+343+  8870 E0 50 E0 51                  dw 50E0h, 51E0h, 52E0h, 53E0h
+343+  8874 E0 52 E0 53
+344+  8878 E0 54 E0 55                  dw 54E0h, 55E0h, 56E0h, 57E0h
+344+  887C E0 56 E0 57
+345+  8880
+346+  8880              ; vim: set sw=16 ts=16 :
+347+  8880
+# file closed: src/sprites.asm
+ 73   8880
+ 74   8880              	savesna "isaac.sna",start
+ 75   8880
+ 76   8880
+ 77   8880              ; vim: set sw=16 :
+ 78   8880
+# file closed: src/main.asm
