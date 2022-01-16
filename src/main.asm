@@ -48,41 +48,78 @@ InterruptRoutine:
                 inc (hl)
 
                 call keyboard.Read
+
+                ld c, 0 ; has movement?
+
                 ld a, (keyboard.movement)
                 bit UP, a
                 jr z, no_up
 
+                inc c
                 ld hl, The.isaac_y
                 dec (hl)
-                ld hl, The.isaac_moving
+                ld hl, The.isaac_facing
                 ld (hl), UP
 no_up:
                 bit DOWN, a
                 jr z, no_down
 
+                inc c
                 ld hl, The.isaac_y
                 inc (hl)
-                ld hl, The.isaac_moving
+                ld hl, The.isaac_facing
                 ld (hl), DOWN
 no_down:
                 bit LEFT, a
                 jr z, no_left
 
+                inc c
                 ld hl, The.isaac_x
                 dec (hl)
-                ld hl, The.isaac_moving
+                ld hl, The.isaac_facing
                 ld (hl), LEFT
 no_left:
                 bit RIGHT, a
                 jr z, no_right
 
+                inc c
                 ld hl, The.isaac_x
                 inc (hl)
-                ld hl, The.isaac_moving
+                ld hl, The.isaac_facing
                 ld (hl), RIGHT
 
 no_right:
 
+                xor a
+                or c
+                jr nz, had_movement
+
+no_movement:    ld hl, The.isaac_facing
+                ld (hl), DOWN
+                ld hl, The.isaac_step
+                ld (hl), 0
+                ld hl, The.isaac_step_counter
+                ld (hl), 0
+                jr isaac_step_done
+
+had_movement:   ; animate steps
+                ld hl, The.isaac_step_max
+                ld a, (The.isaac_step_counter)
+                inc a
+                cp (hl)
+                jr z, next_step
+
+                ld (The.isaac_step_counter), a
+                jr isaac_step_done
+
+next_step:      xor a
+                ld (The.isaac_step_counter), a
+                ld a, (The.isaac_step)
+                inc a
+                and 3
+                ld (The.isaac_step), a
+
+isaac_step_done:
                 xor a
                 ld (vsync), a
 

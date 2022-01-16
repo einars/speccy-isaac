@@ -6,7 +6,9 @@ isaac_x db 40
 isaac_y db 40
 
 isaac_facing db LEFT
-isaac_moving db LEFT
+isaac_step db 0
+isaac_step_counter db 0
+isaac_step_max db 5
 
 timer db 0
 
@@ -23,11 +25,11 @@ spl_isaac_facing
                 dw isaac_left
                 dw isaac_down
                 dw isaac_right
-spl_isaac_body_f0 
-                dw isaac_up_body_f0
-                dw isaac_left_body_f0
-                dw isaac_down_body_f0
-                dw isaac_right_body_f0
+spl_isaac_body
+                dw isaac_body_f0
+                dw isaac_body_f1
+                dw isaac_body_f2
+                dw isaac_body_f3
 
 
 Color:

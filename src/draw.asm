@@ -13,11 +13,11 @@ Isaac:
                 ld c, a
 
                 ld a, b
-                sub 21
+                sub 20
                 ld b, a
                 
                 ld hl, spl_isaac_facing
-                ld a, (The.isaac_moving)
+                ld a, (The.isaac_facing)
                 or a
                 rlca
                 add l ; loc. guaranteed won't overflow
@@ -39,8 +39,8 @@ Isaac:
                 sub 5
                 ld b, a
 
-                ld hl, spl_isaac_body_f0
-                ld a, (The.isaac_moving)
+                ld hl, spl_isaac_body
+                ld a, (The.isaac_step)
                 or a
                 rlca
                 add l
