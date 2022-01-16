@@ -30,11 +30,11 @@ Start:
                 call Isaac
 
 
-                ld a, Color.blue
+                ld a, Color.white
                 out (254), a
-                ld b, 64
+                ld b, 7
                 djnz $
-                ld a, Color.yellow
+                ld a, Color.black
                 out (254), a
                 halt
 
