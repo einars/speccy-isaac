@@ -2,8 +2,10 @@
 
                 org 0xe000
 
+isaac_pos:
 isaac_x db 40
 isaac_y db 40
+isaac_speed db 1
 
 isaac_facing db LEFT
 isaac_step db 0

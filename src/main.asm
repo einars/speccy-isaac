@@ -9,19 +9,17 @@ Start:
                 xor a
                 ld (The.timer), a
 
-                ld a, 0b110
+                ld a, Color.black
                 out (254), a
 
                 ld hl, 0x4000
                 ld de, 0x4001
                 ld bc, 192 * 32 - 1
-                ld a, 0b10001000
+                xor a
                 ld (hl), a
                 ldir
-                ld bc, 798 - 1
-                ld a, Color.white + Bg.blue + Color.bright
-                ld (hl), a
-                ldir
+
+                call Room.SetAttributes
 
 
 .again          
@@ -31,6 +29,13 @@ Start:
                 ld b, a
                 call Isaac
 
+
+                ld a, Color.blue
+                out (254), a
+                ld b, 64
+                djnz $
+                ld a, Color.yellow
+                out (254), a
                 halt
 
                 jp .again
@@ -49,79 +54,7 @@ InterruptRoutine:
 
                 call keyboard.Read
 
-                ld c, 0 ; has movement?
-
-                ld a, (keyboard.movement)
-                bit UP, a
-                jr z, no_up
-
-                inc c
-                ld hl, The.isaac_y
-                dec (hl)
-                ld hl, The.isaac_facing
-                ld (hl), UP
-no_up:
-                bit DOWN, a
-                jr z, no_down
-
-                inc c
-                ld hl, The.isaac_y
-                inc (hl)
-                ld hl, The.isaac_facing
-                ld (hl), DOWN
-no_down:
-                bit LEFT, a
-                jr z, no_left
-
-                inc c
-                ld hl, The.isaac_x
-                dec (hl)
-                ld hl, The.isaac_facing
-                ld (hl), LEFT
-no_left:
-                bit RIGHT, a
-                jr z, no_right
-
-                inc c
-                ld hl, The.isaac_x
-                inc (hl)
-                ld hl, The.isaac_facing
-                ld (hl), RIGHT
-
-no_right:
-
-                xor a
-                or c
-                jr nz, had_movement
-
-no_movement:    ld hl, The.isaac_facing
-                ld (hl), DOWN
-                ld hl, The.isaac_step
-                ld (hl), 0
-                ld hl, The.isaac_step_counter
-                ld (hl), 0
-                jr isaac_step_done
-
-had_movement:   ; animate steps
-                ld hl, The.isaac_step_max
-                ld a, (The.isaac_step_counter)
-                inc a
-                cp (hl)
-                jr z, next_step
-
-                ld (The.isaac_step_counter), a
-                jr isaac_step_done
-
-next_step:      xor a
-                ld (The.isaac_step_counter), a
-                ld a, (The.isaac_step)
-                inc a
-                and 3
-                ld (The.isaac_step), a
-
-isaac_step_done:
-                xor a
-                ld (vsync), a
+                call Isaac.Move
 
                 pop iy
                 pop ix
@@ -132,32 +65,17 @@ isaac_step_done:
 
                 ei
                 reti
-vsync db 0
-
-wait_vsync:     ld a, 1
-                ld (vsync), a
-
-                ld a, 0b101
-                out (254), a
-
-k:              ld a, (vsync)
-                or a
-                jr nz, k
-
-                ld a, 0b110
-                out (254), a
-
-                ret
 
 
-                include "the.asm"
-
+                include "isaac.asm"
                 include "draw.asm"
                 include "keyboard.asm"
 
                 include "generated-sprites.asm"
 
 
+                include "room.asm"
+                include "the.asm"
 
                 ; do not put anything after this line
                 ; ----------------------------
