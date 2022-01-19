@@ -4,8 +4,8 @@
 
 Start:          jr 1f
 
-                Ei
-                Di
+                ei
+                di
                 rst 0
                 ; made in Latvia
 
