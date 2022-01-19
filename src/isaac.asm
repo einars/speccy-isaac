@@ -1,4 +1,10 @@
                 module Isaac
+
+OnHit:
+                ld a, Color.red
+                out (254), a
+                ret
+
 Move:
                 ld de, 0 ; movement delta
                 ld a, (The.isaac_speed)

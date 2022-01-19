@@ -17,3 +17,19 @@ LineInc_DE      macro
 .q:
 
                 endm
+
+jz              macro label
+                jr z, label
+                endm
+
+jc              macro label
+                jr c, label
+                endm
+                
+jnz             macro label
+                jr nz, label
+                endm
+
+jnc             macro label
+                jr nc, label
+                endm

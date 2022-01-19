@@ -28,14 +28,79 @@ Start:          jr 1f
 
                 call Room.SetAttributes
 
+                ld hl, spider_init
+                ld bc, 0x5530
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x6530
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x7530
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x8530
+                call appear
+
+
+                ld hl, spider_init
+                ld bc, 0x7060
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x7070
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x7080
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x7090
+                call appear
+
+
+
+                ld hl, spider_init
+                ld bc, 0x55d0
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x65d0
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x75d0
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x85d0
+                call appear
+/*
+
+                ld hl, spider_init
+                ld bc, 0x55e0
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x65e0
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x75e0
+                call appear
+
+                ld hl, spider_init
+                ld bc, 0x85e0
+                call appear
+*/
 
 .again          
-                ld a, (The.isaac_x)
-                ld c, a
-                ld a, (The.isaac_y)
-                ld b, a
                 call Isaac
 
+                call draw_sprites
 
                 ld a, Color.white
                 out (254), a
@@ -63,6 +128,15 @@ InterruptRoutine:
 
                 call Isaac.Move
 
+                call update_sprites
+
+                ld hl, The.isaac_y
+                ld b, (hl)
+                ld hl, The.isaac_x
+                ld c, (hl)
+                ld hl, Isaac.OnHit
+                call hittest_sprites
+
                 pop iy
                 pop ix
                 pop af
@@ -77,6 +151,8 @@ InterruptRoutine:
                 include "isaac.asm"
                 include "draw.asm"
                 include "keyboard.asm"
+
+                include "entities.asm"
 
                 include "generated-sprites.asm"
 

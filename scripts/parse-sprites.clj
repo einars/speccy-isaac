@@ -16,14 +16,20 @@
     \- 0
     \. 0
     \0 1
-    (assert false)))
+    (do
+      (printf "What is this: [%c]?\n" c)
+      (flush)
+      (assert false))))
 
 (defn make-mask-char [c]
   (condp = c
     \- 1
     \. 0
     \0 0
-    (assert false)))
+    (do
+      (printf "What is this: [%c]?\n" c)
+      (flush)
+      (assert false))))
 
 (defn make-pixels [column]
   (map #(map make-pixel-char %) column))
