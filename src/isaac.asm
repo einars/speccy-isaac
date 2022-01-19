@@ -84,18 +84,17 @@ ApplyMovement:
                 ; de - delta
                 ld a, d
                 or e
-                jr z, skip_2 ; no movement at all
+                ret z ; no movement at all
 
                 push hl
                 pop ix
 
-                ;ld c, (ix + 0)
-                ld c, (hl)
+                ld c, (ix + 0)
                 ld b, (ix + 1)
 
                 ld a, e
                 or a
-                jr z, skip_1
+                jr z, 1f
 
                 ld a, c
                 add e
@@ -106,13 +105,13 @@ ApplyMovement:
                 pop bc
 
                 and Geo.perm + Geo.wall
-                jr nz, skip_1
+                jr nz, 1f
 
                 ld (ix), c
-skip_1          
-                ld a, d
+
+1               ld a, d
                 or a
-                jr z, skip_2
+                ret z
 
                 ld c, (ix)
 
@@ -125,11 +124,10 @@ skip_1
                 pop bc
 
                 and Geo.perm + Geo.wall
-                jr nz, skip_2
+                ret nz
 
                 ld (ix + 1), b
 
-skip_2
                 ret
                 
 

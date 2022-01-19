@@ -1,7 +1,7 @@
 
                 align 256
-spritelist:     db 0xff
-                ds 511 ; max 512 / 16 sprites at a time
+spritelist:     
+                dup 1024 : db 0 : edup
                 
                 display "spritelist: ",/A,spritelist
 
@@ -99,12 +99,14 @@ hittest_sprites:
                 call map_sprites
 
                 ld a, (ix + spr_x)
+
                 add 8
                 cp c
                 ret c
                 sub 16
                 cp c
                 ret nc
+
 
                 ld a, (ix + spr_y)
                 add 8
@@ -114,6 +116,7 @@ hittest_sprites:
                 sub 16
                 cp b
                 ret nc
+
 
                 push bc
 
@@ -133,35 +136,31 @@ update_sprites:
                 call map_sprites
 
                 ld a, (ix + spr_tick)
-                add a, 32
+                add (ix + spr_speed)
+1               cp 32
+                jc noupdate
 
-1               cp (ix + spr_speed)
-                jc noupdate ; if speed > tick
-
-                sub (ix + spr_speed)
-                ld (ix + spr_tick), a
                 
                 push af
-
                 ld hl, .ret
                 push hl
                 ld hl, (ix + spr_update)
                 jp hl
 
 .ret            pop af
-                jr 1b
+                sub 32
 
 noupdate        ld (ix + spr_tick), a
                 ret
 
 
-spidio db 16
+spidio db 4
                 
 spider_init:    
                 ld (ix + spr_type), s_spider
                 ld a, (spidio)
                 ld (ix + spr_speed), a
-                add 8
+                add 3
                 ld (spidio), a
 
                 ld (ix + spr_tick), 0
@@ -175,15 +174,77 @@ spider_init:
                 ret
 
 spider_update:
-                inc (ix + sd1)
+                inc (ix + sd1) ; increase leg frame switcher
                 ld a, (ix + sd1)
                 cp 5
-                ret nz
+                jnz legs_done
                 ld a, (ix + sd0)
                 inc a
                 and 1
                 ld (ix + sd0), a
                 ld (ix + sd1), 0
+
+legs_done
+                ld bc, (ix + spr_pos)
+                call random
+                ld d, h
+                ld e, l
+
+                ld a, d
+                and 7
+
+                cp 1
+                jz yplus
+                cp 2
+                jz yminus
+                cp 3
+                jz 1f
+
+                ; move to isaac direction
+                ld a, (ix + spr_y)
+                ld hl, The.isaac_y
+                cp (hl)
+                jz 1f
+                jc yplus
+                dec b
+
+                jr 1f
+yplus           inc b
+                jr 1f
+yminus          dec b
+
+1               
+                
+                ld a, e
+                and 7
+                cp 1
+                jz xplus
+                cp 2
+                jz xminus
+                cp 3
+                jz 2f
+
+                ld a, (ix + spr_x)
+                ld hl, The.isaac_x
+                cp (hl)
+                jz 2f
+                jc xplus
+                dec c
+                jr 2f
+xplus           inc c
+                jr 2f
+xminus          dec c
+
+2
+                push bc
+                call Room.TileAtXY
+                pop bc
+
+                and Geo.perm + Geo.wall
+                ret nz
+
+                ld (ix + spr_pos), bc
+
                 ret
 
 spider_draw:

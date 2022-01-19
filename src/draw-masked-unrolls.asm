@@ -1,4 +1,3 @@
-                include "macros.asm"
 
                 ; HL - image data
                 ; DE - screen address

@@ -172,24 +172,27 @@ TileAtXY:
                 ; BC - xy (c = x)
                 ; out - A - tile
                 ld a, c
-                sub 8
+                sub 8 ; kreisais charsets
                 srl a
                 srl a
                 srl a
                 srl a
+                and 0xff
                 ld c, a
 
                 ld a, b
-                sub 24
+                sub 24 ; 24 pikseļi — augšējais ekrāns
 
-                and 0b11110000
+                and 0b01110000
                 add c
                 ld c, a
                 ld b, 0
 
+                push hl
                 ld hl, room
                 add hl, bc
                 ld a, (hl)
+                pop hl
                 ret
 
                 endmodule
@@ -207,6 +210,7 @@ room            db W.ul, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W
                 db W.rt, F.oo, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, F.oo, W.rt, 0
                 db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt, 0
                 db W.dl, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dr, 0
+                dup 128 : DB W.rt : EDUP
 
 
 

@@ -1,5 +1,3 @@
-                include "macros.asm"
-
                 ; kills hl, bc, de
 sprite_1ch:     ld a, c
                 add a, c

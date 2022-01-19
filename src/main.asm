@@ -1,4 +1,7 @@
+
                 device zxspectrum48
+
+                include "macros.asm"
 
                 org 5f00h
 
@@ -13,9 +16,6 @@ Start:          jr 1f
 1               ld de, InterruptRoutine
                 call im2.Setup
 
-                xor a
-                ld (The.timer), a
-
                 ld a, Color.black
                 out (254), a
 
@@ -23,10 +23,16 @@ Start:          jr 1f
                 ld de, 0x4001
                 ld bc, 192 * 32 - 1
                 xor a
+                ;ld a, 255
                 ld (hl), a
                 ldir
 
                 call Room.SetAttributes
+
+                ld hl, spider_init
+                ld bc, 0x5530
+                push bc
+                call appear
 
                 ld hl, spider_init
                 ld bc, 0x5530
@@ -52,6 +58,7 @@ Start:          jr 1f
                 ld hl, spider_init
                 ld bc, 0x7070
                 call appear
+/*
 
                 ld hl, spider_init
                 ld bc, 0x7080
@@ -60,8 +67,6 @@ Start:          jr 1f
                 ld hl, spider_init
                 ld bc, 0x7090
                 call appear
-
-
 
                 ld hl, spider_init
                 ld bc, 0x55d0
@@ -78,7 +83,6 @@ Start:          jr 1f
                 ld hl, spider_init
                 ld bc, 0x85d0
                 call appear
-/*
 
                 ld hl, spider_init
                 ld bc, 0x55e0
@@ -110,8 +114,26 @@ Start:          jr 1f
                 out (254), a
                 halt
 
-                jp .again
+                jr .again
 
+
+seed            dw 1245
+random:        
+                ld de, (seed)
+                ld a, d
+                ld h, e
+                ld l, 0xfd
+                or a
+                sbc hl, de
+                sbc hl, de
+                ld d, 0
+                sbc a, d
+                ld e, a
+                sbc hl, de
+                jnc 1f
+                inc hl
+1               ld (seed), hl
+                ret
 
 InterruptRoutine:
                 push hl
@@ -120,9 +142,6 @@ InterruptRoutine:
                 push af
                 push ix
                 push iy
-
-                ld hl, The.timer
-                inc (hl)
 
                 call keyboard.Read
 
@@ -146,6 +165,7 @@ InterruptRoutine:
 
                 ei
                 reti
+
 
 
                 include "isaac.asm"
