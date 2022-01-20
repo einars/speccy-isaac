@@ -3,7 +3,7 @@
 
                 include "macros.asm"
 
-                org 5f00h
+                org 8000h
 
 Start:          jr 1f
 
@@ -58,7 +58,6 @@ Start:          jr 1f
                 ld hl, spider_init
                 ld bc, 0x7070
                 call appear
-/*
 
                 ld hl, spider_init
                 ld bc, 0x7080
@@ -68,6 +67,7 @@ Start:          jr 1f
                 ld bc, 0x7090
                 call appear
 
+/*
                 ld hl, spider_init
                 ld bc, 0x55d0
                 call appear
@@ -136,6 +136,7 @@ random:
                 ret
 
 InterruptRoutine:
+                di
                 push hl
                 push de
                 push bc

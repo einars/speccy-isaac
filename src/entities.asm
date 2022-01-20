@@ -16,14 +16,15 @@ spr_tick        equ 4 ; writes on every update
 spr_draw        equ 5
 spr_update      equ 7
 
-spr_data        equ 9
+spr_canary      equ 9
+spr_data        equ 10
 sd0             equ spr_data
 sd1             equ spr_data + 1
 sd2             equ spr_data + 2
 sd3             equ spr_data + 3
 sd4             equ spr_data + 4
 sd5             equ spr_data + 5
-sd6             equ spr_data + 6
+;sd6             equ spr_data + 6
 
 spr_length      equ 16
 
@@ -52,6 +53,7 @@ found_space
                 ;jz 1f ; a = 0 - this is a dead sprite place
                 ld (ix + spr_length), 255
                 ld (ix + spr_pos), bc
+                ld (ix + spr_canary), 13
                 ret ; jmp $init
 
 map_sprites:
@@ -59,30 +61,36 @@ map_sprites:
                 ;      IX will get the sprite pointer
                 ;      Do not touch the alt. regs there thx
                 pop hl
+                ld (.smc + 1), hl
                 exx
                 ld hl, spritelist
                 ld bc, 16
 1               ld a, (hl)
                 or a
-                ret z ; done. prob should continue if ever we impl dead sprites
+                jz .done
                 inc a
-                ret z ; with alt regs, but who cares
+                jz .done
 
                 push hl ; ix = sprite address
                 pop ix
 
-                exx
-                push hl ; remember func address
+                ld a, (ix + spr_canary)
+                cp 13
+                jz .all_ok
+                
+                ld a, Color.magenta
+                out (254), a
+                di
+                halt
 
-                push hl
-                ld hl, .retmap
-                ex (sp), hl
-                jp hl
-
-.retmap         pop hl ; get $func back
+.all_ok
                 exx
-2               add hl, bc
+.smc            call 0000
+                exx
+                add hl, bc
                 jr 1b
+.done           exx
+                ret
 
 draw_sprites:
                 call map_sprites
@@ -117,16 +125,16 @@ hittest_sprites:
                 cp b
                 ret nc
 
-
-                push bc
-
-                ld hl, .ret
-                push hl
-.smc            jp 0000
-
-.ret
+                ; break out of map_sprites
+.smc            call 0000
                 pop bc
                 ret
+
+                ; loop all the sprites
+;                push bc
+;.smc            call 0000
+;                pop bc
+;                ret
                 
 
 
@@ -177,14 +185,14 @@ spider_update:
                 inc (ix + sd1) ; increase leg frame switcher
                 ld a, (ix + sd1)
                 cp 5
-                jnz legs_done
+                jnz .legs_done
                 ld a, (ix + sd0)
                 inc a
                 and 1
                 ld (ix + sd0), a
                 ld (ix + sd1), 0
 
-legs_done
+.legs_done
                 ld bc, (ix + spr_pos)
                 call random
                 ld d, h
@@ -194,9 +202,9 @@ legs_done
                 and 7
 
                 cp 1
-                jz yplus
+                jz .yplus
                 cp 2
-                jz yminus
+                jz .yminus
                 cp 3
                 jz 1f
 
@@ -205,22 +213,22 @@ legs_done
                 ld hl, The.isaac_y
                 cp (hl)
                 jz 1f
-                jc yplus
+                jc .yplus
                 dec b
 
                 jr 1f
-yplus           inc b
+.yplus          inc b
                 jr 1f
-yminus          dec b
+.yminus         dec b
 
 1               
                 
                 ld a, e
                 and 7
                 cp 1
-                jz xplus
+                jz .xplus
                 cp 2
-                jz xminus
+                jz .xminus
                 cp 3
                 jz 2f
 
@@ -228,12 +236,12 @@ yminus          dec b
                 ld hl, The.isaac_x
                 cp (hl)
                 jz 2f
-                jc xplus
+                jc .xplus
                 dec c
                 jr 2f
-xplus           inc c
+.xplus          inc c
                 jr 2f
-xminus          dec c
+.xminus         dec c
 
 2
                 push bc

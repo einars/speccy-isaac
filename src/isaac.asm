@@ -87,10 +87,10 @@ ApplyMovement:
                 ret z ; no movement at all
 
                 push hl
-                pop ix
+                pop iy
 
-                ld c, (ix + 0)
-                ld b, (ix + 1)
+                ld c, (iy + 0)
+                ld b, (iy + 1)
 
                 ld a, e
                 or a
@@ -107,13 +107,13 @@ ApplyMovement:
                 and Geo.perm + Geo.wall
                 jr nz, 1f
 
-                ld (ix), c
+                ld (iy), c
 
 1               ld a, d
                 or a
                 ret z
 
-                ld c, (ix)
+                ld c, (iy)
 
                 ld a, b
                 add d
@@ -126,7 +126,7 @@ ApplyMovement:
                 and Geo.perm + Geo.wall
                 ret nz
 
-                ld (ix + 1), b
+                ld (iy + 1), b
 
                 ret
                 

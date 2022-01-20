@@ -5,27 +5,27 @@ Read:
                 ld bc, 0xfffe
 
                 ld hl, keymap
-loop:           ld a, (hl)
+.loop           ld a, (hl)
                 inc hl
                 and a
-                jr z, done
+                jz .done
 
                 ld b, a
                 in a, (c) ; that's port BC actually
 
                 and (hl) ; 0 - pressed
                 inc hl
-                jr nz, no_press
+                jnz .no_press
 
                 ; key pressed
                 ld a, d
                 or (hl)
                 ld d, a
 
-no_press:       inc hl
-                jr loop
+.no_press       inc hl
+                jr .loop
 
-done:           ld a, d
+.done           ld a, d
                 ld (movement), a
                 ret
                 
