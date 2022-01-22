@@ -2,9 +2,10 @@
 
                 org 0xe000
 
-isaac_pos:
-isaac_x db 40
-isaac_y db 40
+isaac_pos equ spritelist + spr_pos
+isaac_x equ spritelist + spr_x
+isaac_y equ spritelist + spr_y
+
 isaac_speed db 1
 
 isaac_facing db LEFT

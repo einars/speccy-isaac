@@ -8,7 +8,7 @@
                 ; HL - byte after sprite data end
                 ; everything else probably messed up
 
-masked_1c:      
+single_column_masked:
                 ld a, c
                 add a, c
                 add a, c

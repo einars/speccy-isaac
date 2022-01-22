@@ -1,4 +1,4 @@
-                display "mmm: ",/A,again.m0
+                display "dso: ",/A,draw_sprites_ordered
 
 
                 device zxspectrum48
@@ -33,6 +33,12 @@ Start:          jr 1f
                 ld a, Color.black
                 out (254), a
 
+
+                ; shold always be first
+                ld hl, isaac_init
+                ld bc, 0x4040
+                push bc
+                call appear
 
 
                 ld hl, spider_init
@@ -109,9 +115,9 @@ Start:          jr 1f
                 ei
 
 .again          
-                call Isaac
 
-                call draw_sprites
+                call draw_sprites_ordered
+                ;call draw_sprites
 
                 ld a, Color.white
                 out (254), a

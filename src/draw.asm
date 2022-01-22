@@ -1,66 +1,3 @@
-spl_isaac_facing 
-                dw isaac_up
-                dw isaac_left
-                dw isaac_down
-                dw isaac_right
-spl_isaac_body
-                dw isaac_body_f0
-                dw isaac_body_f1
-                dw isaac_body_f2
-                dw isaac_body_f3
-
-
-Isaac:
-                ; BC: x, y; base of the legs
-                ld a, (The.isaac_y)
-                sub 20
-                ld b, a
-
-                ld a, (The.isaac_x)
-                sub 8
-                ld c, a
-
-                ld hl, spl_isaac_facing
-                ld a, (The.isaac_facing)
-                or a
-                rlca
-                add l ; loc. guaranteed won't overflow
-                ld l, a
-                ld a, (hl)
-                ld e, a
-                inc hl
-                ld a, (hl)
-                ld d, a
-                ex hl, de
-
-                call draw_masked_sprite
-
-                ld a, (The.isaac_y)
-                sub 5
-                ld b, a
-
-                ld a, (The.isaac_x)
-                sub 4
-                ld c, a
-
-                ld hl, spl_isaac_body
-                ld a, (The.isaac_step)
-                or a
-                rlca
-                add l
-                ld l, a
-                ld a, (hl)
-                ld e, a
-                inc hl
-                ld a, (hl)
-                ld d, a
-                ex hl, de
-
-                ;call draw_masked_sprite
-                ;ret
-
-
-
 draw_masked_sprite:
                 ; hl - sprite base
 
@@ -68,7 +5,6 @@ draw_masked_sprite:
                 call bc_xy_to_addr
                 ; de - now is screen pos
                 ; a - offset
-                ld b, 0
                 ld c, a
 
 1               ld a, (hl)
@@ -82,10 +18,10 @@ draw_masked_sprite:
                 ; HL - &image_data (starting with mask)
                 ; B - height of column
                 ; C - bit offset
-                
+
                 push de
                 push bc
-                call masked_1c
+                call single_column_masked
                 pop bc
                 pop de
 
