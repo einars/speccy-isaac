@@ -23,433 +23,395 @@ again           jr $
                 jp .m5;.m5
                 jp .m6;.m6
                 jp .m7;.m7
+
 .m0
-                ld a, (de)
-                and (hl)
-                inc hl
-                or (hl)
-                inc hl
-                ld (de), a
+                ld a, (de) ; 7
+                and (hl)   ; 7
+                inc hl     ; 6
+                or (hl)    ; 7
+                inc hl     ; 6
+                ld (de), a ; 7
 
-                LineInc_DE
+                LineInc_DE ; X
 
-                djnz .m0
+                djnz .m0   ; 13 / 8
                 ret
 
 .m1 ;=================================================
-                ; apply mask
-                ld a, (hl)
-                rrca
-                ld c, a
-                and 0b01111111
-                or  0b10000000
+
                 ex hl, de
+1
+                ld a, (de)
+                ld c, 0xff
+
+                rra
+                rr c
+                or 0b10000000
+
                 and (hl)
                 ld (hl), a
-                ex hl, de
+                inc hl
+
+                ld a, c
+
+                and (hl)
+                ld (hl), a
+                dec hl
 
                 inc de
 
-                ld a, c
-                and 0b10000000
-                or  0b01111111
-                ex hl, de
-                and (hl)
-                ld (hl), a
-                ex hl, de
+                ld a, (de)
+                ld c, 0
 
-                dec de
-
-                inc hl
-
-                ; apply sprite
-
-                ld a, (hl)
-                rrca
-                ld c, a
+                rra
+                rr c
                 and 0b01111111
-                ex hl, de
+
                 or (hl)
                 ld (hl), a
-                ex hl, de
+                inc hl
 
+                ld a, c
+
+                or (hl)
+                ld (hl), a
+                dec hl
+
+                LineInc_HL
                 inc de
 
-                ld a, c
-                and 0b10000000
+                djnz 1b
+
                 ex hl, de
-                or (hl)
-                ld (hl), a
-                ex hl, de
-
-                dec de
-
-                LineInc_DE
-                inc hl
-
-                djnz .m1
 
                 ret
-
-
 
 .m2 ;=================================================
-                ; apply mask
-                ld a, (hl)
-                rrca
-                rrca
-                ld c, a
-                and 0b00111111
-                or  0b11000000
+
                 ex hl, de
+2
+                ld a, (de)
+                ld c, 0xff
+
+                rra
+                rr c
+                rra
+                rr c
+                or 0b11000000
+
                 and (hl)
                 ld (hl), a
-                ex hl, de
+                inc hl
+
+                ld a, c
+
+                and (hl)
+                ld (hl), a
+                dec hl
 
                 inc de
 
-                ld a, c
-                and 0b11000000
-                or  0b00111111
-                ex hl, de
-                and (hl)
-                ld (hl), a
-                ex hl, de
+                ld a, (de)
+                ld c, 0
 
-                dec de
-
-                inc hl
-
-                ; apply sprite
-
-                ld a, (hl)
-                rrca
-                rrca
-                ld c, a
+                rra
+                rr c
+                rra
+                rr c
                 and 0b00111111
-                ex hl, de
+
                 or (hl)
                 ld (hl), a
-                ex hl, de
+                inc hl
 
+                ld a, c
+
+                or (hl)
+                ld (hl), a
+                dec hl
+
+                LineInc_HL
                 inc de
 
-                ld a, c
-                and 0b11000000
+                djnz 2b
+
                 ex hl, de
-                or (hl)
-                ld (hl), a
-                ex hl, de
-
-                dec de
-
-                LineInc_DE
-                inc hl
-
-                djnz .m2
-
                 ret
-
-
 
 .m3 ;=================================================
-                ; apply mask
-                ld a, (hl)
-                rrca
-                rrca
-                rrca
-                ld c, a
-                and 0b00011111
-                or  0b11100000
                 ex hl, de
+3
+                ld a, (de)
+                ld c, 0xff
+
+                rra
+                rr c
+                rra
+                rr c
+                rra
+                rr c
+                or 0b11100000
+
                 and (hl)
                 ld (hl), a
-                ex hl, de
+                inc hl
+
+                ld a, c
+
+                and (hl)
+                ld (hl), a
+                dec hl
 
                 inc de
 
-                ld a, c
-                and 0b11100000
-                or  0b00011111
-                ex hl, de
-                and (hl)
-                ld (hl), a
-                ex hl, de
+                ld a, (de)
+                ld c, 0
 
-                dec de
-
-                inc hl
-
-                ; apply sprite
-
-                ld a, (hl)
-                rrca
-                rrca
-                rrca
-                ld c, a
+                rra
+                rr c
+                rra
+                rr c
+                rra
+                rr c
                 and 0b00011111
-                ex hl, de
+
                 or (hl)
                 ld (hl), a
-                ex hl, de
+                inc hl
 
+                ld a, c
+
+                or (hl)
+                ld (hl), a
+                dec hl
+
+                LineInc_HL
                 inc de
 
-                ld a, c
-                and 0b11100000
+                djnz 3b
+
                 ex hl, de
-                or (hl)
-                ld (hl), a
-                ex hl, de
-
-                dec de
-
-                LineInc_DE
-                inc hl
-
-                djnz .m3
-
                 ret
-
-
 
 .m4 ;=================================================
-                ; apply mask
-                ld a, (hl)
-                rrca
-                rrca
-                rrca
-                rrca
-                ld c, a
-                and 0b00001111
-                or  0b11110000
                 ex hl, de
+4
+                ld a, (de)
+                ld c, 0xff
+
+                rra
+                rr c
+                rra
+                rr c
+                rra
+                rr c
+                rra
+                rr c
+                or 0b11110000
+
                 and (hl)
                 ld (hl), a
-                ex hl, de
+                inc hl
+
+                ld a, c
+
+                and (hl)
+                ld (hl), a
+                dec hl
 
                 inc de
 
-                ld a, c
-                and 0b11110000
-                or  0b00001111
-                ex hl, de
-                and (hl)
-                ld (hl), a
-                ex hl, de
+                ld a, (de)
+                ld c, 0
 
-                dec de
-
-                inc hl
-
-                ; apply sprite
-
-                ld a, (hl)
-                rrca
-                rrca
-                rrca
-                rrca
-                ld c, a
+                rra
+                rr c
+                rra
+                rr c
+                rra
+                rr c
+                rra
+                rr c
                 and 0b00001111
-                ex hl, de
+
                 or (hl)
                 ld (hl), a
-                ex hl, de
+                inc hl
 
+                ld a, c
+
+                or (hl)
+                ld (hl), a
+                dec hl
+
+                LineInc_HL
                 inc de
 
-                ld a, c
-                and 0b11110000
+                djnz 4b
+
                 ex hl, de
-                or (hl)
-                ld (hl), a
-                ex hl, de
-
-                dec de
-
-                LineInc_DE
-                inc hl
-
-                djnz .m4
-
                 ret
-
 
 
 .m5 ;=================================================
-                ; apply mask
-                ld a, (hl)
-                rlca
-                rlca
-                rlca
-                ld c, a
-                and 0b00000111
-                or  0b11111000
                 ex hl, de
+5
+                ld a, (de)
+                ld c, 0xff
+
+                rla
+                rl c
+                rla
+                rl c
+                rla
+                rl c
+                or 0b00000111
+
+                ex af, af'
+                ld a, (hl)
+                and c
+                ld (hl), a
+                inc hl
+
+                ex af, af'
                 and (hl)
                 ld (hl), a
-                ex hl, de
+                dec hl
 
                 inc de
 
-                ld a, c
+                ld a, (de)
+                ld c, 0
+
+                rla
+                rl c
+                rla
+                rl c
+                rla
+                rl c
                 and 0b11111000
-                or  0b00000111
-                ex hl, de
-                and (hl)
+
+                ex af, af'
+                ld a, (hl)
+                or c
                 ld (hl), a
-                ex hl, de
-
-                dec de
-
                 inc hl
 
-                ; apply sprite
-
-                ld a, (hl)
-                rlca
-                rlca
-                rlca
-                ld c, a
-                and 0b00000111
-                ex hl, de
+                ex af, af'
                 or (hl)
                 ld (hl), a
-                ex hl, de
+                dec hl
 
+                LineInc_HL
                 inc de
 
-                ld a, c
-                and 0b11111000
+                djnz 5b
+
                 ex hl, de
-                or (hl)
-                ld (hl), a
-                ex hl, de
-
-                dec de
-
-                LineInc_DE
-                inc hl
-
-                djnz .m5
-
                 ret
-
 
 
 .m6 ;=================================================
-                ; apply mask
-                ld a, (hl)
-                rlca
-                rlca
-                ld c, a
-                and 0b00000011
-                or  0b11111100
                 ex hl, de
+6
+                ld a, (de)
+                ld c, 0xff
+
+                rla
+                rl c
+                rla
+                rl c
+                or 0b00000011
+
+                ex af, af'
+                ld a, (hl)
+                and c
+                ld (hl), a
+                inc hl
+
+                ex af, af'
                 and (hl)
                 ld (hl), a
-                ex hl, de
+                dec hl
 
                 inc de
 
-                ld a, c
+                ld a, (de)
+                ld c, 0
+
+                rla
+                rl c
+                rla
+                rl c
                 and 0b11111100
-                or  0b00000011
-                ex hl, de
-                and (hl)
+
+                ex af, af'
+                ld a, (hl)
+                or c
                 ld (hl), a
-                ex hl, de
-
-                dec de
-
                 inc hl
 
-                ; apply sprite
-
-                ld a, (hl)
-                rlca
-                rlca
-                ld c, a
-                and 0b00000011
-                ex hl, de
+                ex af, af'
                 or (hl)
                 ld (hl), a
-                ex hl, de
+                dec hl
 
+                LineInc_HL
                 inc de
 
-                ld a, c
-                and 0b11111100
+                djnz 6b
+
                 ex hl, de
-                or (hl)
-                ld (hl), a
-                ex hl, de
-
-                dec de
-
-                LineInc_DE
-                inc hl
-
-                djnz .m6
-
                 ret
-
 
 
 .m7 ;=================================================
-                ; apply mask
-                ld a, (hl)
-                rlca
-                ld c, a
-                and 0b00000001
-                or  0b11111110
                 ex hl, de
+6
+                ld a, (de)
+                ld c, 0xff
+
+                rla
+                rl c
+                or 0b00000001
+
+                ex af, af'
+                ld a, (hl)
+                and c
+                ld (hl), a
+                inc hl
+
+                ex af, af'
                 and (hl)
                 ld (hl), a
-                ex hl, de
+                dec hl
 
                 inc de
 
-                ld a, c
+                ld a, (de)
+                ld c, 0
+
+                rla
+                rl c
                 and 0b11111110
-                or  0b00000001
-                ex hl, de
-                and (hl)
+
+                ex af, af'
+                ld a, (hl)
+                or c
                 ld (hl), a
-                ex hl, de
-
-                dec de
-
                 inc hl
 
-                ; apply sprite
-
-                ld a, (hl)
-                rlca
-                ld c, a
-                and 0b00000001
-                ex hl, de
+                ex af, af'
                 or (hl)
                 ld (hl), a
-                ex hl, de
+                dec hl
 
+                LineInc_HL
                 inc de
 
-                ld a, c
-                and 0b11111110
+                djnz 6b
+
                 ex hl, de
-                or (hl)
-                ld (hl), a
-                ex hl, de
-
-                dec de
-
-                LineInc_DE
-                inc hl
-
-                djnz .m7
-
                 ret
-
 
 

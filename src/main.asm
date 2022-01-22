@@ -1,3 +1,5 @@
+                display "mmm: ",/A,again.m0
+
 
                 device zxspectrum48
 
@@ -12,12 +14,8 @@ Start:          jr 1f
                 rst 0
                 ; made in Latvia
 
-
-1               ld de, InterruptRoutine
-                call im2.Setup
-
-                ld a, Color.black
-                out (254), a
+1
+                call Room.SetAttributes
 
                 ld hl, 0x4000
                 ld de, 0x4001
@@ -27,7 +25,15 @@ Start:          jr 1f
                 ld (hl), a
                 ldir
 
-                call Room.SetAttributes
+
+                ld de, InterruptRoutine
+                call im2.Setup
+
+
+                ld a, Color.black
+                out (254), a
+
+
 
                 ld hl, spider_init
                 ld bc, 0x5530
@@ -100,6 +106,7 @@ Start:          jr 1f
                 ld bc, 0x85e0
                 call appear
 */
+                ei
 
 .again          
                 call Isaac

@@ -18,6 +18,26 @@ LineInc_DE      macro
 
                 endm
 
+LineInc_HL      macro
+
+                ; move down a pixel line
+                ; H 0-1-0-y7-y6-y2-y1-y0 l y5-y4-y3-x4-x3-x2-x1-x0
+
+                inc h
+                ld a, h
+                and 7
+                jr nz, .q
+                ld a, l
+                add a, 32
+                ld l, a
+                jr c, .q
+                ld a, h
+                sub 8
+                ld h, a
+.q:
+
+                endm
+
 jz              macro label
                 jr z, label
                 endm

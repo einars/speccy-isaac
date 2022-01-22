@@ -24,73 +24,42 @@ SetAttributes:
                 call fill
 
 
-                ld a, Bg.red + Color.white
-                ld (hl), a
-                inc hl
-
                 ld a, Bg.red + Color.white + Color.bright
-                ld b, 30
+                ld b, 32
                 call fill
 
-                ld a, Bg.red + Color.white
-                ld (hl), a
-                inc hl
 
-
-                ld (hl), (Bg.red + Color.white)
-                inc hl
 
                 ld a, Bg.red + Color.white + Color.bright
-                ld b, 30
+                ld b, 32
                 call fill
-
-                ld (hl), (Bg.red + Color.white)
-                inc hl
 
                 ld c, 14
 1
-                ld (hl), (Bg.red + Color.white)
-                inc hl
-
                 ld a, Bg.red + Color.white + Color.bright
                 ld b, 2
                 call fill
 
                 ld a, Bg.blue + Color.white + Color.bright
-                ld b, 26
+                ld b, 28
                 call fill
 
                 ld a, Bg.red + Color.white + Color.bright
                 ld b, 2
                 call fill
-
-                ld (hl), (Bg.red + Color.white)
-                inc hl
 
                 dec c
                 jr nz, 1b
 
 
 
-                ld (hl), (Bg.red + Color.white)
-                inc hl
-
                 ld a, Bg.red + Color.white + Color.bright
-                ld b, 30
+                ld b, 32
                 call fill
 
-                ld (hl), (Bg.red + Color.white)
-                inc hl
-
-                ld (hl), (Bg.red + Color.white)
-                inc hl
-
                 ld a, Bg.red + Color.white + Color.bright
-                ld b, 30
+                ld b, 32
                 call fill
-
-                ld (hl), (Bg.red + Color.white)
-                inc hl
 
                 ld a, Bg.red + Color.white
                 ld b, 32
@@ -132,10 +101,8 @@ not_this
                 inc de
                 inc c
                 ld a, c
-                cp 15
+                cp 16
                 jr nz, loop_p
-
-                inc de
 
                 inc b
                 ld a, b
@@ -158,7 +125,6 @@ AttrAddrPQ:     ; BC - pq (c = p)
                 ld a, l
                 add c
                 add c
-                inc a
                 ld l, a
 
                 push de
@@ -172,7 +138,6 @@ TileAtXY:
                 ; BC - xy (c = x)
                 ; out - A - tile
                 ld a, c
-                sub 8 ; kreisais charsets
                 srl a
                 srl a
                 srl a
@@ -201,15 +166,15 @@ TileAtXY:
 
 
 
-room            db W.ul, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.ur, 0
-                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt, 0
-                db W.rt, F.oo, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, F.oo, W.rt, 0
-                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt, 0
-                db W.rt, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, W.rt, 0
-                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt, 0
-                db W.rt, F.oo, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, F.oo, W.rt, 0
-                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt, 0
-                db W.dl, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dr, 0
+room            db W.ul, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, F.oo, W.ur
+                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
+                db W.rt, F.oo, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
+                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
+                db W.rt, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, W.rt
+                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
+                db W.rt, F.oo, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
+                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
+                db W.dl, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, F.oo, W.dr
                 dup 128 : DB W.rt : EDUP
 
 

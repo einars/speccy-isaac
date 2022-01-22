@@ -38,7 +38,6 @@ cleanup         ld (hl), a
                 djnz .loop
 
                 im 2
-                ei
                 ret
 
                 endmodule

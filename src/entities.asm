@@ -3,8 +3,6 @@
 spritelist:     
                 dup 1024 : db 0 : edup
                 
-                display "spritelist: ",/A,spritelist
-
 ; 9..15 bytes for an entity pers. data should be nuff? 
 spr_type        equ 0
 spr_pos         equ 1
