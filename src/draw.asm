@@ -1,21 +1,25 @@
+spl_isaac_facing 
+                dw isaac_up
+                dw isaac_left
+                dw isaac_down
+                dw isaac_right
+spl_isaac_body
+                dw isaac_body_f0
+                dw isaac_body_f1
+                dw isaac_body_f2
+                dw isaac_body_f3
+
 
 Isaac:
                 ; BC: x, y; base of the legs
-                ld hl, The.isaac_y
-                ld b, (hl)
+                ld a, (The.isaac_y)
+                sub 20
+                ld b, a
 
-                ld hl, The.isaac_x
-                ld c, (hl)
-
-                push bc
-                ld a, c
+                ld a, (The.isaac_x)
                 sub 8
                 ld c, a
 
-                ld a, b
-                sub 20
-                ld b, a
-                
                 ld hl, spl_isaac_facing
                 ld a, (The.isaac_facing)
                 or a
@@ -31,13 +35,13 @@ Isaac:
 
                 call draw_masked_sprite
 
-                pop bc
-                ld a, c
-                sub 4
-                ld c, a
-                ld a, b
+                ld a, (The.isaac_y)
                 sub 5
                 ld b, a
+
+                ld a, (The.isaac_x)
+                sub 4
+                ld c, a
 
                 ld hl, spl_isaac_body
                 ld a, (The.isaac_step)
@@ -52,9 +56,8 @@ Isaac:
                 ld d, a
                 ex hl, de
 
-                ;ld hl, isaac_down_body_f0
-                call draw_masked_sprite
-                ret
+                ;call draw_masked_sprite
+                ;ret
 
 
 
@@ -63,17 +66,14 @@ draw_masked_sprite:
 
                 ; bc - top left xy
                 call bc_xy_to_addr
-                push bc
-                pop de
                 ; de - now is screen pos
                 ; a - offset
                 ld b, 0
                 ld c, a
 
-column           
-                ld a, (hl)
+1               ld a, (hl)
                 or a
-                jr z, done
+                ret z
                 ld b, a ; height
                 inc hl
 
@@ -90,11 +90,7 @@ column
                 pop de
 
                 inc de
-
-                jr column
-
-done
-                ret
+                jr 1b
 
 
 
@@ -102,13 +98,12 @@ bc_xy_to_addr:  ; in:
                 ;   B = y (0..191)
                 ;   C = x (0..255)
                 ; out:
-                ;   BC - screen address
+                ;   DE - screen address
                 ;   A - scroll offset
                 ; messes up:
                 ;   nothing
 
                 push hl
-                push de
                 ld  h, 0
                 ld  l, b            ; hl = row
                 add hl, hl          ; hl = row number * 2
@@ -127,11 +122,9 @@ bc_xy_to_addr:  ; in:
                 and 0b00011111
                 ld e, a             ; de = X (character based)
                 add hl, de          ; hl = screen addr + 32
+                ex hl, de
                 ld a, c
                 and 7
-                push hl
-                pop bc
-                pop de
                 pop hl
                 ret
 

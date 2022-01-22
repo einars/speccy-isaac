@@ -62,17 +62,12 @@ map_sprites:
                 ;      Do not touch the alt. regs there thx
                 pop hl
                 ld (.smc + 1), hl
-                exx
-                ld hl, spritelist
-                ld bc, 16
-1               ld a, (hl)
+                ld ix, spritelist
+1               ld a, (ix)
                 or a
-                jz .done
+                ret z
                 inc a
-                jz .done
-
-                push hl ; ix = sprite address
-                pop ix
+                ret z
 
                 ld a, (ix + spr_canary)
                 cp 13
@@ -84,13 +79,10 @@ map_sprites:
                 halt
 
 .all_ok
-                exx
 .smc            call 0000
-                exx
-                add hl, bc
+                ld bc, 16
+                add ix, bc
                 jr 1b
-.done           exx
-                ret
 
 draw_sprites:
                 call map_sprites
@@ -103,10 +95,14 @@ hittest_sprites:
                 ; hl - on hit success
 
                 ld (.smc + 1), hl
+                ld l, c
+                ld h, b
+                ld (.bc + 1), hl
 
                 call map_sprites
 
                 ld a, (ix + spr_x)
+.bc             ld bc, 0
 
                 add 8
                 cp c
@@ -125,16 +121,11 @@ hittest_sprites:
                 cp b
                 ret nc
 
-                ; break out of map_sprites
+                
 .smc            call 0000
-                pop bc
+                pop bc ; eat return to map_sprites - finish iterating
                 ret
 
-                ; loop all the sprites
-;                push bc
-;.smc            call 0000
-;                pop bc
-;                ret
                 
 
 
@@ -256,11 +247,10 @@ spider_update:
                 ret
 
 spider_draw:
-                ld bc, (ix + spr_pos)
-                ld a, c
+                ld a, (ix + spr_x)
                 sub 8
                 ld c, a
-                ld a, b
+                ld a, (ix + spr_y)
                 sub 7
                 ld b, a
                 ld hl, spider_f0
@@ -268,8 +258,7 @@ spider_draw:
                 or a
                 jz 1f
                 ld hl, spider_f1
-1               call draw_masked_sprite
-                ret
+1               jp draw_masked_sprite
 
 
                 

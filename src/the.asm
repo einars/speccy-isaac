@@ -22,17 +22,6 @@ DOWN  equ 2
 RIGHT equ 3
 
 
-spl_isaac_facing 
-                dw isaac_up
-                dw isaac_left
-                dw isaac_down
-                dw isaac_right
-spl_isaac_body
-                dw isaac_body_f0
-                dw isaac_body_f1
-                dw isaac_body_f2
-                dw isaac_body_f3
-
 
 Color:
 .black   equ 0
