@@ -41,133 +41,41 @@ Start:          jr 1f
                 call appear
 
 
-/*
-                ld hl, isaac_init
-                ld bc, 0x2080
-                call appear
+                call Scenes.Spiders
+                ;call Scenes.Spiders
+                ;call Scenes.Spiders
+                ;call Scenes.Isaacs
 
-                ld hl, isaac_init
-                ld bc, 0x3081
-                call appear
 
-                ld hl, isaac_init
-                ld bc, 0x4082
-                call appear
-
-                ld hl, isaac_init
-                ld bc, 0x5083
-                call appear
-
-                ld hl, isaac_init
-                ld bc, 0x6084
-                call appear
-
-                ld hl, isaac_init
-                ld bc, 0x7085
-                call appear
-
-                ld hl, isaac_init
-                ld bc, 0x8086
-                call appear
-
-                ld hl, isaac_init
-                ld bc, 0x9087
-                call appear
-                */
-
-                ld hl, spider_init
-                ld bc, 0x5530
-                push bc
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x5530
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x6530
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x7530
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x8530
-                call appear
-
-/*
-
-                ld hl, spider_init
-                ld bc, 0x7060
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x7070
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x7080
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x7090
-                call appear
-
-                ld hl, isaac_init
-                ld bc, 0x9090
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x55d0
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x65d0
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x75d0
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x85d0
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x55e0
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x65e0
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x75e0
-                call appear
-
-                ld hl, spider_init
-                ld bc, 0x85e0
-                call appear
-*/
                 ei
 
 .again          
 
                 ld a, (tick)
                 push af
-                ld a, Color.red
-                out (254), a
+                ;ld a, Color.red
+                ;out (254), a
                 call draw_sprites_ordered
-                ld a, Color.green
-                out (254), a
+                ;ld a, Color.green
+                ;out (254), a
                 pop af
                 ld hl, tick
                 cp (hl)
                 ;jnz .again ; redraw is slow, interrupt missed - no messing with halt
+
+
+                ld a, Color.white
+                out (254), a
+                ld b, 20
+                djnz $
+                ld a, Color.black
+                out (254), a
+
                 halt ; smooth mode
+
                 jr .again
 
+                include "test-scenes.asm"
 
 seed            dw 1245
 random:        

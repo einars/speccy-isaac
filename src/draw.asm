@@ -26,8 +26,7 @@ draw_masked_1:
                 ; a - offset
                 ld c, a
 
-                ld a, (hl)
-                ld b, a
+                ld b, (hl)
                 inc hl
                 jp single_column_masked
 
@@ -72,6 +71,7 @@ bc_xy_to_addr:  ; in:
                 ;   A - scroll offset
                 ; messes up:
                 ;   nothing
+
 
                 push hl
                 ld  h, 0

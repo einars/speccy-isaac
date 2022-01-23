@@ -1,28 +1,27 @@
 
                 align 256
 
-max_sprites     equ 20
+max_sprites     equ 32
 
 spritelist:     ds (max_sprites * spr_length)
 
 spr_type        equ 0
-spr_draw_flag   equ 1 ; required to be 1
-spr_pos         equ 2
-spr_x           equ 2
-spr_y           equ 3
-spr_speed       equ 4
-spr_tick        equ 5 ; writes on every update
+spr_pos         equ 1
+spr_x           equ 1
+spr_y           equ 2
+spr_speed       equ 3
+spr_tick        equ 4 ; writes on every update
 
-spr_draw        equ 6
-spr_update      equ 8
+spr_draw        equ 5
+spr_update      equ 7
 
-spr_canary      equ 10
-spr_data        equ 11
+spr_data        equ 9
 sd0             equ spr_data
 sd1             equ spr_data + 1
 sd2             equ spr_data + 2
 sd3             equ spr_data + 3
 sd4             equ spr_data + 4
+sd5             equ spr_data + 5
 
 spr_length      equ 16 ; sometimes important, search for spr_length
 
@@ -52,7 +51,6 @@ found_space
                 ;jz 1f ; a = 0 - this is a dead sprite place
                 ld (ix + spr_length), 255
                 ld (ix + spr_pos), bc
-                ld (ix + spr_canary), 13
                 ret ; jmp $init
 
 map_sprites_without_isaac:
@@ -75,15 +73,6 @@ map_sprites:
                 ret z
                 inc a
                 ret z
-
-                ld a, (ix + spr_canary)
-                cp 13
-                jz .all_ok
-
-                ld a, Color.magenta
-                out (254), a
-                di
-                halt
 
 .all_ok
 .smc            call 0000
@@ -122,8 +111,48 @@ draw_sprites_ordered:
 .done
                 ; now bubble-sort that shit
 
-                push de
 
+                push de
+                ;jr .bubble_ix
+                ;jr .nuff
+
+
+;;; bubblesort, stack-based implementation
+.bubble_stack:
+                di
+
+                ld a, d
+                dec a
+                ld (.xsmc + 2), a
+                ld (.ssp + 1), sp
+
+.xagain         ld sp, sort_area
+.xsmc           ld bc, 0
+                pop de
+.xbub           
+                pop hl
+                ld a, e
+                cp l
+                jc .xno_swap
+                jz .xno_swap
+                push de
+                push hl
+                pop hl
+                ex de, hl
+                inc c
+.xno_swap:      ex de, hl
+                djnz .xbub
+                ld a, c
+                or a
+                jnz .xagain
+.ssp            ld sp, 0
+                ei
+                jr .nuff
+
+
+
+;;; bubblesort, ix-based implementation
+.bubble_ix:
                 ld b, d
                 ld c, d
 .again          ld ix, sort_area
@@ -135,7 +164,7 @@ draw_sprites_ordered:
 .nbub:          ld a, (ix)
                 ld e, (ix + 2)
                 cp e
-                jz .no_swap
+                ;jz .no_swap
                 jc .no_swap
                 ;jnc .no_swap
 .swap           ld (ix), e
@@ -156,7 +185,6 @@ draw_sprites_ordered:
                 jnz .again
 .nuff
 
-                ;;;;  make me
                 pop de
 
                 ; now:
@@ -169,22 +197,20 @@ draw_sprites_ordered:
 .draw           inc hl
                 ld a, (hl)
                 inc hl
-                push hl
+                exx
                 ld h, 0
                 ld l, a
                 add hl, hl
                 add hl, hl
                 add hl, hl
                 add hl, hl ; hl = idx * 16 ; spr_length!
-                push bc
                 ld bc, spritelist
                 add hl, bc
                 ld ix, hl
                 ld hl, (ix + spr_draw)
                 ld (.smc + 1), hl
 .smc            call 0
-                pop bc
-                pop hl
+                exx
                 djnz .draw
                 ret
 

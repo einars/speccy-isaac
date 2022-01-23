@@ -16,8 +16,10 @@ double_column_masked:
                 ld a, b ; line counter will live in a'
 .again          jr $
                 ; jump table to implementations
-                jp .m0
-                jp .m1
+                jr .m0
+                db 0
+                jr .m1
+                db 0
                 jp .m2
                 jp .m3
                 jp .m4
@@ -335,6 +337,10 @@ double_column_masked:
                 ld b, (hl)
                 inc hl
                 ld c, 0
+
+                rra
+                rr b
+                rr c
 
                 rra
                 rr b
