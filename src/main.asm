@@ -1,4 +1,4 @@
-                display "dso: ",/A,draw_sprites_ordered
+                display "dso: ",/A,double_column_masked
 
 
                 device zxspectrum48
@@ -36,13 +36,44 @@ Start:          jr 1f
 
                 ; shold always be first
                 ld hl, isaac_init
-                ld bc, 0x4040
+                ld bc, 0x4041
                 push bc
+                call appear
+
+
+/*
+                ld hl, isaac_init
+                ld bc, 0x2080
                 call appear
 
                 ld hl, isaac_init
-                ld bc, 0x9595
+                ld bc, 0x3081
                 call appear
+
+                ld hl, isaac_init
+                ld bc, 0x4082
+                call appear
+
+                ld hl, isaac_init
+                ld bc, 0x5083
+                call appear
+
+                ld hl, isaac_init
+                ld bc, 0x6084
+                call appear
+
+                ld hl, isaac_init
+                ld bc, 0x7085
+                call appear
+
+                ld hl, isaac_init
+                ld bc, 0x8086
+                call appear
+
+                ld hl, isaac_init
+                ld bc, 0x9087
+                call appear
+                */
 
                 ld hl, spider_init
                 ld bc, 0x5530
@@ -52,7 +83,7 @@ Start:          jr 1f
                 ld hl, spider_init
                 ld bc, 0x5530
                 call appear
-/*
+
                 ld hl, spider_init
                 ld bc, 0x6530
                 call appear
@@ -65,6 +96,7 @@ Start:          jr 1f
                 ld bc, 0x8530
                 call appear
 
+/*
 
                 ld hl, spider_init
                 ld bc, 0x7060
@@ -124,11 +156,15 @@ Start:          jr 1f
 
                 ld a, (tick)
                 push af
+                ld a, Color.red
+                out (254), a
                 call draw_sprites_ordered
+                ld a, Color.green
+                out (254), a
                 pop af
                 ld hl, tick
                 cp (hl)
-                jnz .again ; redraw is slow, interrupt missed - no messing with halt
+                ;jnz .again ; redraw is slow, interrupt missed - no messing with halt
                 halt ; smooth mode
                 jr .again
 
@@ -182,7 +218,6 @@ InterruptRoutine:
                 pop bc
                 pop de
                 pop hl
-
                 ei
                 reti
 

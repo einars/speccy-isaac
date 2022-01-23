@@ -62,10 +62,31 @@
            (partition-all 2 (interleave pix-col mask-col)))
       )))
 
+(defn two-columns-to-string [[p1 p2] [m1 m2]]
+  (str/join
+    "\n"
+    (concat
+      [(format "                db %d" (count p1))] ; height
+      (map (fn [[pa pb ma mb]]
+             (format "                db %s, %s, %s, %s" 
+                     (binary-s ma)
+                     (binary-s mb)
+                     (binary-s pa)
+                     (binary-s pb)))
+           (partition-all 4 (interleave p1 p2 m1 m2)))
+      )))
+
 (defn sprite-to-string [{:keys [label pixels masks width-chars height-pixels]}]
   (let [label (str/replace label "." "_")
-        asm (if (= 1 width-chars)
+        asm (cond
+              (= 1 width-chars)
               (column-to-string (first pixels) (first masks))
+
+              (= 2 width-chars)
+              (two-columns-to-string pixels masks)
+
+              :else
+              ; custom width
               (str/join "\n\n"
                         (mapv
                           (fn [[pix mask]] (column-to-string pix mask))

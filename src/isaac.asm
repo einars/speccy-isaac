@@ -2,7 +2,7 @@
 
 OnHit:
                 ld a, Color.red
-                out (254), a
+                ;out (254), a
                 ret
 
 Move:

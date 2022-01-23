@@ -367,7 +367,7 @@ spider_draw:
                 or a
                 jz 1f
                 ld hl, spider_f1
-1               jp draw_masked_sprite
+1               jp draw_masked_2
 
 
 isaac_init:
@@ -406,7 +406,7 @@ isaac_draw:
                 ld d, a
                 ex hl, de
 
-                call draw_masked_sprite
+                call draw_masked_2
 
                 ld a, (ix + spr_y)
                 sub 5
@@ -429,7 +429,7 @@ isaac_draw:
                 ld d, a
                 ex hl, de
 
-                jp draw_masked_sprite
+                jp draw_masked_1
 
 spl_isaac_facing
                 dw isaac_up

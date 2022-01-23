@@ -1,4 +1,3 @@
-
                 ; HL - image data
                 ; DE - screen address
                 ; B - height
@@ -12,8 +11,8 @@ single_column_masked:
                 ld a, c
                 add a, c
                 add a, c
-                ld (again+1), a
-again           jr $
+                ld (.again+1), a
+.again          jr $
                 ; jump table to implementations
                 jp .m0
                 jp .m1

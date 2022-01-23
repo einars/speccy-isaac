@@ -1,6 +1,7 @@
                 module im2
                 ; DE - handler routine
 
+
 jumpspace equ 0xfdfd
 table_base equ 0xfe00
 
@@ -13,10 +14,10 @@ Setup:
                 ld hl, jumpspace
                 xor a
 
-cleanup         ld (hl), a
+1               ld (hl), a
                 inc hl
                 cp h
-                jr nz, cleanup
+                jr nz, 1b
 
                 ld hl, jumpspace
                 ld (hl), 0xc3

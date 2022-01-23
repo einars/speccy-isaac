@@ -1,4 +1,38 @@
-draw_masked_sprite:
+draw_masked_2:
+                ; hl - sprite base
+
+                ; bc - top left xy
+                call bc_xy_to_addr
+                ; de - now is screen pos
+                ; a - offset
+                ld c, a
+
+                ld b, (hl)
+                inc hl
+
+                ; now:
+                ; DE — &screen_addr
+                ; HL - &image_data (starting with mask)
+                ; B - height of column
+                ; C - bit offset
+
+                jp double_column_masked
+
+draw_masked_1:
+                ; hl - sprite base
+                ; bc - top left xy
+                call bc_xy_to_addr
+                ; de - now is screen pos
+                ; a - offset
+                ld c, a
+
+                ld a, (hl)
+                ld b, a
+                inc hl
+                jp single_column_masked
+
+
+draw_masked_custom:
                 ; hl - sprite base
 
                 ; bc - top left xy
@@ -116,4 +150,5 @@ screen_map:
                 dw 50E0h, 51E0h, 52E0h, 53E0h
                 dw 54E0h, 55E0h, 56E0h, 57E0h
 
-                include "draw-masked-unrolls.asm"
+                include "draw-masked-1c.asm"
+                include "draw-masked-2c.asm"
