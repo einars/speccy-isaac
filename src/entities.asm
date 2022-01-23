@@ -1,10 +1,12 @@
 
                 align 256
-spritelist:     
-                dup 1024 : db 0 : edup
+
+max_sprites     equ 20
+
+spritelist:     ds (max_sprites * spr_length)
 
 spr_type        equ 0
-spr_draw_flag   equ 1
+spr_draw_flag   equ 1 ; required to be 1
 spr_pos         equ 2
 spr_x           equ 2
 spr_y           equ 3
@@ -22,11 +24,11 @@ sd2             equ spr_data + 2
 sd3             equ spr_data + 3
 sd4             equ spr_data + 4
 
-spr_length      equ 16
+spr_length      equ 16 ; sometimes important, search for spr_length
 
 s_nothing       equ 0
 s_spider        equ 1
-s_isaac        equ 0x69
+s_isaac         equ 0x69
 
 
 appear:
@@ -77,7 +79,7 @@ map_sprites:
                 ld a, (ix + spr_canary)
                 cp 13
                 jz .all_ok
-                
+
                 ld a, Color.magenta
                 out (254), a
                 di
@@ -91,108 +93,102 @@ map_sprites:
 
 
 
+sort_area       ds max_sprites * 2
+
+
+
 draw_sprites_ordered:
-                ; this is much too slow
-                ; the current algorithm is piss-poor
-                ; it repeatedly does this:
-                ;   - walk through all undrawn sprites, searching lowest coords
-                ;   - walk through all sprites, drawing the sprites matching these coords
-                ; repeat until no undrawn sprites found
-                ; even some kind of bubble sort would probably be better/faster
-
-                ; set all "walked" to zero
-                ld bc, spr_length
                 ld ix, spritelist
-1
-                ld a, (ix)
-                inc a
-                jz .cont
-                ld (ix + spr_draw_flag), a
-                add ix, bc
-                jr 1b
-.cont
-
-                ; pass 1: find smallest idx for undrawn sprite
-.pass1_restart
-                ld hl, 0xffff ; min x, y
-                ld ix, spritelist
-                ld d, 0 ; found anything?
                 ld bc, spr_length
-                
-.pass1
-                ld a, (ix)
-                ;or a
-                ;jz .not_this
-                inc a
-                jz .pass1_iteration_done
+                ld hl, sort_area
+                ld d, 0 ; sprite index
 
-                ld a, (ix + spr_draw_flag)
+                // sort_area will contain:
+                // [ y, idx ] [ y, idx ], ...
+
+1               ld a, (ix)
                 or a
-                jz .not_this ; already drawn
-
+                jz .next
+                inc a
+                jz .done
                 ld a, (ix + spr_y)
-                cp h
-                jc .found_candidate
-                jnz .not_this
-                ; y match. compare x
-
-                ;ld a, (ix + spr_x)
-                ;cp l
-                ;jnc .not_this
-
-.found_candidate:
-                ;ld l, (ix + spr_x)
-                ld h, (ix + spr_y)
+                ld (hl), a
+                inc hl
+                ld (hl), d
+                inc hl
+.next           add ix, bc
                 inc d
+                jr 1b
+.done
+                ; now bubble-sort that shit
 
-.not_this
-                add ix, bc
-                jr .pass1
+                push de
 
-                ld a, (ix + spr_y)
-                or a
-                
+                ld b, d
+                ld c, d
+.again          ld ix, sort_area
 
-.pass1_iteration_done:
+                ld h, 0
+                ld b, c
+                dec b
+                jz .nuff
+.nbub:          ld a, (ix)
+                ld e, (ix + 2)
+                cp e
+                jz .no_swap
+                jc .no_swap
+                ;jnc .no_swap
+.swap           ld (ix), e
+                ld (ix + 2), a
+                ; swap indices
+                ld a, (ix + 1)
+                ld e, (ix + 3)
+                ld (ix + 1), e
+                ld (ix + 3), a
+                inc h
+.no_swap        inc ix
+                inc ix
+                djnz .nbub
+                dec c
+                jz .nuff
+                ld a, h
+                or h
+                jnz .again
+.nuff
 
-                ld a, d
-                or a
-                ret z
+                ;;;;  make me
+                pop de
 
-                ld ix, spritelist
+                ; now:
+                ; D - n_elements
+                ; &spritelist - y-sorted sprite indexes
 
-; pass2: call draw for all sprites that match b/c location
+                ld b, d
 
-                ; now
-                ; HL = min x, y
-                ; BC = spr_length
-                
-                ; walk through the sprites and, if they match HL coords, draw them
-
-.pass2_loop
-                ld a, (ix)
-                or a
-                jz .pass2_next
-                inc a
-                jz .pass1_restart
-                ld a, (ix + spr_y)
-                cp h
-                jnz .pass2_next
-                ;ld a, (ix + spr_x)
-                ;cp l
-                ;jnz .pass2_next
-
-                ld (ix + spr_draw_flag), 0
-
+                ld hl, sort_area
+.draw           inc hl
+                ld a, (hl)
+                inc hl
                 push hl
+                ld h, 0
+                ld l, a
+                add hl, hl
+                add hl, hl
+                add hl, hl
+                add hl, hl ; hl = idx * 16 ; spr_length!
+                push bc
+                ld bc, spritelist
+                add hl, bc
+                ld ix, hl
                 ld hl, (ix + spr_draw)
-                ld (.smccall + 1), hl
-.smccall        call 0
+                ld (.smc + 1), hl
+.smc            call 0
+                pop bc
                 pop hl
-.pass2_next     ld bc, spr_length
-                add ix, bc
-                jr .pass2_loop
-                
+                djnz .draw
+                ret
+
+
 
 
 
@@ -234,12 +230,12 @@ hittest_sprites:
                 cp b
                 ret nc
 
-                
+
 .smc            call 0000
                 pop bc ; eat return to map_sprites - finish iterating
                 ret
 
-                
+
 
 
 
@@ -252,7 +248,7 @@ update_sprites:
 1               cp 32
                 jc noupdate
 
-                
+
                 push af
                 ld hl, .ret
                 push hl
@@ -267,8 +263,8 @@ noupdate        ld (ix + spr_tick), a
 
 
 spidio db 4
-                
-spider_init:    
+
+spider_init:
                 ld (ix + spr_type), s_spider
                 ld a, (spidio)
                 ld (ix + spr_speed), a
@@ -325,8 +321,8 @@ spider_update:
                 jr 1f
 .yminus         dec b
 
-1               
-                
+1
+
                 ld a, e
                 and 7
                 cp 1
@@ -386,9 +382,9 @@ isaac_init:
                 ld (ix + sd0), 0 ; frame, 1 vs 0
                 ld (ix + sd1), 0 ; frame counter
                 ret
-                
+
 isaac_update:   ret ; everything currently is done in Isaac.move elsewhere
-isaac_draw:     
+isaac_draw:
                 ld a, (ix + spr_y)
                 sub 20
                 ld b, a
@@ -412,11 +408,11 @@ isaac_draw:
 
                 call draw_masked_sprite
 
-                ld a, (The.isaac_y)
+                ld a, (ix + spr_y)
                 sub 5
                 ld b, a
 
-                ld a, (The.isaac_x)
+                ld a, (ix + spr_x)
                 sub 4
                 ld c, a
 

@@ -40,6 +40,9 @@ Start:          jr 1f
                 push bc
                 call appear
 
+                ld hl, isaac_init
+                ld bc, 0x9595
+                call appear
 
                 ld hl, spider_init
                 ld bc, 0x5530
@@ -49,7 +52,7 @@ Start:          jr 1f
                 ld hl, spider_init
                 ld bc, 0x5530
                 call appear
-
+/*
                 ld hl, spider_init
                 ld bc, 0x6530
                 call appear
@@ -79,7 +82,10 @@ Start:          jr 1f
                 ld bc, 0x7090
                 call appear
 
-/*
+                ld hl, isaac_init
+                ld bc, 0x9090
+                call appear
+
                 ld hl, spider_init
                 ld bc, 0x55d0
                 call appear
@@ -116,17 +122,14 @@ Start:          jr 1f
 
 .again          
 
+                ld a, (tick)
+                push af
                 call draw_sprites_ordered
-                ;call draw_sprites
-
-                ld a, Color.white
-                out (254), a
-                ld b, 7
-                djnz $
-                ld a, Color.black
-                out (254), a
-                halt
-
+                pop af
+                ld hl, tick
+                cp (hl)
+                jnz .again ; redraw is slow, interrupt missed - no messing with halt
+                halt ; smooth mode
                 jr .again
 
 
@@ -170,6 +173,9 @@ InterruptRoutine:
                 ld hl, Isaac.OnHit
                 call hittest_sprites
 
+                ld hl, tick
+                inc (hl)
+
                 pop iy
                 pop ix
                 pop af
@@ -180,7 +186,7 @@ InterruptRoutine:
                 ei
                 reti
 
-
+tick:           db 0
 
                 include "isaac.asm"
                 include "draw.asm"
