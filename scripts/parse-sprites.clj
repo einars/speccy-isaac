@@ -76,7 +76,8 @@
            (partition-all 4 (interleave p1 p2 m1 m2)))
       )))
 
-(defn sprite-to-string [{:keys [label pixels masks width-chars height-pixels]}]
+
+(defn sprite-to-string [{:keys [label pixels masks width-chars]}]
   (let [label (str/replace label "." "_")
         asm (cond
               (= 1 width-chars)

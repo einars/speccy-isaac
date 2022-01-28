@@ -38,13 +38,13 @@ appear:
                 ld de, spr_length
 1               ld a, (hl)
                 or a
-                jz found_space
+                jz .found_space
                 cp 255
-                jz found_space
+                jz .found_space
                 add hl, de
                 jr 1b
 
-found_space
+.found_space
                 push hl
                 pop ix
                 ;or a
@@ -272,19 +272,17 @@ update_sprites:
                 ld a, (ix + spr_tick)
                 add (ix + spr_speed)
 1               cp 32
-                jc noupdate
+                jc 1f
 
 
-                push af
-                ld hl, .ret
-                push hl
                 ld hl, (ix + spr_update)
-                jp hl
-
-.ret            pop af
+                ld (.smc + 1), hl
+                push af
+.smc            call 0
+                pop af
                 sub 32
 
-noupdate        ld (ix + spr_tick), a
+1              ld (ix + spr_tick), a
                 ret
 
 
