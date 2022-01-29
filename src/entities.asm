@@ -107,7 +107,7 @@ draw_sprites_ordered:
                 inc hl
 .next           add ix, bc
                 inc d
-                jr 1b
+                jp 1b
 .done
                 ; now bubble-sort that shit
 
@@ -138,8 +138,8 @@ draw_sprites_ordered:
                 pop hl
                 ld a, e
                 cp l
-                jc .xno_swap
-                jz .xno_swap
+                jp c, .xno_swap
+                jp z, .xno_swap
                 push de
                 push hl
                 pop hl
@@ -149,7 +149,7 @@ draw_sprites_ordered:
                 djnz .xbub
                 ld a, c
                 or a
-                jnz .xagain
+                jp nz, .xagain
 .ssp            ld sp, 0
                 ei
                 jr .nuff
@@ -229,6 +229,11 @@ draw_sprites:
                 ld hl, (ix + spr_draw)
                 jp hl
 
+draw_sprites_cleanest:
+                ;call map_sprites
+                call map_sprites
+                ld hl, (ix + spr_draw)
+                jp hl
 
 hittest_sprites:
                 ; bc - (isaac) coords

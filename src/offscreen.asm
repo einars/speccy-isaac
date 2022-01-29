@@ -91,6 +91,114 @@ MarkDirty2:
                 pop bc
                 ret
 
+MarkAllDirty:
+                ld hl, room
+                ld b, Room.W * Room.H
+1
+                set 7,(hl) ; Geo.dirty
+                inc hl
+                djnz 1b
+                ret
+
+
+dirty_slice     db 0
+RestoreNextDirtySlice:
+                ld hl, dirty_slice
+                ld a, (hl)
+                inc a
+                cp Room.H
+                jnz 1f
+                xor a
+1
+                ld (hl), a
+
+RestoreDirtySlice:
+                ; restore dirty tiles on horizontal line Q
+                ; A = Q
+
+                ld d, a
+
+                rlca
+                rlca
+                rlca
+                rlca
+                ld l, a
+                ld h, room >> 8
+                ; hl - &room
+
+                ld b, Room.W
+.x
+                bit Geo.dirty_bit, (hl)
+                jnz .redraw
+
+.loop
+                inc hl
+                djnz .x
+                ret
+
+.redraw:
+                res Geo.dirty_bit, (hl)
+                
+                push bc
+                push hl
+                push de
+
+                ld a, Room.W
+                sub b
+                ld c, a
+                ld b, d
+
+                call Util.XY_of_PQ
+                call Util.Scr_of_XY
+                ld h, d
+                ld l, e
+                set 7, h
+
+                dup 8
+                  ld a, (hl)
+                  ld (de), a
+                  inc hl
+                  inc de
+
+                  ld a, (hl)
+                  ld (de), a
+                  dec hl
+                  dec de
+
+                  inc h
+                  inc d
+                edup
+
+                dec d
+                LineInc_DE
+                ld h, d
+                ld l, e
+                set 7, h
+
+                dup 8
+                  ld a, (hl)
+                  ld (de), a
+                  inc hl
+                  inc de
+
+                  ld a, (hl)
+                  ld (de), a
+                  dec hl
+                  dec de
+
+                  inc h
+                  inc d
+                edup
+
+                pop de
+                pop hl
+                pop bc
+                jp .loop
+
+
+
+
+
 
 
 RestoreDirty:
@@ -268,9 +376,13 @@ SetAttributes:
                 ld hl, 0x5800
 
                 ld a, Bg.black + Color.white
-                ld b, 32 * Room.TopReserve
+                ld b, 32 * (Room.TopReserve - 1)
                 call fill
 
+                ; avoid cleaning the single line the isaac's head pops out
+                ld a, Bg.black + Color.black
+                ld b, 32
+                call fill
 
                 ld a, Bg.red + Color.white + Color.bright
                 ld b, 32

@@ -36,10 +36,10 @@ Start:          jr 1f
                 call appear
 
 
+                call Scenes.Spiders
                 ;call Scenes.Spider
                 ;call Scenes.Spiders2
-                ;call Scenes.Spiders
-                ;call Scenes.Isaacs
+                call Scenes.Isaacs
 
 
                 ei
@@ -50,14 +50,20 @@ Start:          jr 1f
                 push af
                 ;ld a, Color.red
                 ;out (254), a
-                call Offscreen.RestoreDirty
+
+                ;call Offscreen.RestoreDirty
+                ;call draw_sprites_ordered
+
+                call Offscreen.RestoreNextDirtySlice
+                ;call Offscreen.RestoreNextDirtySlice
                 call draw_sprites_ordered
+                ;call draw_sprites
                 ;ld a, Color.green
                 ;out (254), a
                 pop af
                 ld hl, tick
                 cp (hl)
-                jnz .again ; redraw is slow, interrupt missed - no messing with halt
+                ;jnz .again ; redraw is slow, interrupt missed - no messing with halt
 
 
                 ;ld a, Color.white
