@@ -231,6 +231,7 @@ double_column_masked:
 
                 ex de, hl
                 and (hl)
+
                 ld (hl), a
                 inc hl
                 ld a, (hl)

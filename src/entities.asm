@@ -119,10 +119,15 @@ draw_sprites_ordered:
 
 ;;; bubblesort, stack-based implementation
 .bubble_stack:
-                di
 
                 ld a, d
+
                 dec a
+
+                jz .nuff
+
+                di
+
                 ld (.xsmc + 2), a
                 ld (.ssp + 1), sp
 
@@ -148,7 +153,6 @@ draw_sprites_ordered:
 .ssp            ld sp, 0
                 ei
                 jr .nuff
-
 
 
 ;;; bubblesort, ix-based implementation
@@ -185,6 +189,7 @@ draw_sprites_ordered:
                 jnz .again
 .nuff
 
+                
                 pop de
 
                 ; now:
@@ -369,7 +374,7 @@ spider_update:
 
 2
                 push bc
-                call Room.TileAtXY
+                call Util.TileAtXY
                 pop bc
 
                 and Geo.perm + Geo.wall

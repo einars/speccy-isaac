@@ -1,172 +1,48 @@
-                include "room-tiles.asm"
 
-                module Room
+                module Geo
 
-fill            ld (hl), a
-                inc hl
-                djnz fill
-                ret
+perm  equ 0b01000000 ; nothing passes, ever
+wall  equ 0b00100000 ; impassable for isaac
+dirty equ 0b10000000 ; by convention, bit 7
+free  equ 0
 
-
-SetAttributes:
-                ld hl, 0x5800
-
-                ld a, Bg.black + Color.white
-                ld b, 32
-                call fill
-
-                ld a, Bg.black + Color.white
-                ld b, 32
-                call fill
-
-                ld a, Bg.red + Color.white
-                ld b, 32
-                call fill
-
-
-                ld a, Bg.red + Color.white + Color.bright
-                ld b, 32
-                call fill
-
-
-
-                ld a, Bg.red + Color.white + Color.bright
-                ld b, 32
-                call fill
-
-                ld c, 14
-1
-                ld a, Bg.red + Color.white + Color.bright
-                ld b, 2
-                call fill
-
-                ld a, Bg.blue + Color.white + Color.bright
-                ld b, 28
-                call fill
-
-                ld a, Bg.red + Color.white + Color.bright
-                ld b, 2
-                call fill
-
-                dec c
-                jr nz, 1b
-
-
-
-                ld a, Bg.red + Color.white + Color.bright
-                ld b, 32
-                call fill
-
-                ld a, Bg.red + Color.white + Color.bright
-                ld b, 32
-                call fill
-
-                ld a, Bg.red + Color.white
-                ld b, 32
-                call fill
-
-                ld a, Bg.black + Color.white
-                ld b, 32
-                call fill
-
-                ld a, Bg.black + Color.white
-                ld b, 32
-                call fill
-
-
-                ld bc, 00
-                ld de, room
-
-loop_q
-                ld c, 0
-loop_p
-                ld a, (de)
-                cp S.v1
-                jr nz, not_this
-
-                call AttrAddrPQ
-                ld (hl), Bg.black + Color.white + Color.bright
-                inc hl
-                ld (hl), Bg.black + Color.white + Color.bright
-                dec hl
-                push de
-                ld de, 32
-                add hl, de
-                pop de
-                ld (hl), Bg.black + Color.white + Color.bright
-                inc hl
-                ld (hl), Bg.black + Color.white + Color.bright
-
-not_this
-                inc de
-                inc c
-                ld a, c
-                cp 16
-                jr nz, loop_p
-
-                inc b
-                ld a, b
-                cp 9
-                jr nz, loop_q
-
-                ret
-
-AttrAddrPQ:     ; BC - pq (c = p)
-                ; out - HL - attribute address for top left
-
-                ld l, b
-                ld h, 0; q * 32 * 2
-                add hl, hl
-                add hl, hl
-                add hl, hl
-                add hl, hl
-                add hl, hl
-                add hl, hl
-                ld a, l
-                add c
-                add c
-                ld l, a
-
-                push de
-                ld de, 0x5800 + 96
-                add hl, de
-                pop de
-
-                ret
-
-TileAtXY:
-                ; BC - xy (c = x)
-                ; out - A - tile
-                ld a, c
-                srl a
-                srl a
-                srl a
-                srl a
-                and 0xff
-                ld c, a
-
-                ld a, b
-                sub 24 ; 24 pikseļi — augšējais ekrāns
-
-                and 0b01110000
-                add c
-                ld c, a
-                ld b, 0
-
-                push hl
-                ld hl, room
-                add hl, bc
-                ld a, (hl)
-                pop hl
-                ret
+dirty_bit equ 7
 
                 endmodule
 
+                module W ; walls
+uninitialized  equ Geo.wall + 0x00
+ul equ Geo.perm + 0x01
+ur equ Geo.perm + 0x02
+dl equ Geo.perm + 0x03
+dr equ Geo.perm + 0x03
+up equ Geo.perm + 0x04
+dn equ Geo.perm + 0x05
+lt equ Geo.perm + 0x06
+rt equ Geo.perm + 0x07
+                endmodule
 
+                module S ; stone
+v1 equ Geo.wall + 0x08
+v2 equ Geo.wall + 0x09
+                endmodule
 
+                module F ; Floor
+oo equ Geo.free + 0x0a
+xt equ Geo.perm + 0x0b
+xb equ Geo.perm + 0x0c
+                endmodule
 
+                module Room
+W equ 16
+H equ 10
+TopReserve equ 4 ; lines
 
+                endmodule
+
+                align 256
 room            db W.ul, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, F.oo, W.ur
+                db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
                 db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
                 db W.rt, F.oo, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
                 db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
@@ -175,8 +51,7 @@ room            db W.ul, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W
                 db W.rt, F.oo, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
                 db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
                 db W.dl, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, F.oo, W.dr
-                dup 128 : DB W.rt : EDUP
-
+                ds 256 - (Room.W * Room.H) ; safety zone for dirty flags
 
 
 

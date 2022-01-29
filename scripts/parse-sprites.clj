@@ -76,24 +76,41 @@
            (partition-all 4 (interleave p1 p2 m1 m2)))
       )))
 
-
-(defn sprite-to-string [{:keys [label pixels masks width-chars]}]
+(defn tile-to-string [{:keys [label pixels] :as s}]
   (let [label (str/replace label "." "_")
-        asm (cond
-              (= 1 width-chars)
-              (column-to-string (first pixels) (first masks))
+        [p1 p2] pixels
+        asm (map (fn [pa pb]
+                   (format "            db %s, %s"
+                           (binary-s pa)
+                           (binary-s pb)))
+                 p1
+                 p2)]
+    (format "%s: db %d\n%s\n          db 0" 
+            label 
+            (count (first pixels)) 
+            (str/join "\n" asm))))
 
-              (= 2 width-chars)
-              (two-columns-to-string pixels masks)
 
-              :else
-              ; custom width
-              (str/join "\n\n"
-                        (mapv
-                          (fn [[pix mask]] (column-to-string pix mask))
-                          (partition-all 2 (interleave pixels masks))
-                          )))]
-    (format "%s:\n%s\n                db 0" label asm))) ; end flag
+(defn sprite-to-string [{:keys [label pixels masks width-chars] :as s}]
+  (if
+    (str/starts-with? label "tile")
+    (tile-to-string s)
+    (let [label (str/replace label "." "_")
+          asm (cond
+                (= 1 width-chars)
+                (column-to-string (first pixels) (first masks))
+
+                (= 2 width-chars)
+                (two-columns-to-string pixels masks)
+
+                :else
+                ; custom width
+                (str/join "\n\n"
+                          (mapv
+                            (fn [[pix mask]] (column-to-string pix mask))
+                            (partition-all 2 (interleave pixels masks))
+                            )))]
+      (format "%s:\n%s\n                db 0" label asm)))) ; end flag
 
 
 

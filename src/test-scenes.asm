@@ -2,35 +2,35 @@
 
 Isaacs:
                 ld hl, isaac_init
-                ld bc, 0x2080
+                ld bc, 0x3080
                 call appear
 
                 ld hl, isaac_init
-                ld bc, 0x3081
+                ld bc, 0x4081
                 call appear
 
                 ld hl, isaac_init
-                ld bc, 0x4082
+                ld bc, 0x5082
                 call appear
 
                 ld hl, isaac_init
-                ld bc, 0x5083
+                ld bc, 0x6083
                 call appear
 
                 ld hl, isaac_init
-                ld bc, 0x6084
+                ld bc, 0x7084
                 call appear
 
                 ld hl, isaac_init
-                ld bc, 0x7085
+                ld bc, 0x8085
                 call appear
 
                 ld hl, isaac_init
-                ld bc, 0x8086
+                ld bc, 0x9086
                 call appear
 
                 ld hl, isaac_init
-                ld bc, 0x9087
+                ld bc, 0xa087
                 call appear
                 ret
 
@@ -39,7 +39,6 @@ Spiders:
 
                 ld hl, spider_init
                 ld bc, 0x5530
-                push bc
                 call appear
 
                 ld hl, spider_init
@@ -67,19 +66,19 @@ Spiders:
                 ld bc, 0x7070
                 call appear
 
+Spiders2:
                 ld hl, spider_init
                 ld bc, 0x7080
                 call appear
 
+
+Spider:
                 ld hl, spider_init
                 ld bc, 0x7090
                 call appear
                 ret
 
-                ld hl, spider_init
-                ld bc, 0x7090
-                call appear
-                ret
+
 
 
 /*

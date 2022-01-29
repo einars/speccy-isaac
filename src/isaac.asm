@@ -101,7 +101,7 @@ ApplyMovement:
                 ld c, a
 
                 push bc
-                call Room.TileAtXY
+                call Util.TileAtXY
                 pop bc
 
                 and Geo.perm + Geo.wall
@@ -120,7 +120,7 @@ ApplyMovement:
                 ld b, a
 
                 push bc
-                call Room.TileAtXY
+                call Util.TileAtXY
                 pop bc
 
                 and Geo.perm + Geo.wall

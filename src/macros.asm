@@ -6,16 +6,15 @@ LineInc_DE      macro
                 inc d
                 ld a, d
                 and 7
-                jr nz, .q
+                jr nz, .lq
                 ld a, e
                 add a, 32
                 ld e, a
-                jr c, .q
+                jr c, .lq
                 ld a, d
                 sub 8
                 ld d, a
-.q:
-
+.lq
                 endm
 
 LineInc_HL      macro
@@ -26,16 +25,15 @@ LineInc_HL      macro
                 inc h
                 ld a, h
                 and 7
-                jr nz, .q
+                jr nz, .lq
                 ld a, l
                 add a, 32
                 ld l, a
-                jr c, .q
+                jr c, .lq
                 ld a, h
                 sub 8
                 ld h, a
-.q:
-
+.lq
                 endm
 
 jz              macro label
@@ -52,4 +50,13 @@ jnz             macro label
 
 jnc             macro label
                 jr nc, label
+                endm
+
+stop            macro 
+                di
+                push af
+                ld a, Color.magenta
+                out (254), a
+                pop af
+                halt
                 endm

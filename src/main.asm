@@ -1,4 +1,4 @@
-                display "dso: ",/A,double_column_masked
+                display "debug: ",/A, Offscreen.RestoreDirty
 
 
                 device zxspectrum48
@@ -15,16 +15,11 @@ Start:          jr 1f
                 ; made in Latvia
 
 1
-                call Room.SetAttributes
 
-                ld hl, 0x4000
-                ld de, 0x4001
-                ld bc, 192 * 32 - 1
-                xor a
-                ;ld a, 255
-                ld (hl), a
-                ldir
+                call Offscreen.SetAttributes
 
+                call Offscreen.Build
+                call Offscreen.Draw
 
                 ld de, InterruptRoutine
                 call im2.Setup
@@ -36,13 +31,13 @@ Start:          jr 1f
 
                 ; shold always be first
                 ld hl, isaac_init
-                ld bc, 0x4041
+                ld bc, 0x4045
                 push bc
                 call appear
 
 
-                call Scenes.Spiders
-                ;call Scenes.Spiders
+                ;call Scenes.Spider
+                ;call Scenes.Spiders2
                 ;call Scenes.Spiders
                 ;call Scenes.Isaacs
 
@@ -55,21 +50,22 @@ Start:          jr 1f
                 push af
                 ;ld a, Color.red
                 ;out (254), a
+                call Offscreen.RestoreDirty
                 call draw_sprites_ordered
                 ;ld a, Color.green
                 ;out (254), a
                 pop af
                 ld hl, tick
                 cp (hl)
-                ;jnz .again ; redraw is slow, interrupt missed - no messing with halt
+                jnz .again ; redraw is slow, interrupt missed - no messing with halt
 
 
-                ld a, Color.white
-                out (254), a
-                ld b, 20
-                djnz $
-                ld a, Color.black
-                out (254), a
+                ;ld a, Color.white
+                ;out (254), a
+                ;ld b, 20
+                ;djnz $
+                ;ld a, Color.red
+                ;out (254), a
 
                 halt ; smooth mode
 
@@ -103,6 +99,13 @@ InterruptRoutine:
                 push af
                 push ix
                 push iy
+                exx
+                ex af, af'
+                push hl
+                push de
+                push bc
+                push af
+
 
                 call keyboard.Read
 
@@ -119,6 +122,13 @@ InterruptRoutine:
 
                 ld hl, tick
                 inc (hl)
+
+                pop af
+                pop bc
+                pop de
+                pop hl
+                ex af, af'
+                exx
 
                 pop iy
                 pop ix
@@ -141,6 +151,8 @@ tick:           db 0
 
 
                 include "room.asm"
+                include "util.asm"
+                include "offscreen.asm"
                 include "the.asm"
 
                 ; do not put anything after this line
