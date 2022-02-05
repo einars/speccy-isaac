@@ -1,4 +1,3 @@
-                display "debug: ",/A, double_column_clean
                 display "debug: ",/A, restore_mask_2
 
 

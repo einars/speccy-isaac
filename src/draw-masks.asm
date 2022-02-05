@@ -28,17 +28,28 @@ restore_mask_2:
 
                 inc hl
 
+                ld a, c
+                add a, c
+                add a, c
+                ld (.jump_table + 1), a
+
                 ld a, b
                 di
                 ld (sp_ret + 1), sp
                 ld (.sp + 1), hl
 .sp             ld sp, 0
 
-                ;jp double_column_clean
+.jump_table     jr $
+                jp dc0
+                jp dc0
+                jp dc0
+                jp dc0
+                jp dc0
+                jp dc0
+                jp dc0
+                jp dc0
 
-
-
-double_column_clean:
+dc0:
                 ; DE = screen, DE|8000 = offscreen, HL = sprite
 
 1
