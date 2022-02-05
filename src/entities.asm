@@ -111,10 +111,23 @@ sort_area       ds max_sprites * 2
 
 
 draw_sprites_ordered:
-                ld ix, spritelist
+
+                ld a, (ord_remaining)
+                or a
+                jz .sort_again
+
+                ld b, a
+                ld iy, (ord_left_at)
+                jp .draw_reentry
+
+
+
+
+.sort_again:     
+                ld ix, spritelist + spr_length ; ignore isaac
                 ld bc, spr_length
                 ld hl, sort_area
-                ld d, 0 ; sprite index
+                ld d, 1 ; sprite index
 
                 // sort_area will contain:
                 // [ y, idx ] [ y, idx ], ...
@@ -218,30 +231,47 @@ draw_sprites_ordered:
                 ; D - n_elements
                 ; &spritelist - y-sorted sprite indexes
 
+                ld a, d
+                ld (ord_remaining), a
                 ld b, d
 
-                ld iy, sort_area
+                ld hl, sort_area
+                ld (ord_left_at), hl
+.draw_reentry
 .draw           
-                
+                ld ix, spritelist
+                call update_sprite
+                call materialize_sprite
+
+                dup 3
+                ld hl, (ord_left_at)
+                inc hl
+                ld l, (hl)
                 ld h, 0
-                ld a, (iy + 1)
-                ld l, a
                 add hl, hl
                 add hl, hl
                 add hl, hl
                 add hl, hl ; hl = idx * 16 ; spr_length!
-                push bc
                 ld bc, spritelist
                 add hl, bc
                 ld ix, hl
-                ld a, (iy + 0) ; sprite index
+                call update_sprite ; todo: handle death
                 call materialize_sprite
-                pop bc
-                inc iy
-                inc iy
-                djnz .draw
+
+                ld hl, ord_left_at
+                inc (hl)
+                inc (hl)
+                ;djnz .draw
+                dec hl
+                ;ld hl, ord_remaining
+                dec (hl)
+                ret z
+                edup
+
                 ret
 
+ord_remaining db 0
+ord_left_at dw 0
 
 
 
@@ -349,6 +379,7 @@ hittest_sprites:
 update_sprites:
                 call map_sprites
 
+update_sprite:
                 ld a, (ix + spr_tick)
                 add (ix + spr_speed)
                 cp 32
@@ -625,9 +656,10 @@ mimic_update:
 .choose_new_direction
                 
                 call random
+                ld b, a
                 and 63
                 ld (ix + sd1), a ; distance to run
-                call random
+                ld a, b
                 and 3
                 ld (ix + sd2), a ; direction
 
@@ -642,7 +674,7 @@ mimic_appear:   ; BC - coordinates of isaac
                 ld hl, mimic_update
                 ld a, s_monster
                 call appear
-                ;ld (ix + spr_speed), 16
+                ld (ix + spr_speed), 16
                 xor a
                 ld (ix + sd0), a
                 ld (ix + sd1), a
@@ -655,9 +687,9 @@ spider_appear:   ; BC - coordinates of isaac
                 ld hl, spider_update
                 ld a, s_monster
                 call appear
-                ;ld (ix + spr_speed), 16
-                call random
-                ld (ix + spr_speed), a
+                ld (ix + spr_speed), 16
+                ;call random
+                ;ld (ix + spr_speed), a
                 xor a
                 ld (ix + sd0), a ; frame, 1/0
                 ld (ix + sd1), a ; frame_counter

@@ -63,10 +63,10 @@ Isaacs1
 ;                ld bc, 0x7060
 ;                call appear
 ;
-;                ld hl, spider_init
-;                ld bc, 0x7070
-;                call appear
-;
+Spiders3
+                ld bc, 0x7070
+                call spider_appear
+
 Spiders2
                 ld bc, 0x7080
                 call spider_appear

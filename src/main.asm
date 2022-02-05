@@ -40,11 +40,13 @@ Start:          jr 1f
                 ;call Scenes.Isaacs3
                 ;call Scenes.Isaacs4
                 ;call Scenes.Isaacs7
-                call Scenes.Isaacs1
+                call Scenes.Isaacs7
+                call Scenes.Isaacs3
+                call Scenes.Spiders1
 
-                ;call Scenes.Spiders1
-                ;call Scenes.Spiders2
-                ;call Scenes.Spiders2
+                call Scenes.Spiders1
+                call Scenes.Spiders2
+                call Scenes.Spiders2
 
                 ei
                 halt
@@ -54,11 +56,12 @@ Start:          jr 1f
                 call LoadIndicator.FrameStart
 
                call draw_sprites_ordered
+               ;call draw_sprites_chaotic
                ;call draw_sprites_cleanest
                ;call draw_sprites_chaotic
 
-                call LoadIndicator.FrameEnd
-                ;halt ; smooth mode
+                ;call LoadIndicator.FrameEnd
+                halt ; smooth mode
                 jr .again
 
                 include "test-scenes.asm"
@@ -104,7 +107,7 @@ InterruptRoutine:
 
                 call Isaac.Move
 
-                call update_sprites
+                ;call update_sprites
 
                 ld hl, The.isaac_y
                 ld b, (hl)
