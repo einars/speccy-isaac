@@ -3,55 +3,80 @@
 
 max_sprites     equ 32
 
-spritelist:     ds (max_sprites * spr_length)
+spritelist:     ds (max_sprites * spr_length), 255
 
 spr_type        equ 0
 spr_pos         equ 1
 spr_x           equ 1
 spr_y           equ 2
-spr_speed       equ 3
-spr_tick        equ 4 ; writes on every update
 
-spr_draw        equ 5
-spr_update      equ 7
+spr_prev_pos         equ 3
+spr_prev_x           equ 3
+spr_prev_y           equ 4
 
-spr_data        equ 9
+spr_sprite     equ 5 ; , 6
+
+spr_speed       equ 7
+spr_tick        equ 8 ; writes on every update
+
+spr_update      equ 9 ; , 10
+
+spr_data        equ 11
 sd0             equ spr_data
 sd1             equ spr_data + 1
 sd2             equ spr_data + 2
 sd3             equ spr_data + 3
 sd4             equ spr_data + 4
-sd5             equ spr_data + 5
 
 spr_length      equ 16 ; sometimes important, search for spr_length
 
 s_nothing       equ 0
 s_spider        equ 1
-s_isaac         equ 0x69
+s_isaac_head    equ 0x69
+s_isaac_body    equ 0x6a
 
 
 appear:
+                ; A - spr_type
                 ; BC - at what pos
-                ; HL — initializer func; gets ix = ptr to sprite table
+                ; DE - pointer to sprite
+                ; HL - update_func
+                ; returns:
+                ; IX = pointer to sprite structure. you may wish to tweak it
                 push hl
+                push de
+                push af
                 ld hl, spritelist
                 ld de, spr_length
 1               ld a, (hl)
                 or a
                 jz .found_space
                 cp 255
-                jz .found_space
+                jz .found_space_in_end
                 add hl, de
                 jr 1b
+
+.found_space_in_end
+                push hl
+                pop ix
+                ld (ix + spr_length), 255
+1
+                pop af
+                ld (hl), a
+                pop de
+                pop hl
+                ld (ix + spr_pos), bc
+                ld (ix + spr_prev_pos), bc
+                ld (ix + spr_sprite), de
+                ld (ix + spr_update), hl
+                ld (ix + spr_speed), 32 ; default speed, 1/f
+                ret
 
 .found_space
                 push hl
                 pop ix
-                ;or a
-                ;jz 1f ; a = 0 - this is a dead sprite place
-                ld (ix + spr_length), 255
-                ld (ix + spr_pos), bc
-                ret ; jmp $init
+                ;ld (ix + spr_length), 255
+                jp 1b
 
 map_sprites_without_isaac:
                 pop hl
@@ -126,8 +151,6 @@ draw_sprites_ordered:
 
                 jz .nuff
 
-                di
-
                 ld (.xsmc + 2), a
                 ld (.ssp + 1), sp
 
@@ -151,7 +174,6 @@ draw_sprites_ordered:
                 or a
                 jp nz, .xagain
 .ssp            ld sp, 0
-                ei
                 jr .nuff
 
 
@@ -202,6 +224,7 @@ draw_sprites_ordered:
 .draw           inc hl
                 ld a, (hl)
                 inc hl
+                push bc
                 exx
                 ld h, 0
                 ld l, a
@@ -212,28 +235,74 @@ draw_sprites_ordered:
                 ld bc, spritelist
                 add hl, bc
                 ld ix, hl
-                ld hl, (ix + spr_draw)
-                ld (.smc + 1), hl
-.smc            call 0
+                call materialize_sprite
                 exx
+                pop bc
                 djnz .draw
                 ret
 
 
 
 
-
-draw_sprites:
-                ;call map_sprites
+draw_sprites_chaotic:
                 call map_sprites
-                ld hl, (ix + spr_draw)
-                jp hl
+                call materialize_sprite
+                ret
 
 draw_sprites_cleanest:
-                ;call map_sprites
-                call map_sprites
-                ld hl, (ix + spr_draw)
-                jp hl
+                ld b, Room.H
+                ld d, Room.TopReservePix
+                ld e, Room.TopReservePix + 16 ; next tile
+                ld hl, spritelist
+.new_row
+
+.row_loop
+                ld a, (hl)
+                or a
+                jz .next
+                inc a
+                jnz .maybe_draw_this
+                ld hl, spritelist
+
+                ; sprite list iterated
+                ; move to next line
+
+                ld d, e
+                ld a, 16
+                add e
+                ld e, a
+                ld hl, spritelist
+                djnz .new_row
+                ret
+
+.pop_next:
+                pop hl
+.next
+                ld a, spr_length
+                add l
+                ld l, a
+                jnc .row_loop
+                inc h
+                jp .row_loop
+
+.maybe_draw_this
+                push hl
+                inc l
+                inc l
+                ld a, (hl) ; pos_y
+                cp d
+                jp c, .pop_next
+                cp e
+                jp nc, .pop_next
+                dec l
+                dec l
+                ld ix, hl
+                push bc
+                exx
+                call materialize_sprite
+                exx
+                pop bc
+                jp .pop_next
 
 hittest_sprites:
                 ; bc - (isaac) coords
@@ -281,189 +350,215 @@ update_sprites:
 
                 ld a, (ix + spr_tick)
                 add (ix + spr_speed)
-1               cp 32
+                cp 32
                 jc 1f
 
 
                 ld hl, (ix + spr_update)
                 ld (.smc + 1), hl
+
                 push af
+                ld a, (ix + spr_x)
+                ld (ix + spr_prev_x), a
+
+                ld a, (ix + spr_y)
+                ld (ix + spr_prev_y), a
+
 .smc            call 0
                 pop af
                 sub 32
 
-1              ld (ix + spr_tick), a
+                ; todo: check if the sprite died
+
+1               ld (ix + spr_tick), a
                 ret
 
 
-spidio db 4
+materialize_sprite:
+                ld a, (ix + spr_x)
+                cp (ix + spr_prev_x)
+                jnz .changed
+                ld a, (ix + spr_y)
+                cp (ix + spr_prev_y)
+                jnz .changed
 
-spider_init:
-                ld (ix + spr_type), s_spider
-                ld a, (spidio)
-                ld (ix + spr_speed), a
-                add 3
-                ld (spidio), a
+                ; not changed, do nothing
+                ; (maybe draw?)
+                jp .draw
+                ;;ret
 
-                ld (ix + spr_tick), 0
-                ld (ix + spr_data + 1), 5
-                ld hl, spider_draw
-                ld (ix + spr_draw), hl
-                ld hl, spider_update
-                ld (ix + spr_update), hl
-                ld (ix + sd0), 0 ; frame, 1 vs 0
-                ld (ix + sd1), 0 ; frame counter
-                ret
+.changed
+                ld bc, (ix + spr_prev_pos)
+                ld hl, (ix + spr_sprite)
+                call restore_mask
 
-spider_update:
-                inc (ix + sd1) ; increase leg frame switcher
-                ld a, (ix + sd1)
-                cp 5
-                jnz .legs_done
-                ld a, (ix + sd0)
-                inc a
-                and 1
-                ld (ix + sd0), a
-                ld (ix + sd1), 0
 
-.legs_done
+.draw
                 ld bc, (ix + spr_pos)
-                call random
-                ld d, h
-                ld e, l
-
-                ld a, d
-                and 7
-
-                cp 1
-                jz .yplus
-                cp 2
-                jz .yminus
-                cp 3
-                jz 1f
-
-                ; move to isaac direction
-                ld a, (ix + spr_y)
-                ld hl, The.isaac_y
-                cp (hl)
-                jz 1f
-                jc .yplus
-                dec b
-
-                jr 1f
-.yplus          inc b
-                jr 1f
-.yminus         dec b
-
-1
-
-                ld a, e
-                and 7
-                cp 1
-                jz .xplus
-                cp 2
-                jz .xminus
-                cp 3
-                jz 2f
-
-                ld a, (ix + spr_x)
-                ld hl, The.isaac_x
-                cp (hl)
-                jz 2f
-                jc .xplus
-                dec c
-                jr 2f
-.xplus          inc c
-                jr 2f
-.xminus         dec c
-
-2
-                push bc
-                call Util.TileAtXY
-                pop bc
-
-                and Geo.perm + Geo.wall
-                ret nz
-
-                ld (ix + spr_pos), bc
-
+                ld hl, (ix + spr_sprite)
+                call sprite_draw
                 ret
 
-spider_draw:
-                ld a, (ix + spr_x)
-                sub 8
-                ld c, a
-                ld a, (ix + spr_y)
-                sub 7
-                ld b, a
-                ld hl, spider_f0
-                ld a, (ix + sd0)
-                or a
-                jz 1f
-                ld hl, spider_f1
-1               jp draw_masked_2
 
 
-isaac_init:
-                ld (ix + spr_type), s_isaac
-                ld (ix + spr_speed), 32
 
-                ld (ix + spr_tick), 0
-                ld hl, isaac_draw
-                ld (ix + spr_draw), hl
-                ld hl, isaac_update
-                ld (ix + spr_update), hl
-                ld (ix + sd0), 0 ; frame, 1 vs 0
-                ld (ix + sd1), 0 ; frame counter
-                ret
+;spidio db 4
+;
+;spider_init:
+;                ld (ix + spr_type), s_spider
+;                call random
+;                ;ld a, (spidio)
+;                ld (ix + spr_speed), a
+;                ;add 3
+;                ld (spidio), a
+;
+;                ld (ix + spr_tick), 0
+;                ld (ix + spr_data + 1), 5
+;                ld hl, spider_draw
+;                ld (ix + spr_draw), hl
+;                ld hl, spider_update
+;                ld (ix + spr_update), hl
+;                ld (ix + sd0), 0 ; frame, 1 vs 0
+;                ld (ix + sd1), 0 ; frame counter
+;                ret
+;
+;spider_update:
+;                inc (ix + sd1) ; increase leg frame switcher
+;                ld a, (ix + sd1)
+;                cp 5
+;                jnz .legs_done
+;                ld a, (ix + sd0)
+;                inc a
+;                and 1
+;                ld (ix + sd0), a
+;                ld (ix + sd1), 0
+;
+;.legs_done
+;                ld bc, (ix + spr_pos)
+;                call random
+;                ld d, h
+;                ld e, l
+;
+;                ld a, d
+;                and 7
+;
+;                cp 1
+;                jz .yplus
+;                cp 2
+;                jz .yminus
+;                cp 3
+;                jz 1f
+;
+;                ; move to isaac direction
+;                ld a, (ix + spr_y)
+;                ld hl, The.isaac_y
+;                cp (hl)
+;                jz 1f
+;                jc .yplus
+;                dec b
+;
+;                jr 1f
+;.yplus          inc b
+;                jr 1f
+;.yminus         dec b
+;
+;1
+;
+;                ld a, e
+;                and 7
+;                cp 1
+;                jz .xplus
+;                cp 2
+;                jz .xminus
+;                cp 3
+;                jz 2f
+;
+;                ld a, (ix + spr_x)
+;                ld hl, The.isaac_x
+;                cp (hl)
+;                jz 2f
+;                jc .xplus
+;                dec c
+;                jr 2f
+;.xplus          inc c
+;                jr 2f
+;.xminus         dec c
+;
+;2
+;                push bc
+;                call Util.TileAtXY
+;                pop bc
+;
+;                and Geo.perm + Geo.wall
+;                ret nz
+;
+;                ld (ix + spr_pos), bc
+;
+;                xor a
+;
+;                ret
+;
+;spider_draw:
+;                ld a, (ix + spr_x)
+;                sub 8
+;                ld c, a
+;                ld a, (ix + spr_y)
+;                sub 7
+;                ld b, a
+;                ld hl, spider_f0
+;                ld a, (ix + sd0)
+;                or a
+;                jz 1f
+;                ld hl, spider_f1
+;1               jp draw_masked_2
+;
 
-isaac_update:   ret ; everything currently is done in Isaac.move elsewhere
-isaac_draw:
-                ld a, (ix + spr_y)
-                sub 20
-                ld b, a
-
-                ld a, (ix + spr_x)
-                sub 8
-                ld c, a
-
+isaac_head_update:   
+                ; 1. facing
                 ld hl, spl_isaac_facing
                 ld a, (The.isaac_facing)
-                or a
-                rlca
-                add l ; loc. guaranteed won't overflow
-                ld l, a
+                rla
+                Add_HL_A
                 ld a, (hl)
-                ld e, a
                 inc hl
-                ld a, (hl)
-                ld d, a
-                ex hl, de
+                ld h, (hl)
+                ld l, a
 
-                call draw_masked_2
+                ld (ix + spr_sprite), hl
+                ; spr_x and spr_y updated in interrupt, do not touch here
+                ;ld c, (ix + spr_x)
+                ;ld a, (ix + spr_y)
+                ;sub 20
+                ;ld ld b, a
+                ld a, (The.isaac_x)
+                ld (ix + spr_x), a
+                ld a, (The.isaac_y)
+                sub 6
+                ld (ix + spr_y), a
+                xor a
+                ret
 
-                ld a, (ix + spr_y)
-                sub 5
-                ld b, a
-
-                ld a, (ix + spr_x)
-                sub 4
-                ld c, a
-
+isaac_body_update:
                 ld hl, spl_isaac_body
                 ld a, (The.isaac_step)
-                or a
-                rlca
-                add l
-                ld l, a
+                rla
+                Add_HL_A
                 ld a, (hl)
-                ld e, a
                 inc hl
-                ld a, (hl)
-                ld d, a
-                ex hl, de
+                ld h, (hl)
+                ld l, a
+                ld (ix + spr_sprite), hl
 
-                jp draw_masked_1
+                ld a, (The.isaac_x)
+                ld (ix + spr_x), a
+                ld a, (The.isaac_y)
+                ld (ix + spr_y), a
+
+                xor a
+                ret
+                
+
+
 
 spl_isaac_facing
                 dw isaac_up
@@ -475,3 +570,52 @@ spl_isaac_body
                 dw isaac_body_f1
                 dw isaac_body_f2
                 dw isaac_body_f3
+
+
+isaac_appear:   ; BC - coordinates of isaac
+                push bc
+
+                ld a, c
+                ld (The.isaac_x), a
+                ld a, b
+                ld (The.isaac_y), a
+
+                ld de, isaac_down
+                ld a, b
+                sub 6    ; size of isaac body
+                ld b, a
+                ld hl, isaac_head_update
+                ld a, s_isaac_head
+                call appear
+
+                pop bc
+                ld de, isaac_body_f0
+                ld hl, isaac_body_update
+                ld a, s_isaac_body
+                call appear
+                ld (ix + sd0), 0 ; frame, 1 vs 0
+                ld (ix + sd1), 0 ; frame counter
+                ret
+
+                
+                
+mimic_appear:   ; BC - coordinates of isaac
+                push bc
+                ld de, isaac_down
+                ld a, b
+                sub 6    ; size of isaac body
+                ld b, a
+                ld hl, noupdate
+                ld a, s_isaac_head
+                call appear
+
+                pop bc
+                ld de, isaac_body_f0
+                ld hl, noupdate
+                ld a, s_isaac_body
+                call appear
+noupdate
+                ret
+
+                
+                

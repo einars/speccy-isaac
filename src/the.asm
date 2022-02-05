@@ -2,9 +2,13 @@
 
                 org 0xe000
 
-isaac_pos equ spritelist + spr_pos
-isaac_x equ spritelist + spr_x
-isaac_y equ spritelist + spr_y
+;isaac_pos equ spritelist + spr_pos
+;isaac_x equ spritelist + spr_x
+;isaac_y equ spritelist + spr_y
+
+isaac_pos
+isaac_x db 0
+isaac_y db 0
 
 isaac_speed db 1
 

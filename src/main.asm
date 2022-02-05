@@ -1,4 +1,5 @@
-                display "debug: ",/A, Offscreen.RestoreDirty
+                display "debug: ",/A, double_column_clean
+                display "debug: ",/A, restore_mask_2
 
 
                 device zxspectrum48
@@ -30,51 +31,30 @@ Start:          jr 1f
 
 
                 ; shold always be first
-                ld hl, isaac_init
-                ld bc, 0x4045
-                push bc
-                call appear
+                ld bc, 0x3545
+                call isaac_appear
 
 
-                call Scenes.Spiders
+                ;call Scenes.Spiders
                 ;call Scenes.Spider
                 ;call Scenes.Spiders2
-                call Scenes.Isaacs
+                ;call Scenes.Isaacs3
+                call Scenes.Isaacs7
 
 
                 ei
+                halt
 
 .again          
 
-                ld a, (tick)
-                push af
-                ;ld a, Color.red
-                ;out (254), a
+                call LoadIndicator.FrameStart
 
-                ;call Offscreen.RestoreDirty
-                ;call draw_sprites_ordered
+               call draw_sprites_ordered
+               ;call draw_sprites_cleanest
+               ;call draw_sprites_chaotic
 
-                call Offscreen.RestoreNextDirtySlice
-                ;call Offscreen.RestoreNextDirtySlice
-                call draw_sprites_ordered
-                ;call draw_sprites
-                ;ld a, Color.green
-                ;out (254), a
-                pop af
-                ld hl, tick
-                cp (hl)
-                ;jnz .again ; redraw is slow, interrupt missed - no messing with halt
-
-
-                ;ld a, Color.white
-                ;out (254), a
-                ;ld b, 20
-                ;djnz $
-                ;ld a, Color.red
-                ;out (254), a
-
-                halt ; smooth mode
-
+                call LoadIndicator.FrameEnd
+                ;; halt ; smooth mode
                 jr .again
 
                 include "test-scenes.asm"
@@ -99,6 +79,8 @@ random:
 
 InterruptRoutine:
                 di
+                ld (.stack_ret + 1), sp
+                ld sp, im2.Stack
                 push hl
                 push de
                 push bc
@@ -112,6 +94,7 @@ InterruptRoutine:
                 push bc
                 push af
 
+                call LoadIndicator.Tick
 
                 call keyboard.Read
 
@@ -142,11 +125,13 @@ InterruptRoutine:
                 pop bc
                 pop de
                 pop hl
+.stack_ret      ld sp, 0
                 ei
                 reti
 
 tick:           db 0
 
+                include "loadindicator.asm"
                 include "isaac.asm"
                 include "draw.asm"
                 include "keyboard.asm"

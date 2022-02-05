@@ -1,6 +1,10 @@
                 module im2
                 ; DE - handler routine
 
+                ds 256
+Stack           dw .stop
+
+.stop           stop
 
 jumpspace equ 0xfdfd
 table_base equ 0xfe00

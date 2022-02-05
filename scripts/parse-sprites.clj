@@ -56,7 +56,7 @@
   (str/join
     "\n"
     (concat
-      [(format "                db %d" (count pix-col))]
+      [(format "                db 1, %d" (count pix-col))]
       (map (fn [[pix mask]]
              (format "                db %s, %s" (binary-s mask) (binary-s pix)))
            (partition-all 2 (interleave pix-col mask-col)))
@@ -66,7 +66,7 @@
   (str/join
     "\n"
     (concat
-      [(format "                db %d" (count p1))] ; height
+      [(format "                db 2, %d" (count p1))] ; height
       (map (fn [[pa pb ma mb]]
              (format "                db %s, %s, %s, %s" 
                      (binary-s ma)

@@ -52,6 +52,19 @@ jnc             macro label
                 jr nc, label
                 endm
 
+pushx           macro
+                push hl
+                push de
+                push bc
+                endm
+
+popx            macro
+                pop bc
+                pop de
+                pop hl
+                endm
+
+
 stop            macro 
                 di
                 push af
@@ -59,4 +72,12 @@ stop            macro
                 out (254), a
                 pop af
                 halt
+                endm
+
+Add_HL_A        macro
+                add a, l
+                ld l, a
+                adc a, h
+                sub l
+                ld h, a
                 endm

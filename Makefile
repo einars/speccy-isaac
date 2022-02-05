@@ -7,7 +7,7 @@ run:
 	fuse ./build/isaac.sna
 
 watch:
-	watchexec -W -w src ./compile.sh
+	watchexec --no-vcs-ignore --on-busy-update do-nothing -W -w src ./compile.sh
 
 sprites:
 	cd scripts && clj parse-sprites.clj

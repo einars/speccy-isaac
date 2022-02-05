@@ -37,6 +37,7 @@ xb equ Geo.perm + 0x0c
 W equ 16
 H equ 10
 TopReserve equ 4 ; lines
+TopReservePix equ TopReserve * 8 ; pixels
 TopTiles equ TopReserve / 2 ; tiles
 
                 endmodule
