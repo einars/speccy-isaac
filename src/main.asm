@@ -1,4 +1,4 @@
-                display "debug: ",/A, restore_mask_2
+                display "debug: ",/A, restore_mask
 
 
                 device zxspectrum48
@@ -37,10 +37,14 @@ Start:          jr 1f
                 ;call Scenes.Spiders
                 ;call Scenes.Spider
                 ;call Scenes.Spiders2
-                call Scenes.Isaacs3
-                call Scenes.Isaacs4
-                call Scenes.Isaacs7
+                ;call Scenes.Isaacs3
+                ;call Scenes.Isaacs4
+                ;call Scenes.Isaacs7
+                call Scenes.Isaacs1
 
+                ;call Scenes.Spiders1
+                ;call Scenes.Spiders2
+                ;call Scenes.Spiders2
 
                 ei
                 halt
@@ -53,8 +57,8 @@ Start:          jr 1f
                ;call draw_sprites_cleanest
                ;call draw_sprites_chaotic
 
-                ;call LoadIndicator.FrameEnd
-                halt ; smooth mode
+                call LoadIndicator.FrameEnd
+                ;halt ; smooth mode
                 jr .again
 
                 include "test-scenes.asm"

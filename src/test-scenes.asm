@@ -29,7 +29,8 @@ Isaacs2:
                 ld bc, 0x90c6
                 call mimic_appear
 
-Isaac:
+Isaac
+Isaacs1
                 ld bc, 0xa0d7
                 call mimic_appear
                 ret
@@ -66,17 +67,16 @@ Isaac:
 ;                ld bc, 0x7070
 ;                call appear
 ;
-;Spiders2:
-;                ld hl, spider_init
-;                ld bc, 0x7080
-;                call appear
-;
-;
-;Spider:
-;                ld hl, spider_init
-;                ld bc, 0x7090
-;                call appear
-;                ret
+Spiders2
+                ld bc, 0x7080
+                call spider_appear
+
+
+Spiders1
+Spider
+                ld bc, 0x7090
+                call spider_appear
+                ret
 ;
 ;
 ;

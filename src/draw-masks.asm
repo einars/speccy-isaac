@@ -77,24 +77,7 @@ dc_impl         macro
 
 
 
-restore_mask_1:
-                ld a, c
-                sub 3
-                ld c, a
-                ld a, b
-                sub (hl)
-                ;inc a
-                ld b, a
-
-                call Util.Scr_of_XY
-                ld c, a
-                ld b, (hl)
-
-                inc hl
-                jp single_column_clean
-
-
-restore_mask_2:
+restore_mask:
                 ld a, c
                 sub 7
                 ld c, a
@@ -307,36 +290,5 @@ dc7:
 
                 djnz 1b
                 exx
-                ret
-
-single_column_clean:
-                ex de, hl; HL = screen, DE = sprite
-                ld a, b
-1
-                ex af,af
-
-                ld a, (de)
-                inc de
-                ld c, a ; c = mask
-
-                set 7, h
-                ld a, (hl) ; offscreen
-                res 7, h
-                cpl
-                or c ; and inverse mask
-                cpl
-                ld b, a
-                ld a, (hl) ; screen
-                and c ; mask
-                or b  ; screen
-                ld (hl), a
-
-                inc de
-
-                LineInc_HL
-                
-                ex af, af
-                dec a
-                jp nz, 1b
                 ret
 

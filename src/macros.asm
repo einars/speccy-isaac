@@ -81,3 +81,15 @@ Add_HL_A        macro
                 sub l
                 ld h, a
                 endm
+
+negc            macro
+                jp nc, 1f
+                neg
+1
+                endm
+
+cplc            macro
+                jp nc, 1f
+                cpl
+1
+                endm
