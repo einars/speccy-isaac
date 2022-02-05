@@ -34,19 +34,10 @@ Start:          jr 1f
                 call isaac_appear
 
 
-                ;call Scenes.Spiders
-                ;call Scenes.Spider
-                ;call Scenes.Spiders2
-                ;call Scenes.Isaacs3
-                ;call Scenes.Isaacs4
-                ;call Scenes.Isaacs7
-                call Scenes.Isaacs7
                 call Scenes.Isaacs3
-                call Scenes.Spiders1
+                call Scenes.Spiders3
 
-                call Scenes.Spiders1
-                call Scenes.Spiders2
-                call Scenes.Spiders2
+                ;call Scenes.Spiders2
 
                 ei
                 halt
@@ -107,7 +98,7 @@ InterruptRoutine:
 
                 call Isaac.Move
 
-                ;call update_sprites
+                call update_sprites
 
                 ld hl, The.isaac_y
                 ld b, (hl)

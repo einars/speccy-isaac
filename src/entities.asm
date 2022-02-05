@@ -240,7 +240,7 @@ draw_sprites_ordered:
 .draw_reentry
 .draw           
                 ld ix, spritelist
-                call update_sprite
+                ;call update_sprite
                 call materialize_sprite
 
                 dup 3
@@ -255,7 +255,7 @@ draw_sprites_ordered:
                 ld bc, spritelist
                 add hl, bc
                 ld ix, hl
-                call update_sprite ; todo: handle death
+                ;call update_sprite ; todo: handle death
                 call materialize_sprite
 
                 ld hl, ord_left_at
