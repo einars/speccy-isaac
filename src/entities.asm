@@ -32,6 +32,7 @@ spr_length      equ 16 ; sometimes important, search for spr_length
 
 s_nothing       equ 0
 s_spider        equ 1
+s_mimic         equ 2
 s_isaac_head    equ 0x69
 s_isaac_body    equ 0x6a
 
@@ -220,24 +221,25 @@ draw_sprites_ordered:
 
                 ld b, d
 
-                ld hl, sort_area
-.draw           inc hl
-                ld a, (hl)
-                inc hl
-                push bc
-                exx
+                ld iy, sort_area
+.draw           
+                
                 ld h, 0
+                ld a, (iy + 1)
                 ld l, a
                 add hl, hl
                 add hl, hl
                 add hl, hl
                 add hl, hl ; hl = idx * 16 ; spr_length!
+                push bc
                 ld bc, spritelist
                 add hl, bc
                 ld ix, hl
+                ld a, (iy + 0) ; sprite index
                 call materialize_sprite
-                exx
                 pop bc
+                inc iy
+                inc iy
                 djnz .draw
                 ret
 
@@ -358,12 +360,6 @@ update_sprites:
                 ld (.smc + 1), hl
 
                 push af
-                ld a, (ix + spr_x)
-                ld (ix + spr_prev_x), a
-
-                ld a, (ix + spr_y)
-                ld (ix + spr_prev_y), a
-
 .smc            call 0
                 pop af
                 sub 32
@@ -375,6 +371,15 @@ update_sprites:
 
 
 materialize_sprite:
+
+                ;cp 2 ; idx = 0 or 1 — always draw isaac
+                ;jnc .no_skip
+
+                ;call random
+                ;and 7
+                ;ret nz
+
+.no_skip
                 ld a, (ix + spr_x)
                 cp (ix + spr_prev_x)
                 jnz .changed
@@ -382,8 +387,8 @@ materialize_sprite:
                 cp (ix + spr_prev_y)
                 jnz .changed
 
-                ; not changed, do nothing
-                ; (maybe draw?)
+                ; draw occassionally
+
                 jp .draw
                 ;;ret
 
@@ -395,8 +400,38 @@ materialize_sprite:
 
 .draw
                 ld bc, (ix + spr_pos)
+                ld (ix + spr_prev_pos), bc
                 ld hl, (ix + spr_sprite)
                 call sprite_draw
+                ret
+
+
+move_sprite_in_cardinal_direction:
+                ; ix = sprite
+                ; A = direction (UP / LEFT / DOWN / RIGHT
+                ld bc, (ix + spr_pos)
+                or a
+                jz .up
+                dec a
+                jz .left
+                dec a
+                jz .right
+                ; down
+                inc b
+                jr 1f
+.up             dec b
+                jr 1f
+.left           dec c
+                jr 1f
+.right          inc c
+1               
+                push bc
+                call Util.TileAtXY
+                pop bc
+
+                and Geo.perm + Geo.wall
+                ret nz
+                ld (ix + spr_pos), bc
                 ret
 
 
@@ -525,11 +560,6 @@ isaac_head_update:
                 ld l, a
 
                 ld (ix + spr_sprite), hl
-                ; spr_x and spr_y updated in interrupt, do not touch here
-                ;ld c, (ix + spr_x)
-                ;ld a, (ix + spr_y)
-                ;sub 20
-                ;ld ld b, a
                 ld a, (The.isaac_x)
                 ld (ix + spr_x), a
                 ld a, (The.isaac_y)
@@ -597,24 +627,60 @@ isaac_appear:   ; BC - coordinates of isaac
                 ld (ix + sd1), 0 ; frame counter
                 ret
 
+mimic_update:
+                inc (ix + sd3)
+                ld a, (ix + sd3)
+                and 7
+                jnz 2f ; .no_leg_update
+                ld a, (ix + sd0)
+                inc a
+                and 1
+                ld (ix + sd0), a
+                jz 1f
+                ld hl, mimic_f0
+                ld (ix + spr_sprite), hl
+                jr 2f
+
+1               ld hl, mimic_f1
+                ld (ix + spr_sprite), hl
+2
+                ld a, (ix + sd1) ; distance to run
+                or a
+                jz .choose_new_direction
+
+                dec a
+                ld (ix + sd1), a
+                ld a, (ix + sd2)
+
+                call move_sprite_in_cardinal_direction
+                jz .moved
+
+.choose_new_direction
+                
+                call random
+                and 63
+                ld (ix + sd1), a ; distance to run
+                call random
+                and 3
+                ld (ix + sd2), a ; direction
+
+.moved
+                xor a
+                ret
+
                 
                 
 mimic_appear:   ; BC - coordinates of isaac
-                push bc
-                ld de, isaac_down
-                ld a, b
-                sub 6    ; size of isaac body
-                ld b, a
-                ld hl, noupdate
-                ld a, s_isaac_head
+                ld de, mimic_f0
+                ld hl, mimic_update
+                ld a, s_mimic
                 call appear
-
-                pop bc
-                ld de, isaac_body_f0
-                ld hl, noupdate
-                ld a, s_isaac_body
-                call appear
-noupdate
+                ;ld (ix + spr_speed), 16
+                xor a
+                ld (ix + sd0), a
+                ld (ix + sd1), a
+                ld (ix + sd2), a
+                ld (ix + sd3), a
                 ret
 
                 

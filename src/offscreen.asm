@@ -151,7 +151,7 @@ SetAttributes:
                 call fill
 
                 ; avoid cleaning the single line the isaac's head pops out
-                ld a, Bg.black + Color.black
+                ld a, Bg.black + Color.white + Color.bright
                 ld b, 32
                 call fill
 

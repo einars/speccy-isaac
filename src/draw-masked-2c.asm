@@ -44,7 +44,7 @@ double_column_masked:
 
 
                 inc hl
-                inc de
+                inc e
 
                 ld a, (de)
                 and c
@@ -52,7 +52,7 @@ double_column_masked:
                 ld (de), a
 
                 inc hl
-                dec de
+                dec e
 
                 LineInc_DE
 
@@ -79,17 +79,17 @@ double_column_masked:
                 ex de, hl
                 and (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and c
                 ld (hl), a
 
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
 
@@ -106,16 +106,16 @@ double_column_masked:
                 ex de, hl
                 or (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or c
                 ld (hl), a
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
                 LineInc_DE
@@ -148,17 +148,17 @@ double_column_masked:
                 ex de, hl
                 and (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and c
                 ld (hl), a
 
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
 
@@ -181,16 +181,16 @@ double_column_masked:
                 ex de, hl
                 or (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or c
                 ld (hl), a
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
                 LineInc_DE
@@ -231,17 +231,17 @@ double_column_masked:
                 and (hl)
 
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and c
                 ld (hl), a
 
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
 
@@ -268,16 +268,16 @@ double_column_masked:
                 ex de, hl
                 or (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or c
                 ld (hl), a
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
                 LineInc_DE
@@ -317,17 +317,17 @@ double_column_masked:
                 ex de, hl
                 and (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and c
                 ld (hl), a
 
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
 
@@ -358,16 +358,16 @@ double_column_masked:
                 ex de, hl
                 or (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or c
                 ld (hl), a
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
                 LineInc_DE
@@ -406,18 +406,18 @@ double_column_masked:
                 ex de, hl
                 and (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, c
                 or 0b00000111
                 and (hl)
                 ld (hl), a
 
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
 
@@ -443,17 +443,17 @@ double_column_masked:
                 ex de, hl
                 or (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, c
                 and 0b11111000
                 or (hl)
                 ld (hl), a
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
                 LineInc_DE
@@ -486,18 +486,18 @@ double_column_masked:
                 ex de, hl
                 and (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, c
                 or 0b00000011
                 and (hl)
                 ld (hl), a
 
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
 
@@ -519,17 +519,17 @@ double_column_masked:
                 ex de, hl
                 or (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, c
                 and 0b11111100
                 or (hl)
                 ld (hl), a
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
                 LineInc_DE
@@ -557,18 +557,18 @@ double_column_masked:
                 ex de, hl
                 and (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 and b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, c
                 or 0b00000001
                 and (hl)
                 ld (hl), a
 
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
 
@@ -585,17 +585,17 @@ double_column_masked:
                 ex de, hl
                 or (hl)
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, (hl)
                 or b
                 ld (hl), a
-                inc hl
+                inc l
                 ld a, c
                 and 0b11111110
                 or (hl)
                 ld (hl), a
-                dec hl
-                dec hl
+                dec l
+                dec l
                 ex de, hl
 
                 LineInc_DE

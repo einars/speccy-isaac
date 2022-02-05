@@ -17,14 +17,16 @@ FrameEnd:
                 ; spin until the next interrupt
                 ld hl, tick
                 ld a, (hl)
-                ld d, 33 ; full frame = 32 x d
+                ld d, 20
 .wait_frame
                 cp (hl)
                 jnz .got_frame
 
                 dec d
-                ld b, 150
+                ld b, 200
 .spin
+                cp (hl)
+                jnz .got_frame
                 djnz .spin
                 jp .wait_frame
                 
@@ -33,7 +35,8 @@ FrameEnd:
 
                 ld hl, 0x5800
                 ld a, (counter)
-                or a
+                dec a ; we've already waited for the frame to end
+                ;or a
                 jz .draw_good
                 ld b, a
                 ld a, Color.black + Bg.red

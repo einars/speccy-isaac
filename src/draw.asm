@@ -18,10 +18,11 @@ draw_masked_2:
                 ; hl - sprite base + 1 (after width, looking at height)
                 ; bc - bottom center -> top left
                 ld a, c
-                sub 8
+                sub 7
                 ld c, a
                 ld a, b
                 sub (hl)
+                inc a
                 ld b, a
 
                 call Util.Scr_of_XY
@@ -45,10 +46,11 @@ draw_masked_1:
                 ; hl - sprite base + 1
                 ; bc - bottom center -> top left
                 ld a, c
-                sub 4
+                sub 3
                 ld c, a
                 ld a, b
                 sub (hl)
+                inc a
                 ld b, a
 
                 call Util.Scr_of_XY
