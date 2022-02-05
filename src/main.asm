@@ -1,6 +1,3 @@
-                display "debug: ",/A, restore_mask
-
-
                 device zxspectrum48
 
                 include "macros.asm"
@@ -43,15 +40,19 @@ Start:          jr 1f
                 halt
 
 .again          
+                ;ld a, Color.black
+                ;out (254), a
 
                 call LoadIndicator.FrameStart
 
-               call draw_sprites_ordered
-               ;call draw_sprites_chaotic
-               ;call draw_sprites_cleanest
-               ;call draw_sprites_chaotic
+                call draw_sprites_ordered
+                call Logic ; out of interrupt, end of screen
+
+                ;call draw_sprites_chaotic
 
                 ;call LoadIndicator.FrameEnd
+                ;ld a, Color.blue
+                ;out (254), a
                 halt ; smooth mode
                 jr .again
 
@@ -75,6 +76,20 @@ random:
 1               ld (seed), hl
                 ret
 
+Logic:
+                call Isaac.Move
+
+                call update_sprites
+
+                ld hl, The.isaac_y
+                ld b, (hl)
+                ld hl, The.isaac_x
+                ld c, (hl)
+                ld hl, Isaac.OnHit
+                call hittest_sprites
+                ret
+
+
 InterruptRoutine:
                 di
                 ld (.stack_ret + 1), sp
@@ -96,16 +111,7 @@ InterruptRoutine:
 
                 call keyboard.Read
 
-                call Isaac.Move
-
-                call update_sprites
-
-                ld hl, The.isaac_y
-                ld b, (hl)
-                ld hl, The.isaac_x
-                ld c, (hl)
-                ld hl, Isaac.OnHit
-                call hittest_sprites
+                ;call Logic
 
                 ld hl, tick
                 inc (hl)
@@ -137,6 +143,7 @@ tick:           db 0
                 include "entities.asm"
 
                 include "generated-sprites.asm"
+                include "custom-sprites.asm"
 
 
                 include "room.asm"

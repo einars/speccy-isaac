@@ -14,39 +14,61 @@ Move:
 
                 ld hl, The.isaac_facing
 
+                ld a, (The.isaac_fire_timer)
+                or a
+                jz .no_dec_fire_timer
+                dec a
+                ld (The.isaac_fire_timer), a
+.no_dec_fire_timer:
 
                 ld a, (keyboard.movement)
+                bit FIRE_M, a
+                jz .no_fire_m
+
+                ld a, (The.isaac_fire_timer)
+                or a
+                jnz .no_fire_m
+
+                ld a, (The.isaac_fire_frequency)
+                ld (The.isaac_fire_timer), a
+                
+                ld a, (The.fire_direction)
+                call spawn_isaac_bullet_in_direction
+
+.no_fire_m
+                ld a, (keyboard.movement)
                 bit UP, a
-                jr z, no_up
+                jr z, .no_up
 
                 ld d, c ; -speed
                 ld (hl), UP
 
-no_up:          bit DOWN, a
-                jr z, no_down
+.no_up:         bit DOWN, a
+                jr z, .no_down
 
                 ld d, b ; +speed
                 ld (hl), DOWN
 
-no_down:        bit LEFT, a
-                jr z, no_left
+.no_down:       bit LEFT, a
+                jr z, .no_left
 
                 ld e, c; -speed
                 ld (hl), LEFT
 
-no_left:        bit RIGHT, a
-                jr z, no_right
+.no_left:        bit RIGHT, a
+                jr z, .no_right
 
                 ld e, b ; +speed
                 ld (hl), RIGHT
 
-no_right:
+.no_right:
 
                 ld a, d
                 or e
-                jr nz, had_movement
+                jr nz, .had_movement
 
-no_movement:    ld hl, The.isaac_facing
+                ; no movement
+                ld hl, The.isaac_facing
                 ld (hl), DOWN
                 ld hl, The.isaac_step
                 ld (hl), 0
@@ -54,7 +76,10 @@ no_movement:    ld hl, The.isaac_facing
                 ld (hl), 0
                 jr isaac_step_done
 
-had_movement:   
+.had_movement:   
+                ld a, (hl)
+                ld (The.fire_direction), a
+
                 ; de = delta
                 ld hl, The.isaac_pos
                 call ApplyMovement
@@ -131,6 +156,18 @@ ApplyMovement:
                 ret
                 
 
+spawn_isaac_bullet_in_direction
+                ; A - direction
+                pushx
+                ld h, a
+                ld bc, (The.isaac_pos)
+                ld a, b
+                sub 12
+                ld b, a
+                ld a, h
+                call isaac_bullet_appear
+                popx
+                ret
 
 
                 endmodule

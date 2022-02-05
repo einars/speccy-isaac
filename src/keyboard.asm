@@ -35,12 +35,12 @@ Read:
                 
 
 movement db 0
-fire     db 0
 
 MASK_UP    equ 1 << UP
 MASK_LEFT  equ 1 << LEFT
 MASK_DOWN  equ 1 << DOWN
 MASK_RIGHT equ 1 << RIGHT
+MASK_FIRE_M equ 1 << FIRE_M
 
 
 keymap          
@@ -54,6 +54,10 @@ keymap
                 db 0xef, 0b00010000, MASK_DOWN
                 db 0xef, 0b00000100, MASK_RIGHT
                 db 0xef, 0b00001000, MASK_UP
+                db 0xef, 0b00000001, MASK_FIRE_M
+
+                db 0x7f, 0b00000100, MASK_FIRE_M ; M
+                ;db 0x7f, 0b00000001, MASK_FIRE_M ; space
 
                 db 0
 

@@ -30,8 +30,13 @@ sd4             equ spr_data + 4
 
 spr_length      equ 16 ; sometimes important, search for spr_length
 
+sprite_death  equ 0xff
+
+s_custom_draw  equ 0x80
+
 s_nothing       equ 0
 s_monster       equ 1
+s_isaac_bullet  equ (0x2 or s_custom_draw)
 s_isaac         equ 0x69
 
 
@@ -94,12 +99,13 @@ map_sprites:
 .reentry
 1               ld a, (ix)
                 or a
-                ret z
+                jp z, .skip_this
                 inc a
                 ret z
 
 .all_ok
 .smc            call 0000
+.skip_this
                 ld bc, spr_length
                 add ix, bc
                 jr 1b
@@ -124,10 +130,15 @@ draw_sprites_ordered:
 
 
 .sort_again:     
-                ld ix, spritelist + spr_length ; ignore isaac
+                ld ix, spritelist ; ignore isaac
                 ld bc, spr_length
                 ld hl, sort_area
-                ld d, 1 ; sprite index
+                ld d, 0 ; sprite index
+                ld e, 0 ; number of sprites
+
+                ; ignore isaac, isaac gets updated always
+                inc d
+                add ix, bc
 
                 // sort_area will contain:
                 // [ y, idx ] [ y, idx ], ...
@@ -142,12 +153,17 @@ draw_sprites_ordered:
                 inc hl
                 ld (hl), d
                 inc hl
+                inc e ; number of sprites alive
 .next           add ix, bc
                 inc d
                 jp 1b
 .done
                 ; now bubble-sort that shit
 
+                ld a, e
+                ld d, a
+                or e
+                jp z, draw_requireds
 
                 push de
                 ; stack sorting is slightly faster, but interrupts need to be disabled
@@ -223,8 +239,6 @@ draw_sprites_ordered:
                 or h
                 jnz .again
 .nuff
-
-                
                 pop de
 
                 ; now:
@@ -239,11 +253,11 @@ draw_sprites_ordered:
                 ld (ord_left_at), hl
 .draw_reentry
 .draw           
-                ld ix, spritelist
-                ;call update_sprite
-                call materialize_sprite
 
-                dup 3
+                call draw_requireds
+
+                dup 2
+
                 ld hl, (ord_left_at)
                 inc hl
                 ld l, (hl)
@@ -255,7 +269,7 @@ draw_sprites_ordered:
                 ld bc, spritelist
                 add hl, bc
                 ld ix, hl
-                ;call update_sprite ; todo: handle death
+
                 call materialize_sprite
 
                 ld hl, ord_left_at
@@ -270,6 +284,29 @@ draw_sprites_ordered:
 
                 ret
 
+draw_requireds:
+                ; draw isaac and all of the bullets
+                ld ix, spritelist
+                ld hl, spritelist
+                call materialize_sprite
+                ld hl, spritelist
+.b
+                ld bc, spr_length
+                add hl, bc
+                ld a, (hl)
+                cp 255
+                ret z
+                and s_custom_draw
+                jp z, .b
+.draw_this      push hl
+                pop ix
+                push hl
+                call materialize_sprite
+                pop hl
+                jp .b
+
+                
+
 ord_remaining db 0
 ord_left_at dw 0
 
@@ -277,63 +314,8 @@ ord_left_at dw 0
 
 draw_sprites_chaotic:
                 call map_sprites
-                call materialize_sprite
-                ret
+                jp materialize_sprite
 
-draw_sprites_cleanest:
-                ld b, Room.H
-                ld d, Room.TopReservePix
-                ld e, Room.TopReservePix + 16 ; next tile
-                ld hl, spritelist
-.new_row
-
-.row_loop
-                ld a, (hl)
-                or a
-                jz .next
-                inc a
-                jnz .maybe_draw_this
-                ld hl, spritelist
-
-                ; sprite list iterated
-                ; move to next line
-
-                ld d, e
-                ld a, 16
-                add e
-                ld e, a
-                ld hl, spritelist
-                djnz .new_row
-                ret
-
-.pop_next:
-                pop hl
-.next
-                ld a, spr_length
-                add l
-                ld l, a
-                jnc .row_loop
-                inc h
-                jp .row_loop
-
-.maybe_draw_this
-                push hl
-                inc l
-                inc l
-                ld a, (hl) ; pos_y
-                cp d
-                jp c, .pop_next
-                cp e
-                jp nc, .pop_next
-                dec l
-                dec l
-                ld ix, hl
-                push bc
-                exx
-                call materialize_sprite
-                exx
-                pop bc
-                jp .pop_next
 
 hittest_sprites:
                 ; bc - (isaac) coords
@@ -391,16 +373,49 @@ update_sprite:
 
                 push af
 .smc            call 0
+
+                inc a ; sprite_death
+                jz .handle_death
+
                 pop af
                 sub 32
 
-                ; todo: check if the sprite died
-
 1               ld (ix + spr_tick), a
                 ret
+.handle_death:
+                pop af
+
+                xor a
+                ld (ord_remaining), a ; indirectly force redraw of all sprites
+
+                ; dematerialize_sprite
+                ;call dematerialize_sprite
+                ;ret
+                
+dematerialize_sprite:
+                ; IX = sprite
+                ld a, (ix)
+
+                ld (ix + 0), a ; mark entity as dead
+
+                ld (ix + 0), 0 ; mark entity as dead
+                and s_custom_draw
+                jp nz, .custom
+                ld bc, (ix + spr_pos)
+                ld hl, (ix + spr_sprite)
+                jp restore_mask
+.custom         
+                ld hl, (ix + spr_sprite)
+                ld (.call + 1), hl
+                ld bc, (ix + spr_pos)
+                xor a
+.call           jp 0
+
 
 
 materialize_sprite:
+
+                ; IX = HL = sprite
 
                 ;or a ; idx = 0 — always draw isaac
                 ;jz .no_skip
@@ -408,6 +423,9 @@ materialize_sprite:
                 ;call random
                 ;and 7
                 ;ret nz
+                ld a, (ix)
+                and s_custom_draw
+                jp nz, materialize_sprite_custom
 
 .no_skip
                 ld a, (ix + spr_x)
@@ -440,25 +458,50 @@ materialize_sprite:
                 ld hl, (ix + spr_sprite)
                 jp sprite_draw
 
+materialize_sprite_custom:
+                ld bc, (ix + spr_prev_pos)
+                ld hl, (ix + spr_sprite)
+                ld (.call + 1), hl
+                xor a ; disappear
+                push hl
+.call           call 0
+                ld bc, (ix + spr_pos)
+                ld (ix + spr_prev_pos), bc
+                ld a, 1 ; draw
+                ret ; call spr_draw
+                
 
-move_sprite_in_cardinal_direction:
+
+
+move_in_cardinal_direction:
                 ; ix = sprite
-                ; A = direction (UP / LEFT / DOWN / RIGHT
+                ; h = direction (UP / LEFT / DOWN / RIGHT
+                ; a = amount
+                ld l, a
+                ld a, h
                 ld bc, (ix + spr_pos)
                 or a
                 jz .up
                 dec a
                 jz .left
                 dec a
-                jz .right
-                ; down
-                inc b
+                jz .down
+                ; right
+                ld a, c
+                add l
+                ld c, a
                 jr 1f
-.up             dec b
+.up             ld a, b
+                sub l
+                ld b, a
                 jr 1f
-.left           dec c
+.left           ld a, c
+                sub l
+                ld c, a
                 jr 1f
-.right          inc c
+.down           ld a, b
+                add l
+                ld b, a
 1               
                 push bc
                 call Util.TileAtXY
@@ -470,6 +513,59 @@ move_sprite_in_cardinal_direction:
                 ret
 
 
+move_cardinal_ht_enemy
+                ; ix = sprite
+                ; h = direction (UP / LEFT / DOWN / RIGHT
+                ; a = amount
+                call move_in_cardinal_direction
+                ret nz ; hit the wall
+
+                ; bc - coordinates
+                ld hl, bc
+                ld (.bc + 1), hl
+
+                ld hl, spritelist + spr_length
+.loop
+                ld a, (hl)
+                cp 255
+                jz .nothing_hit
+                cp s_monster
+                jnz .next
+
+                inc hl
+                ld a, (hl) ; x
+.bc             ld bc, 0
+                add 8
+                cp c
+                jc .no_hit_dec1
+                sub 16
+                cp c
+                jnc .no_hit_dec1
+
+                inc hl
+                ld a, (hl) ; y
+                cp b
+                jp c, .no_hit_dec2
+                sub 8
+                cp b
+                jp nc, .no_hit_dec2
+
+                ; have hit!
+                dec hl
+                dec hl
+                xor a
+                dec a
+                scf
+                ret
+
+.no_hit_dec2    dec hl
+.no_hit_dec1    dec hl
+.next           ld bc, spr_length
+                add hl, bc
+                jp .loop
+
+.nothing_hit    xor a
+                ret
 
 
 spider_update:
@@ -490,8 +586,7 @@ spider_update:
 .legs_done
                 ld bc, (ix + spr_pos)
                 call random
-                ld d, h
-                ld e, l
+                ld de, hl
 
                 ld a, d
                 and 7
@@ -547,23 +642,7 @@ spider_update:
                 ld (ix + spr_pos), bc
 
                 xor a
-
                 ret
-;
-;spider_draw:
-;                ld a, (ix + spr_x)
-;                sub 8
-;                ld c, a
-;                ld a, (ix + spr_y)
-;                sub 7
-;                ld b, a
-;                ld hl, spider_f0
-;                ld a, (ix + sd0)
-;                or a
-;                jz 1f
-;                ld hl, spider_f1
-;1               jp draw_masked_2
-;
 
 isaac_update:   
                 ld hl, The.isaac_step
@@ -580,10 +659,10 @@ isaac_update:
                 ld l, a
 
                 ld (ix + spr_sprite), hl
-                ld a, (The.isaac_x)
-                ld (ix + spr_x), a
-                ld a, (The.isaac_y)
-                ld (ix + spr_y), a
+                ;ld a, (The.isaac_x)
+                ;ld (ix + spr_x), a
+                ;ld a, (The.isaac_y)
+                ;ld (ix + spr_y), a
                 xor a
                 ret
 
@@ -648,9 +727,10 @@ mimic_update:
 
                 dec a
                 ld (ix + sd1), a
-                ld a, (ix + sd2)
 
-                call move_sprite_in_cardinal_direction
+                ld h, (ix + sd2)
+                ld a, 1
+                call move_in_cardinal_direction
                 jz .moved
 
 .choose_new_direction
@@ -695,5 +775,21 @@ spider_appear:   ; BC - coordinates of isaac
                 ld (ix + sd1), a ; frame_counter
                 ret
 
+enemy_hit:      push ix
+                push hl
+                pop ix
+                call dematerialize_sprite
+                pop ix
+                ret
+
+isaac_bullet_appear
+                push af ; direction
+                ld de, Custom.Bullet
+                ld hl, Custom.update_isaac_bullet
+                ld a, s_isaac_bullet
+                call appear
+                pop af
+                ld (ix + sd0), a
+                ret
                 
-                
+update_isaac_bullet: ret 

@@ -6,11 +6,11 @@ LineInc_DE      macro
                 inc d
                 ld a, d
                 and 7
-                jr nz, .lq
+                jrnz .lq
                 ld a, e
                 add a, 32
                 ld e, a
-                jr c, .lq
+                jrc .lq
                 ld a, d
                 sub 8
                 ld d, a
@@ -25,30 +25,47 @@ LineInc_HL      macro
                 inc h
                 ld a, h
                 and 7
-                jr nz, .lq
+                jrnz .lq
                 ld a, l
                 add a, 32
                 ld l, a
-                jr c, .lq
+                jrc .lq
                 ld a, h
                 sub 8
                 ld h, a
 .lq
                 endm
 
+; jp is faster on avg, so default to that
 jz              macro label
-                jr z, label
+                jp z, label
                 endm
 
 jc              macro label
-                jr c, label
+                jp c, label
                 endm
                 
 jnz             macro label
-                jr nz, label
+                jp nz, label
                 endm
 
 jnc             macro label
+                jp nc, label
+                endm
+
+jrz             macro label
+                jr z, label
+                endm
+
+jrc             macro label
+                jr c, label
+                endm
+                
+jrnz            macro label
+                jr nz, label
+                endm
+
+jrnc            macro label
                 jr nc, label
                 endm
 
@@ -92,4 +109,8 @@ cplc            macro
                 jp nc, 1f
                 cpl
 1
+                endm
+
+debug           macro
+                display "debug: ",/A, $
                 endm
