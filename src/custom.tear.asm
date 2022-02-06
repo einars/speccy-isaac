@@ -158,6 +158,7 @@ Update:
                 call ht_enemy
                 ret z
                 ; i die and the enemy gets hit as well
+                ld a, (ix + sd0) ; direction
                 call enemy_hit
 .die
                 ld a, sprite_death

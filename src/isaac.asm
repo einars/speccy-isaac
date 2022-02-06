@@ -51,11 +51,33 @@ Move:
 
                 ld a, (keyboard.movement)
                 bit FIRE_M, a
-                jz .allow_facing_reset
+                jnz .fire_m
+                bit FIRE_D, a
+                jnz .fire_d
 
+                ; no fire pressed — allow facing reset
+                ; switch from tmp_junk to actual facing
+                ld hl, Isaac.facing
+                jp .post_fire
+
+.fire_d
                 ld a, (Isaac.fire_timer)
                 or a
-                jnz .no_fire_m
+                jnz .post_fire
+
+                ld a, (Isaac.fire_frequency)
+                ld (Isaac.fire_timer), a
+                
+                ld a, (keyboard.fire_direction)
+                ld (Isaac.facing), a
+                call Tear.Spawn
+                jp .post_fire
+
+
+.fire_m
+                ld a, (Isaac.fire_timer)
+                or a
+                jnz .post_fire
 
                 ld a, (Isaac.fire_frequency)
                 ld (Isaac.fire_timer), a
@@ -63,12 +85,8 @@ Move:
                 ld a, (Isaac.facing)
                 call Tear.Spawn
 
-                jr .no_fire_m
 
-.allow_facing_reset
-                ld hl, Isaac.facing
-
-.no_fire_m
+.post_fire
                 ld a, (keyboard.movement)
                 bit UP, a
                 jr z, .no_up
@@ -104,8 +122,13 @@ Move:
                 ld a, (keyboard.movement)
                 and keyboard.MASK_FIRE_M
                 jnz .no_reset_facing ; fire pressed - continue firing
+                ld a, (keyboard.movement)
+                and keyboard.MASK_FIRE_D
+                jnz .no_reset_facing ; fire pressed - continue firing
+
                 ld hl, Isaac.facing
                 ld (hl), DOWN
+
 .no_reset_facing
                 ld hl, Isaac.step
                 ld (hl), 0

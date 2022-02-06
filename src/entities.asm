@@ -10,7 +10,7 @@ map_type db 0
 map_x db 0
 map_y db 0
 map_sprite dw 0
-map_life db 0
+map_health db 0
 map_prev_x db 0
 map_prev_y db 0
 map_update dw 0
@@ -34,7 +34,7 @@ spr_x           equ map_x - map_base
 spr_y           equ map_y - map_base
 spr_pos         equ spr_x
 spr_sprite      equ map_sprite - map_base
-spr_life        equ map_life - map_base
+spr_health      equ map_health - map_base
 spr_prev_x      equ map_prev_x - map_base
 spr_prev_y      equ map_prev_y - map_base
 spr_prev_pos    equ spr_prev_x
@@ -729,6 +729,8 @@ mimic_appear:   ; BC - coordinates of isaac
                 ld hl, mimic_update
                 ld a, s_monster
                 call appear
+                ld (ix + spr_ticks), a
+                ld (ix + spr_health), 7
                 xor a
                 ld (ix + sd0), a
                 ld (ix + sd1), a
@@ -736,10 +738,36 @@ mimic_appear:   ; BC - coordinates of isaac
                 ld (ix + sd3), a
                 ret
 
-enemy_hit:      push ix
+enemy_hit:      
+                ; A - direction from which it was hit
+                ld (.dir + 1), a
+                push ix
                 push hl
                 pop ix
-                call dematerialize_sprite
+
+                ld a, Color.blue
+                call Blink
+
+                ld a, (ix + spr_health)
+                or a
+                jz .fin
+
+                dec a
+                ld (ix + spr_health), a
+                ld (ix + spr_t), 0
+
+                jz .demat
+                
+.dir            ld h, 0
+                ld a, 4
+                call move_in_cardinal_direction
+
+                jp .fin
+
+.demat          call dematerialize_sprite
+                ld a, Color.red
+                call Blink
+.fin
                 pop ix
                 ret
 

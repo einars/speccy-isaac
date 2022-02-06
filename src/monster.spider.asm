@@ -6,6 +6,7 @@ Appear:         ; BC - coordinates
                 ld a, s_monster
                 call appear
                 xor a
+                ld (ix + spr_health), 3
                 ld (ix + sd0), a ; frame, 1/0
                 ld (ix + sd1), a ; frame_counter
 

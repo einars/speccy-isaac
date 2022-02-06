@@ -1,9 +1,3 @@
-                module The
-
-timer db 0
-
-                endmodule
-
 NONE equ 0xff
 
 UP    equ 0

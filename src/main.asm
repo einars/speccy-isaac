@@ -31,8 +31,8 @@ Start:          jr 1f
                 call isaac_appear
 
 
-                call Scenes.Isaacs2
-                ;call Scenes.Spiders3
+                call Scenes.Isaacs3
+                call Scenes.Spiders3
 
                 ;call Scenes.Spiders2
 
@@ -43,6 +43,7 @@ Start:          jr 1f
                 ;ld a, Color.black
                 ;out (254), a
 
+                call BlinkDo
                 call LoadIndicator.FrameStart
 
                 call draw_sprites_ordered
@@ -89,6 +90,24 @@ Logic:
                 call hittest_sprites
                 ret
 
+bg              db 0
+bg_counter      db 0
+Blink:          ld (bg), a
+                ld a, 4
+                ld (bg_counter), a
+                ret
+
+BlinkDo:        ld a, (bg)
+                or a
+                ret z
+                out (254), a
+                ld a, (bg_counter)
+                dec a
+                ld (bg_counter), a
+                ret nz
+                out (254), a ; 0
+                ld (bg), a 
+                ret
 
 InterruptRoutine:
                 di
