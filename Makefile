@@ -17,4 +17,4 @@ sprites:
 	cd scripts && clj parse-sprites.clj
 
 deploy:
-	scp build/isaac.sna spicausis.lv:spicausis.lv/isaac/
+	scp html/index.html build/isaac.sna spicausis.lv:spicausis.lv/isaac/
