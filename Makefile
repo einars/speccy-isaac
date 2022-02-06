@@ -6,6 +6,10 @@ compile:
 run:
 	fuse ./build/isaac.sna
 
+break:
+	./run-with-breakpoint
+	
+
 watch:
 	watchexec --no-vcs-ignore --on-busy-update do-nothing -W -w src ./compile.sh
 

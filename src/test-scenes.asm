@@ -40,38 +40,38 @@ Isaacs1
 ;
 ;                ld hl, spider_init
 ;                ld bc, 0x5530
-;                call spider_appear
+;                call Spider.Appear
 ;
 ;                ld hl, spider_init
 ;                ld bc, 0x5530
-;                call appear
+;                call Spider.Appear
 ;
 ;                ld hl, spider_init
 ;                ld bc, 0x6530
-;                call appear
+;                call Spider.Appear
 ;
 ;                ld hl, spider_init
 ;                ld bc, 0x7530
-;                call appear
+;                call Spider.Appear
 ;
 Spiders5
                 ld bc, 0x8530
-                call spider_appear
+                call Spider.Appear
 Spiders4
                 ld bc, 0x7060
-                call spider_appear
+                call Spider.Appear
 Spiders3
                 ld bc, 0x7070
-                call spider_appear
+                call Spider.Appear
 
 Spiders2
                 ld bc, 0x7080
-                call spider_appear
+                call Spider.Appear
 
 Spiders1
 Spider
                 ld bc, 0x7090
-                call spider_appear
+                call Spider.Appear
                 ret
 ;
 ;

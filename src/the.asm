@@ -1,34 +1,14 @@
                 module The
 
-isaac_pos equ spritelist + spr_pos
-isaac_x equ spritelist + spr_x
-isaac_y equ spritelist + spr_y
-
-;isaac_pos
-;isaac_x db 0
-;isaac_y db 0
-
-isaac_speed db 1
-
-; it would've been better if these would live in spritelist at spd0..spdx
-isaac_facing db LEFT
-isaac_step db 0
-isaac_step_counter db 0
-isaac_step_max db 5
-
-fire_direction db LEFT
-
-isaac_fire_timer db 0
-isaac_fire_frequency db 21
-isaac_firing db 0
-
 timer db 0
 
                 endmodule
 
+NONE equ 0xff
+
 UP    equ 0
-LEFT  equ 1
-DOWN  equ 2
+DOWN  equ 1
+LEFT  equ 2
 RIGHT equ 3
 
 FIRE_M equ 4 ; movement direction

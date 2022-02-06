@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+set -x
+
+breakpoint_addr () {
+  grep breakpoint ./build/isaac.sym | awk '{ print $3 }'
+}
+
+fuse ./build/isaac.sna --debugger-command="break $(breakpoint_addr)"

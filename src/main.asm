@@ -31,8 +31,8 @@ Start:          jr 1f
                 call isaac_appear
 
 
-                call Scenes.Isaacs3
-                call Scenes.Spiders3
+                call Scenes.Isaacs2
+                ;call Scenes.Spiders3
 
                 ;call Scenes.Spiders2
 
@@ -81,9 +81,9 @@ Logic:
 
                 call update_sprites
 
-                ld hl, The.isaac_y
+                ld hl, Isaac.y
                 ld b, (hl)
-                ld hl, The.isaac_x
+                ld hl, Isaac.x
                 ld c, (hl)
                 ld hl, Isaac.OnHit
                 call hittest_sprites
@@ -143,7 +143,8 @@ tick:           db 0
                 include "entities.asm"
 
                 include "generated-sprites.asm"
-                include "custom-sprites.asm"
+                include "custom.tear.asm"
+                include "monster.spider.asm"
 
 
                 include "room.asm"

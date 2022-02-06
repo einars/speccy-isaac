@@ -112,5 +112,12 @@ cplc            macro
                 endm
 
 debug           macro
-                display "debug: ",/A, $
+                display "debug:         ",/A, $
+                endm
+
+break           macro
+                display "breakpoint:    ",/A, $
+                ; make a global "breakpoint" label outside the label processing flow
+                ; w/o the "!@" the labels following this macro will mess up
+!@breakpoint equ $ 
                 endm

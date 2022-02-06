@@ -4,5 +4,5 @@ $compiler \
   --outprefix=build/ \
   --nologo \
   --lst=build/source.lst \
-  --raw=build/build.raw \
+  --sym=build/isaac.sym \
   src/main.asm

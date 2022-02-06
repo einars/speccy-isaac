@@ -1,32 +1,63 @@
 
-                align 256
 
 max_sprites     equ 32
 
 spritelist:     ds (max_sprites * spr_length), 255
 
-spr_type        equ 0
-spr_pos         equ 1
-spr_x           equ 1
-spr_y           equ 2
+// sample sprite layout for moving things around
+map_base
+map_type db 0
+map_x db 0
+map_y db 0
+map_sprite dw 0
+map_life db 0
+map_prev_x db 0
+map_prev_y db 0
+map_update dw 0
+map_sd0 db 0
+map_sd1 db 0
+map_sd2 db 0
+map_sd3 db 0
+map_sd4 db 0
+map_sd5 db 0
+sprite_length equ $ - map_base
 
-spr_prev_pos         equ 3
-spr_prev_x           equ 3
-spr_prev_y           equ 4
+                assert (sprite_length == 16), The sprite area must be exactly 16
+                // some fields are accessed linearily
+                assert ((map_type - map_base) == 0), Do not move entity type around
+                assert ((map_x - map_base) == 1), Do not move entity position around
+                assert ((map_y - map_base) == 2), Do not move entity position around
+                assert ((map_sprite - map_base) == 3), Do not move entity sprite around
 
-spr_sprite     equ 5 ; , 6
+spr_type        equ map_type - map_base
+spr_x           equ map_x - map_base
+spr_y           equ map_y - map_base
+spr_pos         equ spr_x
+spr_sprite      equ map_sprite - map_base
+spr_life        equ map_life - map_base
+spr_prev_x      equ map_prev_x - map_base
+spr_prev_y      equ map_prev_y - map_base
+spr_prev_pos    equ spr_prev_x
+spr_update      equ map_update - map_base
+sd0             equ map_sd0 - map_base
+sd1             equ map_sd1 - map_base
+sd2             equ map_sd2 - map_base
+sd3             equ map_sd3 - map_base
+sd4             equ map_sd4 - map_base
+sd5             equ map_sd5 - map_base
 
-spr_speed       equ 7
-spr_tick        equ 8 ; writes on every update
+                align 256
 
-spr_update      equ 9 ; , 10
-
-spr_data        equ 11
-sd0             equ spr_data
-sd1             equ spr_data + 1
-sd2             equ spr_data + 2
-sd3             equ spr_data + 3
-sd4             equ spr_data + 4
+spr_t           equ sprite_length - 2
+spr_ticks       equ sprite_length - 1
+tick_threshold  equ 12
+ ; custom tick counter for updates more seldom than every frame
+ ; use by calling entity_tick.
+ ; spr_ticks are 12-based:
+ ;  - 12+ — every frame
+ ;  - 6   - every second frame
+ ;  - 4   - every third frame
+ ; etc
 
 spr_length      equ 16 ; sometimes important, search for spr_length
 
@@ -73,7 +104,6 @@ appear:
                 ld (ix + spr_prev_pos), bc
                 ld (ix + spr_sprite), de
                 ld (ix + spr_update), hl
-                ld (ix + spr_speed), 32 ; default speed, 1/f
                 ret
 
 .found_space
@@ -86,7 +116,7 @@ map_sprites_without_isaac:
                 pop hl
                 ld (map_sprites.smc + 1), hl
                 ld ix, spritelist + spr_length ; by convention, isaac is first
-                jr map_sprites.reentry
+                jp map_sprites.reentry
 
 
 map_sprites:
@@ -114,6 +144,24 @@ map_sprites:
 
 sort_area       ds max_sprites * 2
 
+
+entity_tick:
+                ; returns:
+                ; Z = skip this turn
+                ; NZ = do your thing
+                ld a, (ix + spr_t)
+                add (ix + spr_ticks)
+                cp tick_threshold
+                jnc .skip_frame
+                sub tick_threshold
+                ld (ix + spr_t), a
+                xor a
+                inc a
+                ret
+.skip_frame
+                ld (ix + spr_t), a
+                xor a
+                ret
 
 
 draw_sprites_ordered:
@@ -146,8 +194,8 @@ draw_sprites_ordered:
 1               ld a, (ix)
                 or a
                 jz .next
-                cp s_isaac_tear ; ignore tears
-                jz .next
+                ;cp s_isaac_tear ; ignore tears
+                ;jz .next
                 inc a
                 jz .done
                 ld a, (ix + spr_y)
@@ -167,10 +215,13 @@ draw_sprites_ordered:
                 or e
                 jp z, draw_requireds
 
+
                 push de
+                ; don't sort at all
+                jp .nuff
+
                 ; stack sorting is slightly faster, but interrupts need to be disabled
                 jr .bubble_ix
-                ;jr .nuff
 
 
 ;;; bubblesort, stack-based implementation
@@ -364,29 +415,16 @@ update_sprites:
                 call map_sprites
 
 update_sprite:
-                ld a, (ix + spr_tick)
-                add (ix + spr_speed)
-                cp 32
-                jc 1f
-
-
                 ld hl, (ix + spr_update)
                 ld (.smc + 1), hl
 
-                push af
 .smc            call 0
 
                 inc a ; sprite_death
                 jz .handle_death
 
-                pop af
-                sub 32
-
-1               ld (ix + spr_tick), a
                 ret
 .handle_death:
-                pop af
-
                 xor a
                 ld (ord_remaining), a ; indirectly force redraw of all sprites
 
@@ -477,7 +515,7 @@ materialize_sprite_custom:
 
 move_in_cardinal_direction:
                 ; ix = sprite
-                ; h = direction (UP / LEFT / DOWN / RIGHT
+                ; h = direction (UP / DOWN / LEFT / RIGHT
                 ; a = amount
                 ld l, a
                 ld a, h
@@ -485,9 +523,9 @@ move_in_cardinal_direction:
                 or a
                 jz .up
                 dec a
-                jz .left
-                dec a
                 jz .down
+                dec a
+                jz .left
                 ; right
                 ld a, c
                 add l
@@ -517,6 +555,7 @@ move_in_cardinal_direction:
 
 ht_enemy
                 ; bc - coordinates
+                push de
                 ld hl, bc
                 ld (.bc + 1), hl
 
@@ -543,16 +582,29 @@ ht_enemy
                 inc hl
                 ld a, (hl) ; y
                 cp b
-                jp c, .no_hit_dec2
-                sub 8
+                jc .no_hit_dec2
+
+                ex af, af'
+                push hl
+                inc hl
+                ld a, (hl)
+                inc hl
+                ld h, (hl)
+                ld l, a
+                ld d, (hl) ; A = actual sprite height
+                pop hl
+                ex af, af'
+
+                sub d
                 cp b
-                jp nc, .no_hit_dec2
+                jnc .no_hit_dec2
 
                 ; have hit!
                 dec hl
                 dec hl
                 xor a
                 dec a
+                pop de
                 ret
 
 .no_hit_dec2    dec hl
@@ -562,88 +614,14 @@ ht_enemy
                 jp .loop
 
 .nothing_hit    xor a
+                pop de
                 ret
 
 
-spider_update:
-                inc (ix + sd1) ; increase leg frame switcher
-                ld a, (ix + sd1)
-                cp 5
-                jnz .legs_done
-                ld a, (ix + sd0)
-                inc a
-                and 1
-                ld (ix + sd0), a
-                ld (ix + sd1), 0
-                ld hl, spider_f0
-                jz .o
-                ld hl, spider_f1
-.o              ld (ix + spr_sprite), hl
-
-.legs_done
-                ld bc, (ix + spr_pos)
-                call random
-                ld de, hl
-
-                ld a, d
-                and 7
-
-                cp 1
-                jz .yplus
-                cp 2
-                jz .yminus
-                cp 3
-                jz 1f
-
-                ; move to isaac direction
-                ld a, (ix + spr_y)
-                ld hl, The.isaac_y
-                cp (hl)
-                jz 1f
-                jc .yplus
-                dec b
-
-                jr 1f
-.yplus          inc b
-                jr 1f
-.yminus         dec b
-
-1               ld a, e
-                and 7
-                cp 1
-                jz .xplus
-                cp 2
-                jz .xminus
-                cp 3
-                jz 2f
-
-                ld a, (ix + spr_x)
-                ld hl, The.isaac_x
-                cp (hl)
-                jz 2f
-                jc .xplus
-                dec c
-                jr 2f
-.xplus          inc c
-                jr 2f
-.xminus         dec c
-
-2
-                push bc
-                call Util.TileAtXY
-                pop bc
-
-                and Geo.perm + Geo.wall
-                ret nz
-
-                ld (ix + spr_pos), bc
-
-                xor a
-                ret
 
 isaac_update:   
-                ld hl, The.isaac_step
-                ld a, (The.isaac_facing)
+                ld hl, Isaac.step
+                ld a, (Isaac.facing)
                 rla
                 rla
                 add (hl) ; facing * 4 + step
@@ -656,9 +634,9 @@ isaac_update:
                 ld l, a
 
                 ld (ix + spr_sprite), hl
-                ;ld a, (The.isaac_x)
+                ;ld a, (Isaac.x)
                 ;ld (ix + spr_x), a
-                ;ld a, (The.isaac_y)
+                ;ld a, (Isaac.y)
                 ;ld (ix + spr_y), a
                 xor a
                 ret
@@ -671,14 +649,14 @@ spl_isaac
                 dw isaac_up_f1
                 dw isaac_up_f0
                 dw isaac_up_f2
-                dw isaac_left_f0
-                dw isaac_left_f1
-                dw isaac_left_f0
-                dw isaac_left_f2
                 dw isaac_down_f0
                 dw isaac_down_f1
                 dw isaac_down_f0
                 dw isaac_down_f2
+                dw isaac_left_f0
+                dw isaac_left_f1
+                dw isaac_left_f0
+                dw isaac_left_f2
                 dw isaac_right_f0
                 dw isaac_right_f1
                 dw isaac_right_f0
@@ -688,9 +666,9 @@ spl_isaac
 isaac_appear:   ; BC - coordinates of isaac
 
                 ld a, c
-                ld (The.isaac_x), a
+                ld (Isaac.x), a
                 ld a, b
-                ld (The.isaac_y), a
+                ld (Isaac.y), a
 
                 ld de, isaac_down_f0
                 ld hl, isaac_update
@@ -751,25 +729,11 @@ mimic_appear:   ; BC - coordinates of isaac
                 ld hl, mimic_update
                 ld a, s_monster
                 call appear
-                ld (ix + spr_speed), 16
                 xor a
                 ld (ix + sd0), a
                 ld (ix + sd1), a
                 ld (ix + sd2), a
                 ld (ix + sd3), a
-                ret
-
-spider_appear:   ; BC - coordinates of isaac
-                ld de, spider_f0
-                ld hl, spider_update
-                ld a, s_monster
-                call appear
-                ld (ix + spr_speed), 16
-                ;call random
-                ;ld (ix + spr_speed), a
-                xor a
-                ld (ix + sd0), a ; frame, 1/0
-                ld (ix + sd1), a ; frame_counter
                 ret
 
 enemy_hit:      push ix

@@ -1,5 +1,27 @@
                 module Isaac
 
+pos equ spritelist + spr_pos
+x equ spritelist + spr_x
+y equ spritelist + spr_y
+
+;isaac_pos
+;isaac_x db 0
+;isaac_y db 0
+
+speed db 1
+
+; it would've been better if these would live in spritelist at spd0..spdx
+facing db LEFT
+step db 0
+step_counter db 0
+step_max db 5
+
+tear_limit db 3
+
+fire_timer db 0
+fire_frequency db 21
+firing db 0
+
 
 
 
@@ -9,35 +31,42 @@ OnHit:
                 ;out (254), a
                 ret
 
+tmp_junk db 0
+
 Move:
                 ld de, 0 ; movement delta
-                ld a, (The.isaac_speed)
+                ld a, (Isaac.speed)
                 ld b, a ; b = + speed
                 neg
                 ld c, a ; c = - speed
 
-                ld hl, The.isaac_facing
+                ld hl, Isaac.tmp_junk ; Isaac.facing
 
-                ld a, (The.isaac_fire_timer)
+                ld a, (Isaac.fire_timer)
                 or a
                 jz .no_dec_fire_timer
                 dec a
-                ld (The.isaac_fire_timer), a
+                ld (Isaac.fire_timer), a
 .no_dec_fire_timer:
 
                 ld a, (keyboard.movement)
                 bit FIRE_M, a
-                jz .no_fire_m
+                jz .allow_facing_reset
 
-                ld a, (The.isaac_fire_timer)
+                ld a, (Isaac.fire_timer)
                 or a
                 jnz .no_fire_m
 
-                ld a, (The.isaac_fire_frequency)
-                ld (The.isaac_fire_timer), a
+                ld a, (Isaac.fire_frequency)
+                ld (Isaac.fire_timer), a
                 
-                ld a, (The.fire_direction)
+                ld a, (Isaac.facing)
                 call Tear.Spawn
+
+                jr .no_fire_m
+
+.allow_facing_reset
+                ld hl, Isaac.facing
 
 .no_fire_m
                 ld a, (keyboard.movement)
@@ -72,37 +101,39 @@ Move:
                 jr nz, .had_movement
 
                 ; no movement
-                ld hl, The.isaac_facing
+                ld a, (keyboard.movement)
+                and keyboard.MASK_FIRE_M
+                jnz .no_reset_facing ; fire pressed - continue firing
+                ld hl, Isaac.facing
                 ld (hl), DOWN
-                ld hl, The.isaac_step
+.no_reset_facing
+                ld hl, Isaac.step
                 ld (hl), 0
-                ld hl, The.isaac_step_counter
+                ld hl, Isaac.step_counter
                 ld (hl), 0
                 jr .step_done
 
 .had_movement:   
-                ld a, (hl)
-                ld (The.fire_direction), a
 
                 ; de = delta
-                ld hl, The.isaac_pos
+                ld hl, Isaac.pos
                 call ApplyMovement
                 ; animate steps
-                ld hl, The.isaac_step_max
-                ld a, (The.isaac_step_counter)
+                ld hl, Isaac.step_max
+                ld a, (Isaac.step_counter)
                 inc a
                 cp (hl)
                 jr z, .next_step
 
-                ld (The.isaac_step_counter), a
+                ld (Isaac.step_counter), a
                 jr .step_done
 
 .next_step:      xor a
-                ld (The.isaac_step_counter), a
-                ld a, (The.isaac_step)
+                ld (Isaac.step_counter), a
+                ld a, (Isaac.step)
                 inc a
                 and 3
-                ld (The.isaac_step), a
+                ld (Isaac.step), a
 
 .step_done:
                 ret
