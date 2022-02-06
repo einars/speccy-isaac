@@ -31,30 +31,37 @@ Start:          jr 1f
                 call isaac_appear
 
 
-                call Scenes.Isaacs3
-                call Scenes.Spiders3
+                call Scenes.Isaacs2
+                ;call Scenes.Isaacs3
+                ;call Scenes.Isaacs1
+                ;call Scenes.Isaacs3
+                ;call Scenes.Spiders3
 
                 ;call Scenes.Spiders2
 
                 ei
-                halt
 
 .again          
                 ;ld a, Color.black
                 ;out (254), a
 
                 call BlinkDo
-                call LoadIndicator.FrameStart
+                ;call LoadIndicator.FrameStart
 
-                call draw_sprites_ordered
+                di
+                call draw_sprites_chaotic
+                ei
+
                 call Logic ; out of interrupt, end of screen
 
-                ;call draw_sprites_chaotic
 
                 ;call LoadIndicator.FrameEnd
                 ;ld a, Color.blue
                 ;out (254), a
-                halt ; smooth mode
+
+                ; ld b, 25 : halt : djnz 1b
+                halt
+
                 jr .again
 
                 include "test-scenes.asm"
@@ -109,45 +116,32 @@ BlinkDo:        ld a, (bg)
                 ld (bg), a 
                 ret
 
+DebugLine:
+                push bc
+                out (254), a
+                ld b, 12
+                nop
+                djnz $-1
+                ld a, 0
+                out (254), a
+                pop bc
+                ret
+
 InterruptRoutine:
                 di
                 ld (.stack_ret + 1), sp
                 ld sp, im2.Stack
-                push hl
-                push de
-                push bc
+                pushx
                 push af
-                push ix
-                push iy
-                exx
-                ex af, af'
-                push hl
-                push de
-                push bc
-                push af
-
-                call LoadIndicator.Tick
 
                 call keyboard.Read
-
-                ;call Logic
 
                 ld hl, tick
                 inc (hl)
 
                 pop af
-                pop bc
-                pop de
-                pop hl
-                ex af, af'
-                exx
+                popx
 
-                pop iy
-                pop ix
-                pop af
-                pop bc
-                pop de
-                pop hl
 .stack_ret      ld sp, 0
                 ei
                 reti

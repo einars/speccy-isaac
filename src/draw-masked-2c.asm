@@ -1,4 +1,70 @@
 
+m2_prelude      macro
+                ld a, (hl)
+                inc hl
+                ld b, (hl)
+                inc hl
+                ld c, 0xff
+                endm
+
+m2_intermission macro
+                ex de, hl
+                and (hl)
+                exx
+                ld e, a
+                exx
+                inc l
+                ld a, (hl)
+                and b
+                exx
+                ld d, a
+                exx
+                inc l
+                ld a, (hl)
+                and c
+                exx
+                ld c, a
+                exx
+
+                dec l
+                dec l
+                ex de, hl
+
+
+                ld a, (hl)
+                inc hl
+                ld b, (hl)
+                inc hl
+                ld c, 0
+                endm
+                
+                
+m2_finish       macro
+                ex de, hl
+                exx
+                or e
+                exx
+                ld (hl), a
+                inc l
+                ld a, b
+                exx
+                or d
+                exx
+                ld (hl), a
+                inc l
+                ld a, c
+                exx
+                or c
+                exx
+                ld (hl), a
+                dec l
+                dec l
+                ex de, hl
+
+                LineInc_DE
+
+
+                endm
                 ; HL - sprite
                 ; DE - screen address
                 ; B - height
@@ -65,60 +131,22 @@ double_column_masked:
 .m1 ;=================================================
                 ex af, af'
 
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0xff
+                m2_prelude
+
                 rra
                 rr b
                 rr c
 
                 or 0b10000000
 
-                ex de, hl
-                and (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and b
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and c
-                ld (hl), a
+                m2_intermission
 
-                dec l
-                dec l
-                ex de, hl
-
-
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0
                 rra
                 rr b
                 rr c
                 and 0b01111111
 
-                ex de, hl
-                or (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or b
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or c
-                ld (hl), a
-                dec l
-                dec l
-                ex de, hl
-
-                LineInc_DE
+                m2_finish
 
                 ex af, af'
                 dec a
@@ -130,70 +158,27 @@ double_column_masked:
 
                 ex af, af'
 
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0xff
-                rra
-                rr b
-                rr c
+                m2_prelude
 
-                rra
-                rr b
-                rr c
+                dup 2
+                  rra
+                  rr b
+                  rr c
+                edup
 
                 or 0b11000000
 
-                ex de, hl
-                and (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and b
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and c
-                ld (hl), a
+                m2_intermission
 
-                dec l
-                dec l
-                ex de, hl
-
-
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0
-
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
+                dup 2
+                  rra
+                  rr b
+                  rr c
+                edup
 
                 and 0b00111111
 
-                ex de, hl
-                or (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or b
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or c
-                ld (hl), a
-                dec l
-                dec l
-                ex de, hl
-
-                LineInc_DE
+                m2_finish
 
                 ex af, af'
                 dec a
@@ -202,85 +187,31 @@ double_column_masked:
                 ret
 
 
-
-
-
 .m3 ;=================================================
+
                 ex af, af'
 
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0xff
-                rra
-                rr b
-                rr c
+                m2_prelude
 
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
+                dup 3
+                  rra
+                  rr b
+                  rr c
+                edup
 
                 or 0b11100000
 
-                ex de, hl
-                and (hl)
+                m2_intermission
 
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and b
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and c
-                ld (hl), a
-
-                dec l
-                dec l
-                ex de, hl
-
-
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0
-
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
+                dup 3
+                  rra
+                  rr b
+                  rr c
+                edup
 
                 and 0b00011111
 
-                ex de, hl
-                or (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or b
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or c
-                ld (hl), a
-                dec l
-                dec l
-                ex de, hl
-
-                LineInc_DE
+                m2_finish
 
                 ex af, af'
                 dec a
@@ -288,89 +219,32 @@ double_column_masked:
 
                 ret
 
+
 .m4 ;=================================================
+
                 ex af, af'
 
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0xff
-                rra
-                rr b
-                rr c
+                m2_prelude
 
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
+                dup 4
+                  rra
+                  rr b
+                  rr c
+                edup
 
                 or 0b11110000
 
-                ex de, hl
-                and (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and b
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and c
-                ld (hl), a
+                m2_intermission
 
-                dec l
-                dec l
-                ex de, hl
-
-
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0
-
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
-
-                rra
-                rr b
-                rr c
+                dup 4
+                  rra
+                  rr b
+                  rr c
+                edup
 
                 and 0b00001111
 
-                ex de, hl
-                or (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or b
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or c
-                ld (hl), a
-                dec l
-                dec l
-                ex de, hl
-
-                LineInc_DE
+                m2_finish
 
                 ex af, af'
                 dec a
@@ -379,84 +253,31 @@ double_column_masked:
                 ret
 
 
-
-
 .m5 ;=================================================
 
                 ex af, af'
 
-                ld a, 0xff
-                ld b, (hl)
-                inc hl
-                ld c, (hl)
-                inc hl
+                m2_prelude
 
-                rl c
-                rl b
-                rla
+                dup 5
+                  rra
+                  rr b
+                  rr c
+                edup
 
-                rl c
-                rl b
-                rla
+                or 0b11111000
 
-                rl c
-                rl b
-                rla
+                m2_intermission
 
-                ex de, hl
-                and (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and b
-                ld (hl), a
-                inc l
-                ld a, c
-                or 0b00000111
-                and (hl)
-                ld (hl), a
+                dup 5
+                  rra
+                  rr b
+                  rr c
+                edup
 
-                dec l
-                dec l
-                ex de, hl
+                and 0b00000111
 
-
-                xor a
-                ld b, (hl)
-                inc hl
-                ld c, (hl)
-                inc hl
-
-                rl c
-                rl b
-                rla
-
-                rl c
-                rl b
-                rla
-
-                rl c
-                rl b
-                rla
-
-
-                ex de, hl
-                or (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or b
-                ld (hl), a
-                inc l
-                ld a, c
-                and 0b11111000
-                or (hl)
-                ld (hl), a
-                dec l
-                dec l
-                ex de, hl
-
-                LineInc_DE
+                m2_finish
 
                 ex af, af'
                 dec a
@@ -469,70 +290,27 @@ double_column_masked:
 
                 ex af, af'
 
-                ld a, 0xff
-                ld b, (hl)
-                inc hl
-                ld c, (hl)
-                inc hl
+                m2_prelude
 
-                rl c
-                rl b
-                rla
+                dup 6
+                  rra
+                  rr b
+                  rr c
+                edup
 
-                rl c
-                rl b
-                rla
+                or 0b11111100
 
-                ex de, hl
-                and (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and b
-                ld (hl), a
-                inc l
-                ld a, c
-                or 0b00000011
-                and (hl)
-                ld (hl), a
+                m2_intermission
 
-                dec l
-                dec l
-                ex de, hl
+                dup 6
+                  rra
+                  rr b
+                  rr c
+                edup
 
+                and 0b00000011
 
-                xor a
-                ld b, (hl)
-                inc hl
-                ld c, (hl)
-                inc hl
-
-                rl c
-                rl b
-                rla
-
-                rl c
-                rl b
-                rla
-
-
-                ex de, hl
-                or (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or b
-                ld (hl), a
-                inc l
-                ld a, c
-                and 0b11111100
-                or (hl)
-                ld (hl), a
-                dec l
-                dec l
-                ex de, hl
-
-                LineInc_DE
+                m2_finish
 
                 ex af, af'
                 dec a
@@ -540,68 +318,36 @@ double_column_masked:
 
                 ret
 
+
 .m7 ;=================================================
 
                 ex af, af'
 
-                ld a, 0xff
-                ld b, (hl)
-                inc hl
-                ld c, (hl)
-                inc hl
+                m2_prelude
 
-                rl c
-                rl b
-                rla
+                dup 7
+                  rra
+                  rr b
+                  rr c
+                edup
 
-                ex de, hl
-                and (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                and b
-                ld (hl), a
-                inc l
-                ld a, c
-                or 0b00000001
-                and (hl)
-                ld (hl), a
+                or 0b11111110
 
-                dec l
-                dec l
-                ex de, hl
+                m2_intermission
 
+                dup 7
+                  rra
+                  rr b
+                  rr c
+                edup
 
-                xor a
-                ld b, (hl)
-                inc hl
-                ld c, (hl)
-                inc hl
+                and 0b00000001
 
-                rl c
-                rl b
-                rla
-
-                ex de, hl
-                or (hl)
-                ld (hl), a
-                inc l
-                ld a, (hl)
-                or b
-                ld (hl), a
-                inc l
-                ld a, c
-                and 0b11111110
-                or (hl)
-                ld (hl), a
-                dec l
-                dec l
-                ex de, hl
-
-                LineInc_DE
+                m2_finish
 
                 ex af, af'
                 dec a
                 jnz .m7
 
                 ret
+

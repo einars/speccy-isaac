@@ -2,6 +2,7 @@
 
 max_sprites     equ 32
 
+                align 256
 spritelist:     ds (max_sprites * spr_length), 255
 
 // sample sprite layout for moving things around
@@ -46,7 +47,6 @@ sd3             equ map_sd3 - map_base
 sd4             equ map_sd4 - map_base
 sd5             equ map_sd5 - map_base
 
-                align 256
 
 spr_t           equ sprite_length - 2
 spr_ticks       equ sprite_length - 1
@@ -64,11 +64,12 @@ spr_length      equ 16 ; sometimes important, search for spr_length
 sprite_death  equ 0xff
 
 Custom_draw   equ 0x80
+Every_frame   equ 0x40
 
 s_nothing       equ 0
 s_monster       equ 1
-s_isaac_tear    equ (0x2 or Custom_draw)
-s_isaac         equ 0x69
+s_isaac_tear    equ (0x02 or Custom_draw or Every_frame)
+s_isaac         equ (0x0f or Every_frame)
 
 
 appear:
@@ -84,10 +85,10 @@ appear:
                 ld hl, spritelist
                 ld de, spr_length
 1               ld a, (hl)
-                or a
-                jz .found_space
-                cp 255
+                inc a
                 jz .found_space_in_end
+                dec a
+                jz .found_space
                 add hl, de
                 jr 1b
 
@@ -112,14 +113,14 @@ appear:
                 ;ld (ix + spr_length), 255
                 jp 1b
 
-map_sprites_without_isaac:
+map_entities_no_isaac:
                 pop hl
-                ld (map_sprites.smc + 1), hl
+                ld (map_entities.smc + 1), hl
                 ld ix, spritelist + spr_length ; by convention, isaac is first
-                jp map_sprites.reentry
+                jp map_entities.reentry
 
 
-map_sprites:
+map_entities:
                 ; stack — function to call for all sprites
                 ;      IX will get the sprite pointer
                 ;      Do not touch the alt. regs there thx
@@ -128,11 +129,11 @@ map_sprites:
                 ld ix, spritelist
 .reentry
 1               ld a, (ix)
-                or a
-                jp z, .skip_this
+
                 inc a
                 ret z
-
+                dec a
+                jz .skip_this
 .all_ok
 .smc            call 0000
 .skip_this
@@ -141,6 +142,29 @@ map_sprites:
                 jr 1b
 
 
+
+map_entities_noix:
+                ; stack — function to call for all sprites
+                ;      IX will get the sprite pointer
+                ;      Do not touch the alt. regs there thx
+                pop hl
+                ld (.smc + 1), hl
+                ld hl, spritelist
+.reentry
+1               ld a, (hl)
+                or a
+                jp z, .skip_this
+                inc a
+                ret z
+
+.all_ok
+                push hl
+.smc            call 0000
+                pop hl
+.skip_this
+                ld bc, spr_length
+                add hl, bc
+                jr 1b
 
 sort_area       ds max_sprites * 2
 
@@ -164,210 +188,71 @@ entity_tick:
                 ret
 
 
-draw_sprites_ordered:
+draw_sprites_chaotic:
+.sprites_per_frame equ 2
 
-                ld a, (ord_remaining)
-                or a
-                jz .sort_again
+                ld a, 7
+                call DebugLine
 
-                ld b, a
-                ld iy, (ord_left_at)
-                jp .draw_reentry
+                call .draw_important_stuff
 
+                ld a, 6
+                call DebugLine
 
+.reentry_hl     ld hl, spritelist + spr_length ; smc
+                ld b, .sprites_per_frame
+                ld c, 2 ; avoid spinning around if nothing to draw
 
-
-.sort_again:     
-                ld ix, spritelist ; ignore isaac
-                ld bc, spr_length
-                ld hl, sort_area
-                ld d, 0 ; sprite index
-                ld e, 0 ; number of sprites
-
-                ; ignore isaac, isaac gets updated always
-                inc d
-                add ix, bc
-
-                // sort_area will contain:
-                // [ y, idx ] [ y, idx ], ...
-
-1               ld a, (ix)
-                or a
-                jz .next
-                ;cp s_isaac_tear ; ignore tears
-                ;jz .next
+.loop
+                ld a, (hl)
                 inc a
-                jz .done
-                ld a, (ix + spr_y)
-                ld (hl), a
-                inc hl
-                ld (hl), d
-                inc hl
-                inc e ; number of sprites alive
-.next           add ix, bc
-                inc d
-                jp 1b
-.done
-                ; now bubble-sort that shit
-
-                ld a, e
-                ld d, a
-                or e
-                jp z, draw_requireds
-
-
-                push de
-                ; don't sort at all
-                jp .nuff
-
-                ; stack sorting is slightly faster, but interrupts need to be disabled
-                jr .bubble_ix
-
-
-;;; bubblesort, stack-based implementation
-.bubble_stack:
-
-                ld a, d
-
+                jz .restart
                 dec a
+                jz .next
+                and Every_frame
+                jnz .next
 
-                jz .nuff
-
-                ld (.xsmc + 2), a
-                ld (.ssp + 1), sp
-
-.xagain         ld sp, sort_area
-.xsmc           ld bc, 0
-                pop de
-.xbub           
-                pop hl
-                ld a, e
-                cp l
-                jp c, .xno_swap
-                jp z, .xno_swap
-                push de
+                push bc
                 push hl
-                pop hl
-                ex de, hl
-                inc c
-.xno_swap:      ex de, hl
-                djnz .xbub
-                ld a, c
-                or a
-                jp nz, .xagain
-.ssp            ld sp, 0
-                jr .nuff
-
-
-;;; bubblesort, ix-based implementation
-.bubble_ix:
-                ld b, d
-                ld c, d
-.again          ld ix, sort_area
-
-                ld h, 0
-                ld b, c
-                dec b
-                jz .nuff
-.nbub:          ld a, (ix)
-                ld e, (ix + 2)
-                cp e
-                ;jz .no_swap
-                jc .no_swap
-                ;jnc .no_swap
-.swap           ld (ix), e
-                ld (ix + 2), a
-                ; swap indices
-                ld a, (ix + 1)
-                ld e, (ix + 3)
-                ld (ix + 1), e
-                ld (ix + 3), a
-                inc h
-.no_swap        inc ix
-                inc ix
-                djnz .nbub
-                dec c
-                jz .nuff
-                ld a, h
-                or h
-                jnz .again
-.nuff
-                pop de
-
-                ; now:
-                ; D - n_elements
-                ; &spritelist - y-sorted sprite indexes
-
-                ld a, d
-                ld (ord_remaining), a
-                ld b, d
-
-                ld hl, sort_area
-                ld (ord_left_at), hl
-.draw_reentry
-.draw           
-
-                call draw_requireds
-
-                dup 2
-
-                ld hl, (ord_left_at)
-                inc hl
-                ld l, (hl)
-                ld h, 0
-                add hl, hl
-                add hl, hl
-                add hl, hl
-                add hl, hl ; hl = idx * 16 ; spr_length!
-                ld bc, spritelist
-                add hl, bc
-                ld ix, hl
-
+                push hl
+                pop ix
                 call materialize_sprite
 
-                ld hl, ord_left_at
-                inc (hl)
-                inc (hl)
-                ;djnz .draw
-                dec hl
-                ;ld hl, ord_remaining
-                dec (hl)
-                ret z
-                edup
+                ld a, Color.red
+                call DebugLine
+
+                pop hl
+                pop bc
+
+                djnz .next
+
+                ld a, spr_length
+                Add_HL_A
+                ld (.reentry_hl + 1), hl
 
                 ret
 
-draw_requireds:
-                ; draw isaac and all of the bullets
-                ld ix, spritelist
-                ld hl, spritelist
-                call materialize_sprite
-                ld hl, spritelist
-.b
-                ld bc, spr_length
-                add hl, bc
-                ld a, (hl)
-                cp 255
+
+
+.restart        ld hl, spritelist
+                ld a, Color.magenta
+                call DebugLine
+                dec c
                 ret z
-                and Custom_draw
-                jp z, .b
-.draw_this      push hl
+.next           ld a, spr_length
+                Add_HL_A
+                jp .loop
+
+.draw_important_stuff:
+                ; isaac and his tears are drawn every frame
+                call map_entities_noix
+                ld a, (hl)
+                and Every_frame
+                ret z
+.mat            push hl
                 pop ix
-                push hl
-                call materialize_sprite
-                pop hl
-                jp .b
-
-                
-
-ord_remaining db 0
-ord_left_at dw 0
-
-
-
-draw_sprites_chaotic:
-                call map_sprites
                 jp materialize_sprite
+
 
 
 hittest_sprites:
@@ -379,7 +264,7 @@ hittest_sprites:
                 ld h, b
                 ld (.bc + 1), hl
 
-                call map_sprites_without_isaac
+                call map_entities_no_isaac
 
                 ld a, (ix + spr_x)
 .bc             ld bc, 0
@@ -410,11 +295,16 @@ hittest_sprites:
 
 
 
+n_sprites       db 0
 
 update_sprites:
-                call map_sprites
+                xor a
+                ld (n_sprites), a
+                call map_entities
 
 update_sprite:
+                ld hl, n_sprites
+                inc (hl)
                 ld hl, (ix + spr_update)
                 ld (.smc + 1), hl
 
@@ -426,7 +316,6 @@ update_sprite:
                 ret
 .handle_death:
                 xor a
-                ld (ord_remaining), a ; indirectly force redraw of all sprites
 
                 ; dematerialize_sprite
                 ;call dematerialize_sprite
@@ -471,11 +360,6 @@ materialize_sprite:
                 ld a, (ix + spr_x)
                 sub (ix + spr_prev_x)
                 jnz .changed
-                ;jp z, .no_change_x
-                ;negc
-
-                ;cp 2
-                ;jnc .changed
                 
 .no_change_x
                 ld a, (ix + spr_y)
@@ -487,6 +371,7 @@ materialize_sprite:
                 jp .draw
 
 .changed
+                ld a, Color.white
                 ld bc, (ix + spr_prev_pos)
                 ld hl, (ix + spr_sprite)
                 call restore_mask
@@ -622,10 +507,10 @@ ht_enemy
 isaac_update:   
                 ld hl, Isaac.step
                 ld a, (Isaac.facing)
-                rla
-                rla
+                rlca
+                rlca
                 add (hl) ; facing * 4 + step
-                rla ; x2 (list of words)
+                rlca ; x2 (list of words)
                 ld hl, spl_isaac
                 Add_HL_A
                 ld a, (hl)
@@ -680,6 +565,7 @@ isaac_appear:   ; BC - coordinates of isaac
                 ret
 
 mimic_update:
+                call entity_tick
                 inc (ix + sd3)
                 ld a, (ix + sd3)
                 and 7

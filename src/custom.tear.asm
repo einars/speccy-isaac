@@ -13,9 +13,6 @@ Spawn
                 jp nc, .enough
 1
                 ld bc, (Isaac.pos)
-                ld a, b
-                sub tear_isaac_adj
-                ld b, a
                 ld a, (Isaac.facing)
                 cp 0xff
                 ret z
@@ -40,7 +37,7 @@ n_tears_on_screen:
 .count          ld a, 0
                 ret
 .tears_count_impl
-                call map_sprites_without_isaac
+                call map_entities_no_isaac
                 ld a, (ix)
                 cp s_isaac_tear
                 ret nz
@@ -69,15 +66,12 @@ adjust_for_head:
                 ret
 
                 align 8
-.adjustments    db  0, -5; up
-                db  0,  5 ; down
-                db -5,  0 ; left
-                db  5,  0 ; right
+.adjustments    db  0, -10; up
+                db  0,  1 ; down
+                db -5,  -10 ; left
+                db  5,  -10 ; right
                 
 
-
-tear_isaac_adj  equ 10 ; move actual coord up this much
-tear_visual_adj equ 0 ; and, extra visual adjustment
 
 Draw:
                 ; BC - coordinates
@@ -87,7 +81,6 @@ Draw:
                 jz .clear
 
                 ld a, b
-                sub tear_visual_adj
                 and 0xfe ; ensure bullet is in a single char
                 ld b, a
 
@@ -111,7 +104,6 @@ Draw:
                 ret
 .clear
                 ld a, b
-                sub tear_visual_adj
                 and 0xfe ; ensure bullet is in a single char
                 ld b, a
 
