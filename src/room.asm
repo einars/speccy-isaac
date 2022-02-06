@@ -3,10 +3,7 @@
 
 perm  equ 0b01000000 ; nothing passes, ever
 wall  equ 0b00100000 ; impassable for isaac
-dirty equ 0b10000000 ; by convention, bit 7
 free  equ 0
-
-dirty_bit equ 7
 
                 endmodule
 
@@ -53,7 +50,7 @@ room            db W.ul, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W.up, W
                 db W.rt, F.oo, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, S.v1, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
                 db W.rt, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, F.oo, W.rt
                 db W.dl, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dn, W.dr
-                ds 256 - (Room.W * Room.H) ; safety zone for dirty flags
+                ;ds 256 - (Room.W * Room.H) ; safety zone for dirty flags
 
 
 

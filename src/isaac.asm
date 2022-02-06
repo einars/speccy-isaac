@@ -1,5 +1,9 @@
                 module Isaac
 
+
+
+
+
 OnHit:
                 ld a, Color.red
                 ;out (254), a
@@ -33,7 +37,7 @@ Move:
                 ld (The.isaac_fire_timer), a
                 
                 ld a, (The.fire_direction)
-                call spawn_isaac_bullet_in_direction
+                call Tear.Spawn
 
 .no_fire_m
                 ld a, (keyboard.movement)
@@ -74,7 +78,7 @@ Move:
                 ld (hl), 0
                 ld hl, The.isaac_step_counter
                 ld (hl), 0
-                jr isaac_step_done
+                jr .step_done
 
 .had_movement:   
                 ld a, (hl)
@@ -88,21 +92,21 @@ Move:
                 ld a, (The.isaac_step_counter)
                 inc a
                 cp (hl)
-                jr z, next_step
+                jr z, .next_step
 
                 ld (The.isaac_step_counter), a
-                jr isaac_step_done
+                jr .step_done
 
-next_step:      xor a
+.next_step:      xor a
                 ld (The.isaac_step_counter), a
                 ld a, (The.isaac_step)
                 inc a
                 and 3
                 ld (The.isaac_step), a
 
-isaac_step_done:
+.step_done:
                 ret
-                
+
 
 ApplyMovement:
                 ; hl — ptr to current coordinates
@@ -155,19 +159,6 @@ ApplyMovement:
 
                 ret
                 
-
-spawn_isaac_bullet_in_direction
-                ; A - direction
-                pushx
-                ld h, a
-                ld bc, (The.isaac_pos)
-                ld a, b
-                sub 12
-                ld b, a
-                ld a, h
-                call isaac_bullet_appear
-                popx
-                ret
 
 
                 endmodule

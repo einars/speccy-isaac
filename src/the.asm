@@ -1,7 +1,5 @@
                 module The
 
-                org 0xe000
-
 isaac_pos equ spritelist + spr_pos
 isaac_x equ spritelist + spr_x
 isaac_y equ spritelist + spr_y
@@ -21,7 +19,7 @@ isaac_step_max db 5
 fire_direction db LEFT
 
 isaac_fire_timer db 0
-isaac_fire_frequency db 25
+isaac_fire_frequency db 21
 isaac_firing db 0
 
 timer db 0
@@ -60,3 +58,10 @@ Bg:
 .yellow  equ 6 << 3
 .white   equ 7 << 3
 
+
+
+
+                display "start:         ",/A, Start
+                display "top:           ",/A, $
+                display "everything:    ",/A, ($ - Start)
+                display "free at least: ",/A, (0xc000 - $)

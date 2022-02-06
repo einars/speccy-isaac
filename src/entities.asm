@@ -32,11 +32,11 @@ spr_length      equ 16 ; sometimes important, search for spr_length
 
 sprite_death  equ 0xff
 
-s_custom_draw  equ 0x80
+Custom_draw   equ 0x80
 
 s_nothing       equ 0
 s_monster       equ 1
-s_isaac_bullet  equ (0x2 or s_custom_draw)
+s_isaac_tear    equ (0x2 or Custom_draw)
 s_isaac         equ 0x69
 
 
@@ -145,6 +145,8 @@ draw_sprites_ordered:
 
 1               ld a, (ix)
                 or a
+                jz .next
+                cp s_isaac_tear ; ignore tears
                 jz .next
                 inc a
                 jz .done
@@ -296,7 +298,7 @@ draw_requireds:
                 ld a, (hl)
                 cp 255
                 ret z
-                and s_custom_draw
+                and Custom_draw
                 jp z, .b
 .draw_this      push hl
                 pop ix
@@ -399,15 +401,15 @@ dematerialize_sprite:
                 ld (ix + 0), a ; mark entity as dead
 
                 ld (ix + 0), 0 ; mark entity as dead
-                and s_custom_draw
+                and Custom_draw
                 jp nz, .custom
-                ld bc, (ix + spr_pos)
+                ld bc, (ix + spr_prev_pos)
                 ld hl, (ix + spr_sprite)
                 jp restore_mask
 .custom         
                 ld hl, (ix + spr_sprite)
                 ld (.call + 1), hl
-                ld bc, (ix + spr_pos)
+                ld bc, (ix + spr_prev_pos)
                 xor a
 .call           jp 0
 
@@ -424,7 +426,7 @@ materialize_sprite:
                 ;and 7
                 ;ret nz
                 ld a, (ix)
-                and s_custom_draw
+                and Custom_draw
                 jp nz, materialize_sprite_custom
 
 .no_skip
@@ -513,13 +515,7 @@ move_in_cardinal_direction:
                 ret
 
 
-move_cardinal_ht_enemy
-                ; ix = sprite
-                ; h = direction (UP / LEFT / DOWN / RIGHT
-                ; a = amount
-                call move_in_cardinal_direction
-                ret nz ; hit the wall
-
+ht_enemy
                 ; bc - coordinates
                 ld hl, bc
                 ld (.bc + 1), hl
@@ -535,13 +531,15 @@ move_cardinal_ht_enemy
                 inc hl
                 ld a, (hl) ; x
 .bc             ld bc, 0
-                add 8
+                ; 10 pixels wide area around base
+                add 5
                 cp c
                 jc .no_hit_dec1
-                sub 16
+                sub 10
                 cp c
                 jnc .no_hit_dec1
 
+                ; 8 pixels high
                 inc hl
                 ld a, (hl) ; y
                 cp b
@@ -555,7 +553,6 @@ move_cardinal_ht_enemy
                 dec hl
                 xor a
                 dec a
-                scf
                 ret
 
 .no_hit_dec2    dec hl
@@ -782,14 +779,3 @@ enemy_hit:      push ix
                 pop ix
                 ret
 
-isaac_bullet_appear
-                push af ; direction
-                ld de, Custom.Bullet
-                ld hl, Custom.update_isaac_bullet
-                ld a, s_isaac_bullet
-                call appear
-                pop af
-                ld (ix + sd0), a
-                ret
-                
-update_isaac_bullet: ret 

@@ -148,8 +148,8 @@ tick:           db 0
 
                 include "room.asm"
                 include "util.asm"
-                include "offscreen.asm"
                 include "the.asm"
+                include "offscreen.asm"
 
                 ; do not put anything after this line
                 ; ----------------------------
@@ -157,4 +157,5 @@ tick:           db 0
 
 
 	savesna "isaac.sna", Start
+	;;savetap "isaac.tap", Start
 

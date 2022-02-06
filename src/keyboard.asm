@@ -57,7 +57,7 @@ keymap
                 db 0xef, 0b00000001, MASK_FIRE_M
 
                 db 0x7f, 0b00000100, MASK_FIRE_M ; M
-                ;db 0x7f, 0b00000001, MASK_FIRE_M ; space
+                db 0x7f, 0b00000001, MASK_FIRE_M ; space
 
                 db 0
 

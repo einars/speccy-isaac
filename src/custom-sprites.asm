@@ -1,6 +1,28 @@
-                module Custom
+                module Tear
 
-Bullet:
+Spawn
+                pushx
+                ld h, a
+                ld bc, (The.isaac_pos)
+                ld a, b
+                sub 12
+
+                ld b, a
+                ld a, h
+
+                push af ; direction
+                ld de, Tear.Draw
+                ld hl, Tear.Update
+                ld a, s_isaac_tear
+                call appear
+                pop af
+
+                ld (ix + sd0), a
+                popx
+                ret
+                
+
+Draw:
                 ; BC - coordinates
                 ;ld bc, (ix + spr_pos)
                 ; A = flag. 0 = clear, 1 = draw
@@ -13,7 +35,7 @@ Bullet:
 
                 ld a, c
                 and 7
-                ld hl, bullet_sprites
+                ld hl, Tear.sprites
                 add l
                 ld l, a
                 ld h, (hl)
@@ -36,7 +58,7 @@ Bullet:
 
                 ld a, c
                 and 7
-                ld hl, bullet_sprites
+                ld hl, Tear.sprites
                 add l
                 ld l, a
                 ld h, (hl)
@@ -68,28 +90,22 @@ Bullet:
                 ld (de), a
                 ret
 
-update_isaac_bullet:
+Update:
                 ld h, (ix + sd0)
                 ld a, 2
                 ;call move_in_cardinal_direction
-                call move_cardinal_ht_enemy
-                jc .hit_enemy
-                jnz .die
-                xor a
-                ret
-.die            ld a, sprite_death
-                ret
-.hit_enemy      ; i die and the enemy gets hit as well
+                call move_in_cardinal_direction
+                jnz .die ; hit the wall
+                call ht_enemy
+                ret z
+                ; i die and the enemy gets hit as well
                 call enemy_hit
+.die
                 ld a, sprite_death
                 ret
 
-
-                
-
-
                 align 8
-bullet_sprites:
+sprites:
                 dg OO------
                 dg -OO-----
                 dg --OO----
