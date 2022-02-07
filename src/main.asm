@@ -115,6 +115,7 @@ BlinkDo:        ld a, (bg)
                 ret
 
 DebugLine:
+                ret
                 push bc
                 out (254), a
                 ld b, 12
