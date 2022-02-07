@@ -35,8 +35,8 @@ FrameEnd:
 
                 ld hl, 0x5800
                 ld a, (counter)
-                dec a ; we've already waited for the frame to end
-                ;or a
+                ;dec a ; we've already waited for the frame to end
+                or a
                 jz .draw_good
                 ld b, a
                 ld a, Color.black + Bg.red

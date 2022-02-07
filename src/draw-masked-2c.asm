@@ -74,7 +74,11 @@ double_column_masked:
 
                 ld a, b ; line counter will live in a'
 
-                ; A = B = height
+                exx
+                ld b, a
+
+                ; exx
+                ; B' = height
                 ; HL = screen
                 ; SP = mask + sprite
 
@@ -92,7 +96,7 @@ double_column_masked:
 
 
 m0
-1               ex af, af'
+1               exx
                 pop bc
                 pop de
                 ld a, (hl)
@@ -107,18 +111,13 @@ m0
                 dec l
 
                 LineInc_HL
-                ex af, af'
-                dec a
-                jnz 1b
+                exx
+                djnz 1b
                 jp mret
-
-mret            ld sp, 0
-                ret
 
 
 m1
-                break
-1               ex af, af'
+1               exx
                 pop bc
                 ld a, 255
                 scf
@@ -135,13 +134,12 @@ m1
 
                 ma_impl
 
-                ex af, af'
-                dec a
-                jnz 1b
+                exx
+                djnz 1b
                 jp mret
 
 m2
-1               ex af, af'
+1               exx
                 pop bc
                 ld a, 255
                 scf
@@ -162,13 +160,12 @@ m2
 
                 ma_impl
 
-                ex af, af'
-                dec a
-                jnz 1b
+                exx
+                djnz 1b
                 jp mret
 
 m3
-1               ex af, af'
+1               exx
                 pop bc
                 ld a, 255
                 scf
@@ -189,13 +186,12 @@ m3
 
                 ma_impl
 
-                ex af, af'
-                dec a
-                jnz 1b
+                exx
+                djnz 1b
                 jp mret
 
 m4
-1               ex af, af'
+1               exx
                 pop bc
                 pop de
                 ld a, 255
@@ -216,13 +212,18 @@ m4
 
                 ma_impl
 
-                ex af, af'
-                dec a
-                jnz 1b
-                jp mret
+                exx
+                djnz 1b
+                ;jp mret
+
+; avoid jump for the slowest sprite draw rtn
+mret            ld sp, 0
+                ret
+
+
 
 m5
-1               ex af, af'
+1               exx
                 pop bc
                 pop de
                 ld a, 255
@@ -243,13 +244,12 @@ m5
 
                 mb_impl
 
-                ex af, af'
-                dec a
-                jnz 1b
+                exx
+                djnz 1b
                 jp mret
 
 m6
-1               ex af, af'
+1               exx
                 pop bc
                 pop de
                 ld a, 255
@@ -270,13 +270,12 @@ m6
 
                 mb_impl
 
-                ex af, af'
-                dec a
-                jnz 1b
+                exx
+                djnz 1b
                 jp mret
 
 m7
-1               ex af, af'
+1               exx
                 pop bc
                 pop de
                 ld a, 255
@@ -297,8 +296,7 @@ m7
 
                 mb_impl
 
-                ex af, af'
-                dec a
-                jnz 1b
+                exx
+                djnz 1b
                 jp mret
 

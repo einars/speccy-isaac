@@ -31,21 +31,20 @@ Start:          jr 1f
                 call isaac_appear
 
 
-                call Scenes.Isaacs2
-                ;call Scenes.Isaacs3
+                ;call Scenes.Isaacs2
+                call Scenes.Isaacs3
                 ;call Scenes.Isaacs1
                 ;call Scenes.Isaacs3
-                ;call Scenes.Spiders3
+                call Scenes.Spiders3
                 ;call Scenes.Spiders2
 
                 ei
+                halt
 
 .again          
-                ;ld a, Color.black
-                ;out (254), a
 
                 call BlinkDo
-                ;call LoadIndicator.FrameStart
+                ;; call LoadIndicator.FrameStart
 
                 di
                 call draw_sprites_chaotic
@@ -54,13 +53,12 @@ Start:          jr 1f
 
                 call Logic ; out of interrupt, end of screen
 
+                halt
 
-                ;call LoadIndicator.FrameEnd
-                ;ld a, Color.blue
-                ;out (254), a
+
+                ;; call LoadIndicator.FrameEnd
 
                 ; ld b, 25 : halt : djnz 1b
-                halt
 
                 jr .again
 
@@ -129,8 +127,6 @@ DebugLine:
 
 InterruptRoutine:
                 di
-                ld (.stack_ret + 1), sp
-                ld sp, im2.Stack
                 pushx
                 push af
 
@@ -142,7 +138,6 @@ InterruptRoutine:
                 pop af
                 popx
 
-.stack_ret      ld sp, 0
                 ei
                 reti
 
@@ -162,12 +157,9 @@ tick:           db 0
 
                 include "room.asm"
                 include "util.asm"
-                include "the.asm"
                 include "offscreen.asm"
-
-                ; do not put anything after this line
-                ; ----------------------------
                 include "im2.asm"
+                include "the.asm"
 
 
 	savesna "isaac.sna", Start

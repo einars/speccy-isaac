@@ -233,10 +233,7 @@ not_this
                 ret
 
 
-                org 0xc000
-Offscreen       ds 6144
-Offattrs        ds 768 ; unused
-
+Offscreen       equ 0xc000
                 endmodule
 
 

@@ -2,8 +2,6 @@
 
 max_sprites     equ 32
 
-                align 256
-spritelist:     ds (max_sprites * spr_length), 255
 
 // sample sprite layout for moving things around
 map_base
@@ -166,9 +164,6 @@ map_entities_noix:
                 add hl, bc
                 jr 1b
 
-sort_area       ds max_sprites * 2
-
-
 entity_tick:
                 ; returns:
                 ; Z = skip this turn
@@ -225,6 +220,7 @@ draw_sprites_chaotic:
                 push hl
                 push hl
                 pop ix
+
                 call materialize_sprite
 
                 ld a, Color.red
@@ -660,3 +656,5 @@ enemy_hit:
                 pop ix
                 ret
 
+                align 256
+spritelist:     ds (max_sprites * spr_length), 255
