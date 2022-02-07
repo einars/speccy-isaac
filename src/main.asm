@@ -51,6 +51,12 @@ Start:          jr 1f
                 ;call draw_sprites_all
                 ei
 
+                ld a, Color.green
+                call DebugLine
+                call keyboard.Read
+                ld a, Color.green
+                call DebugLine
+
                 call Logic ; out of interrupt, end of screen
 
                 halt
@@ -131,7 +137,7 @@ InterruptRoutine:
                 pushx
                 push af
 
-                call keyboard.Read
+                ;call keyboard.Read
 
                 ld hl, tick
                 inc (hl)
