@@ -1,80 +1,112 @@
-dc_prelude      macro
+dca_impl        macro
+                ; MASK: E D C
+                set 7, h
 
-                exx
+                ld a, (hl)
+                cpl
+                or e
+                cpl
+                exx : ld e, a : exx
 
-                ld c, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                inc hl
-                inc hl
-                push hl ; 11
-                ld a, 255
-                scf
+                inc l
+
+                ld a, (hl)
+                cpl
+                or d
+                cpl
+                exx : ld d, a : exx
+
+                inc l
+
+                ld a, (hl)
+                cpl
+                or c
+                cpl
+                exx : ld c, a : exx
+                ; OFFSCREEN: E' D' C'
+
+                dec l
+                dec l
+                res 7, h
+
+                ld a, (hl)
+                and e
+                exx : or e : exx
+                ld (hl), a
+
+                inc l
+                ld a, (hl)
+                and d
+                exx : or d : exx
+                ld (hl), a
+
+                inc l
+                ld a, (hl)
+                and c
+                exx : or c : exx
+                ld (hl), a
+
+                dec l
+                dec l
+                
+                LineInc_HL
+
                 endm
 
-dc_impl         macro
-                ; C B L' - mask rolled into position
+dcb_impl        macro
+                ; MASK: C E D
+                set 7, h
 
-                set 7, d
-
-                ld a, (de) ; offscreen
-                inc e
+                ld a, (hl)
                 cpl
-                or c ; and inverse mask
+                or c
                 cpl
-                ld l, a
+                exx : ld c, a : exx
 
-                ld a, (de) ; offscreen
-                inc e
+                inc l
+
+                ld a, (hl)
                 cpl
-                or b ; and inverse mask
+                or e
                 cpl
-                ld h, a
+                exx : ld e, a : exx
 
-                ld a, (de) ; offscreen
-                dec e
-                dec e
+                inc l
+
+                ld a, (hl)
                 cpl
-                exx
-                or l ; and inverse mask
+                or d
                 cpl
-                ld h, a
-                exx
-                ; L H H' — offscreen w/inverse mask applied
+                exx : ld d, a : exx
+                ; OFFSCREEN: C' E' D'
 
-                res 7, d
+                dec l
+                dec l
+                res 7, h
 
-                ld a, (de) ; screen
-                and c ; mask
-                or l  ; screen
-                ld (de), a
-                inc e
+                ld a, (hl)
+                and c
+                exx : or c : exx
+                ld (hl), a
 
-                ld a, (de)
-                and b
-                or h
-                ld (de), a
-                inc e
+                inc l
+                ld a, (hl)
+                and e
+                exx : or e : exx
+                ld (hl), a
 
-                ld a, (de)
-                exx
-                and l
-                or h
-                exx
-                ld (de), a
-                dec e
-                dec e
+                inc l
+                ld a, (hl)
+                and d
+                exx : or d : exx
+                ld (hl), a
 
+                dec l
+                dec l
+                
+                LineInc_HL
 
-                LineInc_DE
-
-                pop hl ; 10
-
-                exx
                 endm
-
-
 
 
 restore_mask:
@@ -91,6 +123,11 @@ restore_mask:
                 ld b, (hl)
 
                 inc hl
+                ld (dcret + 1), sp
+                ld (.sp + 1), hl
+.sp             ld sp, 0
+
+                ex de, hl
 
                 ld a, c
                 add a, c
@@ -98,9 +135,9 @@ restore_mask:
                 ld (.jump_table + 1), a
 
                 ; B = height
-                ; DE = screen,
-                ; DE|8000 = offscreen
-                ; HL = mask + sprite
+                ; HL = screen,
+                ; HL|8000 = offscreen
+                ; SP = mask + sprite
 .jump_table     jr $
                 jp dc0
                 jp dc1
@@ -112,183 +149,186 @@ restore_mask:
                 jp dc7
 
 
+dc0:            
+1               pop de ; mask
 
-dc0:
-                ld a, b
-                exx
-                ld b, a
-1
-                dc_prelude
+                ; MASK: E D
+                set 7, h
 
-                exx
-                ld l, a
-                exx ; C B L' — rolled mask
+                ld a, (hl)
+                cpl
+                or e
+                cpl
+                ld c, a
+
+                inc l
+
+                ld a, (hl)
+                cpl
+                or d
+                cpl
+                exx : ld c, a : exx
+                ; offscreen: C C'
+
+                dec l
+
+                res 7, h
+
+                ld a, (hl)
+                and e
+                or c
+                ld (hl), a
+
+                inc l
+
+                ld a, (hl)
+                and d
+                exx : or c : exx
+                ld (hl), a
+
+                dec l
                 
-                dc_impl
+                LineInc_HL
+
+                pop de ; crap
 
                 djnz 1b
-                ret
+                jp dcret
 
-dc1:
-                ld a, b
-                exx
-                ld b, a
-1
-                dc_prelude
+dc1:            
+1               pop de ; mask
 
-                rr c
-                rr b
-                rra
-                exx
-                ld l, a
-                exx ; C B L' — rolled mask
-                
-                dc_impl
+                xor a
+                dec a
+                dup 1
+                  rr e
+                  rr d
+                  rra
+                edup
+                ld c, a
 
-                djnz 1b
-                ret
-
-
-dc2:
-                ld a, b
-                exx
-                ld b, a
-1
-                dc_prelude
-
-                rr c
-                rr b
-                rra
-                rr c
-                rr b
-                rra
-                exx
-                ld l, a
-                exx ; C B L' — rolled mask
-                
-                dc_impl
+                dca_impl
+                pop de ; crap
 
                 djnz 1b
-                exx
-                ret
+                jp dcret
 
+dc2:            
+1               pop de ; mask
 
-dc3:
-                ld a, b
-                exx
-                ld b, a
-1
-                dc_prelude
+                xor a
+                dec a
+                dup 2
+                  rr e
+                  rr d
+                  rra
+                edup
+                ld c, a
 
-                rr c
-                rr b
-                rra
-                rr c
-                rr b
-                rra
-                rr c
-                rr b
-                rra
-                exx
-                ld l, a
-                exx ; C B L' — rolled mask
-                
-                dc_impl
+                dca_impl
+                pop de ; crap
 
                 djnz 1b
-                exx
-                ret
+                jp dcret
 
-dc4:
-                ld a, b
-                exx
-                ld b, a
-1
-                dc_prelude
+dc3:            
+1               pop de ; mask
 
+                xor a
+                dec a
+                dup 3
+                  rr e
+                  rr d
+                  rra
+                edup
+                ld c, a
+
+                dca_impl
+                pop de ; crap
+
+                djnz 1b
+                jp dcret
+
+dc4:            
+1               pop de ; mask
+
+                xor a
+                dec a
                 dup 4
-                 rr c
-                 rr b
-                 rra
-                edup
-
-                ; C B A — rolled mask
-                exx
-                ld l, a
-                exx ; C B L' — rolled mask
-                
-                dc_impl
-
-                djnz 1b
-                exx
-                ret
-
-dc5:
-                ld a, b
-                exx
-                ld b, a
-1
-                dc_prelude
-
-                dup 5
-                 rr c
-                 rr b
-                 rra
-                edup
-
-                exx
-                ld l, a
-                exx
-                
-                dc_impl
-
-                djnz 1b
-                exx
-                ret
-
-dc6:
-                ld a, b
-                exx
-                ld b, a
-1
-                dc_prelude
-
-                dup 6
-                  rr c
-                  rr b
+                  rr e
+                  rr d
                   rra
                 edup
+                ld c, a
 
-                exx
-                ld l, a
-                exx
-                
-                dc_impl
+                dca_impl
+                pop de ; crap
 
                 djnz 1b
-                exx
+;                jp dcret
+; avoid jump for the slowest of mask-restores
+
+dcret           ld sp, 0
                 ret
 
-dc7:
-                ld a, b
-                exx
-                ld b, a
-1
-                dc_prelude
+dc5:            
+1               pop de ; mask
 
-                dup 7
-                  rr c
-                  rr b
-                  rra
+                xor a
+                dec a
+                dup 3
+                  rl d
+                  rl e
+                  rla
                 edup
+                ld c, a
 
-                exx
-                ld l, a
-                exx
+                dcb_impl ; offscreen: C E D
 
-                dc_impl
+                pop de ; crap
 
                 djnz 1b
-                exx
-                ret
+                jp dcret
+
+dc6:            
+1               pop de ; mask
+
+                xor a
+                dec a
+                dup 2
+                  rl d
+                  rl e
+                  rla
+                edup
+                ld c, a
+
+                dcb_impl ; offscreen: C E D
+
+                pop de ; crap
+
+                djnz 1b
+                jp dcret
+
+dc7:            
+1               pop de ; mask
+
+                xor a
+                dec a
+                dup 1
+                  rl d
+                  rl e
+                  rla
+                edup
+                ld c, a
+
+                dcb_impl ; offscreen: C E D
+
+                pop de ; crap
+
+                djnz 1b
+                jp dcret
+
+
+
+
 

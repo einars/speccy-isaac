@@ -188,6 +188,15 @@ entity_tick:
                 ret
 
 
+draw_sprites_all:
+                ld a, 7
+                call DebugLine
+                call map_entities
+                call materialize_sprite
+                ld a, Color.red
+                call DebugLine
+                ret
+
 draw_sprites_chaotic:
 .sprites_per_frame equ 2
 
@@ -346,12 +355,6 @@ materialize_sprite:
 
                 ; IX = HL = sprite
 
-                ;or a ; idx = 0 — always draw isaac
-                ;jz .no_skip
-
-                ;call random
-                ;and 7
-                ;ret nz
                 ld a, (ix)
                 and Custom_draw
                 jp nz, materialize_sprite_custom

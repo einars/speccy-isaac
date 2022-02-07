@@ -32,10 +32,10 @@ Start:          jr 1f
 
 
                 call Scenes.Isaacs2
-                ;call Scenes.Isaacs3
-                ;call Scenes.Isaacs1
-                ;call Scenes.Isaacs3
-                ;call Scenes.Spiders3
+                call Scenes.Isaacs3
+                call Scenes.Isaacs1
+                call Scenes.Isaacs3
+                call Scenes.Spiders3
 
                 ;call Scenes.Spiders2
 
@@ -50,6 +50,7 @@ Start:          jr 1f
 
                 di
                 call draw_sprites_chaotic
+                ;call draw_sprites_all
                 ei
 
                 call Logic ; out of interrupt, end of screen
