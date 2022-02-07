@@ -1,70 +1,30 @@
-
-m2_prelude      macro
+ma_impl         macro
+                ; mask: C B C'
+                ; sprite: E D E'
                 ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0xff
-                endm
-
-m2_intermission macro
-                ex de, hl
-                and (hl)
-                exx
-                ld e, a
-                exx
+                and c
+                or e
+                ld (hl), a
                 inc l
                 ld a, (hl)
                 and b
-                exx
-                ld d, a
-                exx
+                or d
+                ld (hl), a
                 inc l
                 ld a, (hl)
+                exx
                 and c
-                exx
-                ld c, a
-                exx
-
-                dec l
-                dec l
-                ex de, hl
-
-
-                ld a, (hl)
-                inc hl
-                ld b, (hl)
-                inc hl
-                ld c, 0
-                endm
-                
-                
-m2_finish       macro
-                ex de, hl
-                exx
                 or e
                 exx
                 ld (hl), a
-                inc l
-                ld a, b
-                exx
-                or d
-                exx
-                ld (hl), a
-                inc l
-                ld a, c
-                exx
-                or c
-                exx
-                ld (hl), a
+
                 dec l
                 dec l
-                ex de, hl
 
-                LineInc_DE
-
-
+                LineInc_HL
                 endm
+                
+
                 ; HL - sprite
                 ; DE - screen address
                 ; B - height
@@ -77,277 +37,242 @@ double_column_masked:
                 ld a, c
                 add a, c
                 add a, c
-                ld (.again+1), a
+                ld (.jump_table+1), a
+
+                
+                ld (mret + 1), sp
+                ld (.sp + 1), hl
+.sp             ld sp, 0
+
+                ex de, hl
 
                 ld a, b ; line counter will live in a'
-.again          jr $
+
+                ; A = B = height
+                ; HL = screen
+                ; SP = mask + sprite
+
+.jump_table     jr $
                 ; jump table to implementations
-                jp .m0
-                jp .m1
-                jp .m2
-                jp .m3
-                jp .m4
-                jp .m5
-                jp .m6
-                jp .m7
+                jp m0
+                jp m1
+                jp m2
+                jp m3
+                jp m4
+                jp m5
+                jp m6
+                jp m7
 
 
-.m0            
-                ex af, af'
-                ; hl - sprite
-                ; de - screen
 
-                ld b, (hl)
-                inc hl
-                ld c, (hl)
-                inc hl
-
-
-                ld a, (de)
-                and b
-                or (hl)
-                ld (de), a
-
-
-                inc hl
-                inc e
-
-                ld a, (de)
+m0
+1               ex af, af'
+                pop bc
+                pop de
+                ld a, (hl)
                 and c
-                or (hl)
-                ld (de), a
+                or e
+                ld (hl), a
+                inc l
+                ld a, (hl)
+                and b
+                or d
+                ld (hl), a
+                dec l
 
-                inc hl
-                dec e
-
-                LineInc_DE
-
+                LineInc_HL
                 ex af, af'
                 dec a
-                jnz .m0
+                jnz 1b
+                jp mret
 
+mret            ld sp, 0
                 ret
 
-.m1 ;=================================================
-                ex af, af'
 
-                m2_prelude
-
-                rra
-                rr b
+m1
+                break
+1               ex af, af'
+                pop bc
+                ld a, 255
+                scf
                 rr c
-
-                or 0b10000000
-
-                m2_intermission
-
-                rra
                 rr b
-                rr c
-                and 0b01111111
+                rra
+                exx : ld c, a : exx ; mask: C B C'
+                pop de
+                xor a
+                rr e
+                rr d
+                rra
+                exx : ld e, a : exx ; sprite: E D E'
 
-                m2_finish
+                ma_impl
 
                 ex af, af'
                 dec a
-                jnz .m1
+                jnz 1b
+                jp mret
 
-                ret
-
-.m2 ;=================================================
-
-                ex af, af'
-
-                m2_prelude
-
+m2
+1               ex af, af'
+                pop bc
+                ld a, 255
+                scf
                 dup 2
-                  rra
-                  rr b
                   rr c
+                  rr b
+                  rra
                 edup
-
-                or 0b11000000
-
-                m2_intermission
-
+                exx : ld c, a : exx ; mask: C B C'
+                pop de
+                xor a
                 dup 2
+                  rr e
+                  rr d
                   rra
-                  rr b
-                  rr c
                 edup
+                exx : ld e, a : exx ; sprite: E D E'
 
-                and 0b00111111
-
-                m2_finish
+                ma_impl
 
                 ex af, af'
                 dec a
-                jnz .m2
+                jnz 1b
+                jp mret
 
-                ret
-
-
-.m3 ;=================================================
-
-                ex af, af'
-
-                m2_prelude
-
+m3
+1               ex af, af'
+                pop bc
+                ld a, 255
+                scf
                 dup 3
-                  rra
-                  rr b
                   rr c
+                  rr b
+                  rra
                 edup
-
-                or 0b11100000
-
-                m2_intermission
-
+                exx : ld c, a : exx ; mask: C B C'
+                pop de
+                xor a
                 dup 3
+                  rr e
+                  rr d
                   rra
-                  rr b
-                  rr c
                 edup
+                exx : ld e, a : exx ; sprite: E D E'
 
-                and 0b00011111
-
-                m2_finish
+                ma_impl
 
                 ex af, af'
                 dec a
-                jnz .m3
+                jnz 1b
+                jp mret
 
-                ret
-
-
-.m4 ;=================================================
-
-                ex af, af'
-
-                m2_prelude
-
+m4
+1               ex af, af'
+                pop bc
+                pop de
+                ld a, 255
+                scf
                 dup 4
-                  rra
-                  rr b
                   rr c
+                  rr b
+                  rra
                 edup
-
-                or 0b11110000
-
-                m2_intermission
-
+                exx : ld c, a : exx ; mask: C B C'
+                xor a
                 dup 4
+                  rr e
+                  rr d
                   rra
-                  rr b
-                  rr c
                 edup
+                exx : ld e, a : exx ; sprite: E D E'
 
-                and 0b00001111
-
-                m2_finish
+                ma_impl
 
                 ex af, af'
                 dec a
-                jnz .m4
+                jnz 1b
+                jp mret
 
-                ret
-
-
-.m5 ;=================================================
-
-                ex af, af'
-
-                m2_prelude
-
+m5
+1               ex af, af'
+                pop bc
+                pop de
+                ld a, 255
+                scf
                 dup 5
-                  rra
-                  rr b
                   rr c
+                  rr b
+                  rra
                 edup
-
-                or 0b11111000
-
-                m2_intermission
-
+                exx : ld c, a : exx ; mask: C B C'
+                xor a
                 dup 5
+                  rr e
+                  rr d
                   rra
-                  rr b
-                  rr c
                 edup
+                exx : ld e, a : exx ; sprite: E D E'
 
-                and 0b00000111
-
-                m2_finish
+                ma_impl
 
                 ex af, af'
                 dec a
-                jnz .m5
+                jnz 1b
+                jp mret
 
-                ret
-
-
-.m6 ;=================================================
-
-                ex af, af'
-
-                m2_prelude
-
+m6
+1               ex af, af'
+                pop bc
+                pop de
+                ld a, 255
+                scf
                 dup 6
-                  rra
-                  rr b
                   rr c
+                  rr b
+                  rra
                 edup
-
-                or 0b11111100
-
-                m2_intermission
-
+                exx : ld c, a : exx ; mask: C B C'
+                xor a
                 dup 6
+                  rr e
+                  rr d
                   rra
-                  rr b
-                  rr c
                 edup
+                exx : ld e, a : exx ; sprite: E D E'
 
-                and 0b00000011
-
-                m2_finish
+                ma_impl
 
                 ex af, af'
                 dec a
-                jnz .m6
+                jnz 1b
+                jp mret
 
-                ret
+m7
+1               ex af, af'
+                pop bc
+                pop de
 
-
-.m7 ;=================================================
-
-                ex af, af'
-
-                m2_prelude
-
+                ld a, 255
+                scf
                 dup 7
-                  rra
-                  rr b
                   rr c
+                  rr b
+                  rra
                 edup
-
-                or 0b11111110
-
-                m2_intermission
-
+                exx : ld c, a : exx ; mask: C B C'
+                xor a
                 dup 7
+                  rr e
+                  rr d
                   rra
-                  rr b
-                  rr c
                 edup
+                exx : ld e, a : exx ; sprite: E D E'
 
-                and 0b00000001
-
-                m2_finish
+                ma_impl
 
                 ex af, af'
                 dec a
-                jnz .m7
-
-                ret
-
+                jnz 1b
+                jp mret

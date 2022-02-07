@@ -129,6 +129,7 @@ restore_mask:
 
                 ex de, hl
 
+                ; 47
                 ld a, c
                 add a, c
                 add a, c
@@ -198,8 +199,8 @@ dc0:
 dc1:            
 1               pop de ; mask
 
-                xor a
-                dec a
+                ld a, 255
+                scf
                 dup 1
                   rr e
                   rr d
@@ -216,8 +217,8 @@ dc1:
 dc2:            
 1               pop de ; mask
 
-                xor a
-                dec a
+                ld a, 255
+                scf
                 dup 2
                   rr e
                   rr d
@@ -234,8 +235,8 @@ dc2:
 dc3:            
 1               pop de ; mask
 
-                xor a
-                dec a
+                ld a, 255
+                scf
                 dup 3
                   rr e
                   rr d
@@ -252,8 +253,8 @@ dc3:
 dc4:            
 1               pop de ; mask
 
-                xor a
-                dec a
+                ld a, 255
+                scf
                 dup 4
                   rr e
                   rr d
@@ -274,8 +275,8 @@ dcret           ld sp, 0
 dc5:            
 1               pop de ; mask
 
-                xor a
-                dec a
+                ld a, 255
+                scf
                 dup 3
                   rl d
                   rl e
@@ -293,8 +294,8 @@ dc5:
 dc6:            
 1               pop de ; mask
 
-                xor a
-                dec a
+                ld a, 255
+                scf
                 dup 2
                   rl d
                   rl e
@@ -312,8 +313,8 @@ dc6:
 dc7:            
 1               pop de ; mask
 
-                xor a
-                dec a
+                ld a, 255
+                scf
                 dup 1
                   rl d
                   rl e
