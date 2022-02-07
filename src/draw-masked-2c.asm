@@ -25,6 +25,32 @@ ma_impl         macro
                 endm
                 
 
+mb_impl         macro
+                ; mask: C' C B
+                ; sprite: E' E D
+                ld a, (hl)
+                exx
+                and c
+                or e
+                exx
+                ld (hl), a
+                inc l
+                ld a, (hl)
+                and c
+                or e
+                ld (hl), a
+                inc l
+                ld a, (hl)
+                and b
+                or d
+                ld (hl), a
+
+                dec l
+                dec l
+
+                LineInc_HL
+                endm
+
                 ; HL - sprite
                 ; DE - screen address
                 ; B - height
@@ -201,21 +227,21 @@ m5
                 pop de
                 ld a, 255
                 scf
-                dup 5
-                  rr c
-                  rr b
-                  rra
+                dup 3
+                  rl b
+                  rl c
+                  rla
                 edup
-                exx : ld c, a : exx ; mask: C B C'
+                exx : ld c, a : exx ; mask: C' C B
                 xor a
-                dup 5
-                  rr e
-                  rr d
-                  rra
+                dup 3
+                  rl d
+                  rl e
+                  rla
                 edup
-                exx : ld e, a : exx ; sprite: E D E'
+                exx : ld e, a : exx ; sprite: E' E D
 
-                ma_impl
+                mb_impl
 
                 ex af, af'
                 dec a
@@ -228,21 +254,21 @@ m6
                 pop de
                 ld a, 255
                 scf
-                dup 6
-                  rr c
-                  rr b
-                  rra
+                dup 2
+                  rl b
+                  rl c
+                  rla
                 edup
-                exx : ld c, a : exx ; mask: C B C'
+                exx : ld c, a : exx ; mask: C' C B
                 xor a
-                dup 6
-                  rr e
-                  rr d
-                  rra
+                dup 2
+                  rl d
+                  rl e
+                  rla
                 edup
-                exx : ld e, a : exx ; sprite: E D E'
+                exx : ld e, a : exx ; sprite: E' E D
 
-                ma_impl
+                mb_impl
 
                 ex af, af'
                 dec a
@@ -253,26 +279,26 @@ m7
 1               ex af, af'
                 pop bc
                 pop de
-
                 ld a, 255
                 scf
-                dup 7
-                  rr c
-                  rr b
-                  rra
+                dup 1
+                  rl b
+                  rl c
+                  rla
                 edup
-                exx : ld c, a : exx ; mask: C B C'
+                exx : ld c, a : exx ; mask: C' C B
                 xor a
-                dup 7
-                  rr e
-                  rr d
-                  rra
+                dup 1
+                  rl d
+                  rl e
+                  rla
                 edup
-                exx : ld e, a : exx ; sprite: E D E'
+                exx : ld e, a : exx ; sprite: E' E D
 
-                ma_impl
+                mb_impl
 
                 ex af, af'
                 dec a
                 jnz 1b
                 jp mret
+
