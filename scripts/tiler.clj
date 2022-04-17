@@ -1,12 +1,11 @@
-;(require '[clojure.string :as str])
+(require '[clojure.string :as str])
 (require '[clojure.tools.trace :use all])
 (require '[clojure.pprint :use [pprint]])
 (require '[clojure.java.io :as io])
 (require '[clojure.test :use all])
 
 (def speccy-screen-lines
-  [
-   0x4000 0x4100 0x4200 0x4300 0x4400 0x4500 0x4600 0x4700
+  [0x4000 0x4100 0x4200 0x4300 0x4400 0x4500 0x4600 0x4700
    0x4020 0x4120 0x4220 0x4320 0x4420 0x4520 0x4620 0x4720
    0x4040 0x4140 0x4240 0x4340 0x4440 0x4540 0x4640 0x4740
    0x4060 0x4160 0x4260 0x4360 0x4460 0x4560 0x4660 0x4760
@@ -31,6 +30,12 @@
    0x50C0 0x51C0 0x52C0 0x53C0 0x54C0 0x55C0 0x56C0 0x57C0
    0x50E0 0x51E0 0x52E0 0x53E0 0x54E0 0x55E0 0x56E0 0x57E0])
 
+(def tile-defs
+  [["t_wall_corner_ul" 0 0 :normal]
+   ["t_wall_corner_ur" 0 0 :mirror-h]
+   ["t_wall_corner_dl" 0 0 :mirror-v]
+   ["t_wall_corner_dr" 0 0 :mirror-hv]])
+
 (defn unsigned [b]
   (if (< b 0)
     (+ 256 b)
@@ -47,6 +52,11 @@
   (let [base-addr (nth speccy-screen-lines y)]
     (- (+ base-addr (quot x 8)) 0x4000)))
 
+(defn speccy-attribute-addr [x y]
+  {:pre [(clojure.test/is (<= 0 x 255))
+         (clojure.test/is (<= 0 y 191))]}
+  (+ 0x1800 (* 32 (quot y 8)) (quot x 8)))
+
 (defn get-pixel [b pix]
   ;(println "reading " b " for " pix)
   (case (mod b 8)
@@ -59,22 +69,76 @@
     6 (> (bit-and pix 2) 0)
     7 (> (bit-and pix 1) 0)))
 
-
 (defn speccy-pixel [x y buffer]
   (get-pixel x (get buffer (speccy-addr x y))))
 
-
 (def Pixls
-  { true "X", false "."})
+  {true "X", false "-"})
 
-(defn print-tile [[x y] buffer]
-  (doseq[yy (range y (+ y 16))]
-    (doseq [xx (range x (+ x 16))]
-      (print (Pixls (speccy-pixel xx yy buffer ))))
-    (print "\n")))
+(def Colors
+  {0 "black"
+   1 "blue"
+   2 "red"
+   3 "magenta"
+   4 "green"
+   5 "cyan"
+   6 "yellow"
+   7 "white"
+   })
+
+(def Brights
+  {true "on", false "off"})
+
+(defn get-tile [[x y] buffer]
+  (for [yy (range y (+ y 16))]
+    (map Pixls (for [xx (range x (+ x 16))] 
+                 (speccy-pixel xx yy buffer)))))
 
 (def Work (read-speccy-screen "/proj/isaac/work.scr"))
 
-(print-tile [0 0] Work)
-(println)
-(print-tile [16 0] Work)
+(defn make-asm [tile name]
+  (str/join "\n"
+    (concat
+      [(format "%s:" name)]
+      (map #(format "        dg %s" (str/join "" %)) tile))))
+
+
+(defn rotate-tile [t rotation]
+  (case rotation
+    :normal t
+    :mirror-h (map reverse t)
+    :mirror-v (reverse t)
+    :mirror-hv (reverse (map reverse t))))
+
+(defn make-attr-asm [[x y] buffer]
+  (let [addr (speccy-attribute-addr x y)
+        color (bit-and (get buffer addr) 7)
+        paper (bit-and (bit-shift-right (get buffer addr) 3) 7)
+        bright? (> (bit-and (get buffer addr) 0x40) 0)]
+    (format "        db (Color.%s + Bg.%s + Bright.%s)"
+            (Colors color)
+            (Colors paper)
+            (Brights bright?)
+            addr)))
+
+(defn flatten-attrs [[xs ys]]
+  [(first xs) (second xs) (first ys) (second ys)])
+
+(defn process-def-line [[name x y mode]]
+  (let [tile (get-tile [x y] Work)
+        tile-asm (make-asm (rotate-tile tile mode) name)
+        attr-offsets (rotate-tile 
+                       [[[(+ 0 x) (+ 0 y)] [(+ 8 x) (+ 0 y)]]
+                        [[(+ 0 x) (+ 8 y)] [(+ 8 x) (+ 8 y)]]] mode)
+        attrs-asms (mapv #(make-attr-asm % Work) (flatten-attrs attr-offsets))]
+    (str/join "\n" (apply conj [tile-asm] attrs-asms))))
+
+
+
+
+
+
+(defn main []
+  (spit "/proj/isaac/src/gen.tiles.inc" (str/join "\n\n" (mapv process-def-line tile-defs))))
+
+(main)

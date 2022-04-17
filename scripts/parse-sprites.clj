@@ -2,14 +2,12 @@
 (require '[clojure.tools.trace :use all])
 (require '[clojure.pprint :use [pprint]])
 
-
 (defn multi-concat [accums ys]
   (map #(conj %1 (apply str %2)) accums ys))
 
 (defn split-to-columns [lines]
   (let [ls (mapv #(partition-all 8 %) lines)]
     (reduce multi-concat (map (constantly []) (first ls)) ls)))
-
 
 (defn make-pixel-char [c]
   (condp = c
@@ -54,27 +52,25 @@
 
 (defn column-to-string [pix-col mask-col]
   (str/join
-    "\n"
-    (concat
-      [(format "                db %d" (count pix-col))]
-      (map (fn [[pix mask]]
-             (format "                db %s, %s" (binary-s mask) (binary-s pix)))
-           (partition-all 2 (interleave pix-col mask-col)))
-      )))
+   "\n"
+   (concat
+    [(format "                db %d" (count pix-col))]
+    (map (fn [[pix mask]]
+           (format "                db %s, %s" (binary-s mask) (binary-s pix)))
+         (partition-all 2 (interleave pix-col mask-col))))))
 
 (defn two-columns-to-string [[p1 p2] [m1 m2]]
   (str/join
-    "\n"
-    (concat
-      [(format "                db %d" (count p1))] ; height
-      (map (fn [[pa pb ma mb]]
-             (format "                db %s, %s, %s, %s" 
-                     (binary-s ma)
-                     (binary-s mb)
-                     (binary-s pa)
-                     (binary-s pb)))
-           (partition-all 4 (interleave p1 p2 m1 m2)))
-      )))
+   "\n"
+   (concat
+    [(format "                db %d" (count p1))] ; height
+    (map (fn [[pa pb ma mb]]
+           (format "                db %s, %s, %s, %s"
+                   (binary-s ma)
+                   (binary-s mb)
+                   (binary-s pa)
+                   (binary-s pb)))
+         (partition-all 4 (interleave p1 p2 m1 m2))))))
 
 (defn tile-to-string [{:keys [label pixels] :as s}]
   (let [label (str/replace label "." "_")
@@ -85,15 +81,13 @@
                            (binary-s pb)))
                  p1
                  p2)]
-    (format "%s: db %d\n%s\n          db 0" 
-            label 
-            (count (first pixels)) 
+    (format "%s: db %d\n%s\n          db 0"
+            label
+            (count (first pixels))
             (str/join "\n" asm))))
 
-
 (defn sprite-to-string [{:keys [label pixels masks width-chars] :as s}]
-  (if
-    (str/starts-with? label "tile")
+  (if (str/starts-with? label "tile")
     (tile-to-string s)
     (let [label (str/replace label "." "_")
           asm (cond
@@ -107,22 +101,17 @@
                 ; custom width
                 (str/join "\n\n"
                           (mapv
-                            (fn [[pix mask]] (column-to-string pix mask))
-                            (partition-all 2 (interleave pixels masks))
-                            )))]
+                           (fn [[pix mask]] (column-to-string pix mask))
+                           (partition-all 2 (interleave pixels masks)))))]
       (format "%s:\n%s\n                db 0" label asm)))) ; end flag
-
-
-
 
 (defn materialize [sprites f]
   (spit f (str/join "\n\n" (map sprite-to-string sprites))))
 
-
 (defn read-sprites [f]
   (->>
-    (str/split (slurp f) #"\n\n")
-    (map read-sprite)))
+   (str/split (slurp f) #"\n\n")
+   (map read-sprite)))
 
 (materialize (read-sprites "/proj/isaac/src/sprites.txt")
              "/proj/isaac/src/generated-sprites.asm")
