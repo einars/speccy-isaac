@@ -276,7 +276,7 @@ dc7:
                   rl e
                 edup
 
-                edc_impl ; offscreen: C E D
+                edc_impl
 
                 pop de ; crap
 

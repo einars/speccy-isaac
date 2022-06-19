@@ -36,7 +36,7 @@ Start:          jr 1f
                 call Scenes.Isaacs3
                 ;call Scenes.Isaacs1
                 ;call Scenes.Isaacs3
-                call Scenes.Spiders3
+                ;; call Scenes.Spiders3
                 ;call Scenes.Spiders2
 
                 ei

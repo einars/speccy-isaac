@@ -1,40 +1,39 @@
 ; double-column masked draw routine
 
 ma_impl         macro
-                ; mask: C B C'
-                ; sprite: E D E'
-                ld a, (hl)
-                and c
-                or e
-                ld (hl), a
+                ; mask: C B A
+                ; sprite: E D A'
                 inc l
+                inc l
+                and (hl)
+                ld (hl), a
+                ex af, af'
+                or (hl)
+                ld (hl), a
+
+                dec l
+
                 ld a, (hl)
                 and b
                 or d
                 ld (hl), a
-                inc l
+                dec l
                 ld a, (hl)
-                exx
                 and c
                 or e
-                exx
                 ld (hl), a
-
-                dec l
-                dec l
 
                 LineInc_HL
                 endm
-                
+
 
 mb_impl         macro
-                ; mask: C' C B
-                ; sprite: E' E D
-                ld a, (hl)
-                exx
-                and c
-                or e
-                exx
+                ; mask: A C B
+                ; sprite: A' E D
+                and (hl)
+                ld (hl), a
+                ex af, af'
+                or (hl)
                 ld (hl), a
                 inc l
                 ld a, (hl)
@@ -53,7 +52,8 @@ mb_impl         macro
                 LineInc_HL
                 endm
 
-                ; HL - sprite
+double_column_masked:
+                ; HL - sprite data (actual mask+sprite, without height-byte)
                 ; DE - screen address
                 ; B - height
                 ; C - bit offset
@@ -61,27 +61,25 @@ mb_impl         macro
                 ; on return:
                 ; everything messed up
 
-double_column_masked:
                 ld a, c
-                add a, c
-                add a, c
+                add c
+                add c
                 ld (.jump_table+1), a
 
-                
+
                 ld (mret + 1), sp
                 ld (.sp + 1), hl
 .sp             ld sp, 0
 
                 ex de, hl
 
-                ld a, b ; line counter will live in a'
+                ld a, b ; line counter will live in b'
 
                 exx
                 ld b, a
 
-                ; exx
-                ; B' = height
-                ; HL = screen
+                ; B, B' = height
+                ; HL' = screen
                 ; SP = mask + sprite
 
 .jump_table     jr $
@@ -126,13 +124,15 @@ m1
                 rr c
                 rr b
                 rra
-                exx : ld c, a : exx ; mask: C B C'
+                ex af, af'
                 pop de
                 xor a
                 rr e
                 rr d
                 rra
-                exx : ld e, a : exx ; sprite: E D E'
+                ex af, af'
+                ; mask: C B A
+                ; sprite: E D A'
 
                 ma_impl
 
@@ -150,7 +150,7 @@ m2
                   rr b
                   rra
                 edup
-                exx : ld c, a : exx ; mask: C B C'
+                ex af, af'
                 pop de
                 xor a
                 dup 2
@@ -158,7 +158,7 @@ m2
                   rr d
                   rra
                 edup
-                exx : ld e, a : exx ; sprite: E D E'
+                ex af, af'
 
                 ma_impl
 
@@ -176,7 +176,7 @@ m3
                   rr b
                   rra
                 edup
-                exx : ld c, a : exx ; mask: C B C'
+                ex af, af'
                 pop de
                 xor a
                 dup 3
@@ -184,7 +184,7 @@ m3
                   rr d
                   rra
                 edup
-                exx : ld e, a : exx ; sprite: E D E'
+                ex af, af'
 
                 ma_impl
 
@@ -203,14 +203,14 @@ m4
                   rr b
                   rra
                 edup
-                exx : ld c, a : exx ; mask: C B C'
+                ex af, af'
                 xor a
                 dup 4
                   rr e
                   rr d
                   rra
                 edup
-                exx : ld e, a : exx ; sprite: E D E'
+                ex af, af'
 
                 ma_impl
 
@@ -235,14 +235,16 @@ m5
                   rl c
                   rla
                 edup
-                exx : ld c, a : exx ; mask: C' C B
+                ex af, af
                 xor a
                 dup 3
                   rl d
                   rl e
                   rla
                 edup
-                exx : ld e, a : exx ; sprite: E' E D
+                ex af, af'
+                ; mask: A C B
+                ; sprite: A' E D
 
                 mb_impl
 
@@ -261,14 +263,14 @@ m6
                   rl c
                   rla
                 edup
-                exx : ld c, a : exx ; mask: C' C B
+                ex af, af
                 xor a
                 dup 2
                   rl d
                   rl e
                   rla
                 edup
-                exx : ld e, a : exx ; sprite: E' E D
+                ex af, af
 
                 mb_impl
 
@@ -287,14 +289,14 @@ m7
                   rl c
                   rla
                 edup
-                exx : ld c, a : exx ; mask: C' C B
+                ex af, af
                 xor a
                 dup 1
                   rl d
                   rl e
                   rla
                 edup
-                exx : ld e, a : exx ; sprite: E' E D
+                ex af, af
 
                 mb_impl
 

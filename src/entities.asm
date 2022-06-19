@@ -193,14 +193,11 @@ draw_sprites_all:
                 ret
 
 draw_sprites_chaotic:
-.sprites_per_frame equ 2
-
-                ld a, 7
-                call DebugLine
+.sprites_per_frame equ 1
 
                 call .draw_important_stuff
 
-                ld a, 6
+                ld a, Color.yellow
                 call DebugLine
 
 .reentry_hl     ld hl, spritelist + spr_length ; smc
@@ -221,10 +218,11 @@ draw_sprites_chaotic:
                 push hl
                 pop ix
 
+                ld a, Color.white
+                out (254), a
                 call materialize_sprite
-
-                ld a, Color.red
-                call DebugLine
+                ld a, Color.black
+                out (254), a
 
                 pop hl
                 pop bc
@@ -240,8 +238,6 @@ draw_sprites_chaotic:
 
 
 .restart        ld hl, spritelist
-                ld a, Color.magenta
-                call DebugLine
                 dec c
                 ret z
 .next           ld a, spr_length
@@ -256,7 +252,9 @@ draw_sprites_chaotic:
                 ret z
 .mat            push hl
                 pop ix
-                jp materialize_sprite
+                call materialize_sprite
+
+                ret
 
 
 
@@ -323,7 +321,7 @@ Update_sprites:
                 ; dematerialize_sprite
                 ;call dematerialize_sprite
                 ;ret
-                
+
 dematerialize_sprite:
                 ; IX = sprite
                 ld a, (ix)
@@ -336,7 +334,7 @@ dematerialize_sprite:
                 ld bc, (ix + spr_prev_pos)
                 ld hl, (ix + spr_sprite)
                 jp Draw.Mask.Restore
-.custom         
+.custom
                 ld hl, (ix + spr_sprite)
                 ld (.call + 1), hl
                 ld bc, (ix + spr_prev_pos)
@@ -349,21 +347,19 @@ materialize_sprite:
 
                 ; IX = HL = sprite
 
+
                 ld a, (ix)
                 and Custom_draw
                 jp nz, materialize_sprite_custom
 
-                ;ld a, (ix + spr_x)
-                ;sub (ix + spr_prev_x)
-                ;jnz .changed
-                ;
-.no_change_x
-                ;ld a, (ix + spr_y)
-                ;cp (ix + spr_prev_y)
-                ;jp z, .draw ; no mask restore
+                ld a, (ix + spr_x)
+                sub (ix + spr_prev_x)
+                jnz .changed
 
-                ; draw occassionally
-                ;jp .draw
+.no_change_x
+                ld a, (ix + spr_y)
+                cp (ix + spr_prev_y)
+                jp z, .draw ; no mask restore
 
 .changed
                 ld bc, (ix + spr_prev_pos)
@@ -388,7 +384,7 @@ materialize_sprite_custom:
                 ld (ix + spr_prev_pos), bc
                 ld a, 1 ; draw
                 ret ; call spr_draw
-                
+
 
 
 
@@ -421,7 +417,7 @@ move_in_cardinal_direction:
 .down           ld a, b
                 add l
                 ld b, a
-1               
+1
                 push bc
                 call Util.TileAtXY
                 pop bc
@@ -498,7 +494,7 @@ ht_enemy
 
 
 
-isaac_update:   
+isaac_update:
                 ld hl, Isaac.step
                 ld a, (Isaac.facing)
                 rlca
@@ -589,7 +585,7 @@ mimic_update:
                 jz .moved
 
 .choose_new_direction
-                
+
                 call random
                 ld b, a
                 and 63
@@ -602,8 +598,8 @@ mimic_update:
                 xor a
                 ret
 
-                
-                
+
+
 mimic_appear:   ; BC - coordinates of isaac
                 ld de, mimic_f0
                 ld hl, mimic_update
@@ -618,7 +614,7 @@ mimic_appear:   ; BC - coordinates of isaac
                 ld (ix + sd3), a
                 ret
 
-enemy_hit:      
+enemy_hit:
                 ; A - direction from which it was hit
                 ld (.dir + 1), a
                 push ix
@@ -637,9 +633,9 @@ enemy_hit:
                 ld (ix + spr_t), 0
 
                 jz .demat
-                
+
 .dir            ld h, 0
-                ld a, 4
+                ld a, 8
                 call move_in_cardinal_direction
 
                 jp .fin
