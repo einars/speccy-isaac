@@ -1,115 +1,70 @@
-dca_impl        macro
+                module Mask
+edc_impl        macro
                 ; MASK: E D C
-                set 7, h
+                ld a, b ; store B into A'
+                ex af, af
 
+                set 7, h
                 ld a, (hl)
+                res 7, h
+
                 cpl
                 or e
                 cpl
-                exx : ld e, a : exx
 
-                inc l
-
-                ld a, (hl)
-                cpl
-                or d
-                cpl
-                exx : ld d, a : exx
-
-                inc l
-
-                ld a, (hl)
-                cpl
-                or c
-                cpl
-                exx : ld c, a : exx
-                ; OFFSCREEN: E' D' C'
-
-                dec l
-                dec l
-                res 7, h
+                ld b, a
 
                 ld a, (hl)
                 and e
-                exx : or e : exx
+                or b
                 ld (hl), a
 
                 inc l
+
+                set 7, h
+                ld a, (hl)
+                res 7, h
+                cpl
+                or d
+                cpl
+
+                ld b, a
+
                 ld a, (hl)
                 and d
-                exx : or d : exx
+                or b
                 ld (hl), a
 
                 inc l
+
+                set 7, h
+                ld a, (hl)
+                res 7, h
+                cpl
+                or c
+                cpl
+
+                ld b, a
+
                 ld a, (hl)
                 and c
-                exx : or c : exx
+                or b
                 ld (hl), a
 
                 dec l
                 dec l
                 
                 LineInc_HL
-
-                endm
-
-dcb_impl        macro
-                ; MASK: C E D
-                set 7, h
-
-                ld a, (hl)
-                cpl
-                or c
-                cpl
-                exx : ld c, a : exx
-
-                inc l
-
-                ld a, (hl)
-                cpl
-                or e
-                cpl
-                exx : ld e, a : exx
-
-                inc l
-
-                ld a, (hl)
-                cpl
-                or d
-                cpl
-                exx : ld d, a : exx
-                ; OFFSCREEN: C' E' D'
-
-                dec l
-                dec l
-                res 7, h
-
-                ld a, (hl)
-                and c
-                exx : or c : exx
-                ld (hl), a
-
-                inc l
-                ld a, (hl)
-                and e
-                exx : or e : exx
-                ld (hl), a
-
-                inc l
-                ld a, (hl)
-                and d
-                exx : or d : exx
-                ld (hl), a
-
-                dec l
-                dec l
-                
-                LineInc_HL
+                ex af, af
+                ld b, a
 
                 endm
 
 
-restore_mask:
+Restore:
+                ; BC = XY of sprite
+                ; HL = sprite
+                ; restores area taken by sprite w/offscreen
                 ld a, c
                 sub 7
                 ld c, a
@@ -119,6 +74,11 @@ restore_mask:
                 ld b, a
 
                 call Util.Scr_of_XY
+
+                ;; restore only pixels under mask
+                ;; pretty and proper, yet slow and complicated
+                ;; tried to just restore 3 chars of offscreen — it is fast — but 
+                ;; tends to be v. ugly when thes sprites overlap
                 ld c, a
                 ld b, (hl)
 
@@ -153,7 +113,7 @@ restore_mask:
 dc0:            
 1               pop de ; mask
 
-                ; MASK: E D
+                ; MASK: E-D
                 set 7, h
 
                 ld a, (hl)
@@ -162,29 +122,25 @@ dc0:
                 cpl
                 ld c, a
 
+                res 7, h
+                ld a, (hl)
+                and e
+                or c
+                ld (hl), a
+
+                set 7, h
                 inc l
 
                 ld a, (hl)
                 cpl
                 or d
                 cpl
-                exx : ld c, a : exx
-                ; offscreen: C C'
-
-                dec l
+                ld c, a
 
                 res 7, h
-
-                ld a, (hl)
-                and e
-                or c
-                ld (hl), a
-
-                inc l
-
                 ld a, (hl)
                 and d
-                exx : or c : exx
+                or c
                 ld (hl), a
 
                 dec l
@@ -199,16 +155,15 @@ dc0:
 dc1:            
 1               pop de ; mask
 
-                ld a, 255
+                ld c, 255
                 scf
                 dup 1
                   rr e
                   rr d
-                  rra
+                  rr c
                 edup
-                ld c, a
 
-                dca_impl
+                edc_impl
                 pop de ; crap
 
                 djnz 1b
@@ -217,16 +172,15 @@ dc1:
 dc2:            
 1               pop de ; mask
 
-                ld a, 255
+                ld c, 255
                 scf
                 dup 2
                   rr e
                   rr d
-                  rra
+                  rr c
                 edup
-                ld c, a
 
-                dca_impl
+                edc_impl
                 pop de ; crap
 
                 djnz 1b
@@ -235,16 +189,15 @@ dc2:
 dc3:            
 1               pop de ; mask
 
-                ld a, 255
+                ld c, 255
                 scf
                 dup 3
                   rr e
                   rr d
-                  rra
+                  rr c
                 edup
-                ld c, a
 
-                dca_impl
+                edc_impl
                 pop de ; crap
 
                 djnz 1b
@@ -253,16 +206,15 @@ dc3:
 dc4:            
 1               pop de ; mask
 
-                ld a, 255
+                ld c, 255
                 scf
                 dup 4
                   rr e
                   rr d
-                  rra
+                  rr c
                 edup
-                ld c, a
 
-                dca_impl
+                edc_impl
                 pop de ; crap
 
                 djnz 1b
@@ -275,16 +227,17 @@ dcret           ld sp, 0
 dc5:            
 1               pop de ; mask
 
-                ld a, 255
+                ld c, d
+                ld d, e
+                ld e, 255
                 scf
                 dup 3
+                  rl c
                   rl d
                   rl e
-                  rla
                 edup
-                ld c, a
 
-                dcb_impl ; offscreen: C E D
+                edc_impl
 
                 pop de ; crap
 
@@ -293,17 +246,17 @@ dc5:
 
 dc6:            
 1               pop de ; mask
-
-                ld a, 255
+                ld c, d
+                ld d, e
+                ld e, 255
                 scf
                 dup 2
+                  rl c
                   rl d
                   rl e
-                  rla
                 edup
-                ld c, a
 
-                dcb_impl ; offscreen: C E D
+                edc_impl
 
                 pop de ; crap
 
@@ -313,16 +266,17 @@ dc6:
 dc7:            
 1               pop de ; mask
 
-                ld a, 255
+                ld c, d
+                ld d, e
+                ld e, 255
                 scf
                 dup 1
+                  rl c
                   rl d
                   rl e
-                  rla
                 edup
-                ld c, a
 
-                dcb_impl ; offscreen: C E D
+                edc_impl ; offscreen: C E D
 
                 pop de ; crap
 
@@ -330,6 +284,7 @@ dc7:
                 jp dcret
 
 
+                endmodule
 
 
 

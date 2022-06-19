@@ -1,4 +1,5 @@
-sprite_draw:
+                module Draw
+Sprite:
                 ; hl - sprite base + 1 (after width, looking at height)
                 ; bc - bottom center -> top left
                 ld a, c
@@ -27,5 +28,6 @@ sprite_draw:
                 ;jp double_column_masked
 
 
-                include "draw-masked-2c.asm"
-                include "draw-masks.asm"
+                include "draw.m2c.inc"
+                include "draw.mask.asm"
+                endmodule

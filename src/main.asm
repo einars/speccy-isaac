@@ -45,7 +45,7 @@ Start:          jr 1f
 .again          
 
                 call BlinkDo
-                ;; call LoadIndicator.FrameStart
+                ;call LoadIndicator.FrameStart
 
                 di
                 call draw_sprites_chaotic
@@ -63,7 +63,7 @@ Start:          jr 1f
                 halt
 
 
-                ;; call LoadIndicator.FrameEnd
+                ;call LoadIndicator.FrameEnd
 
                 ; ld b, 25 : halt : djnz 1b
 
@@ -92,7 +92,7 @@ random:
 Logic:
                 call Isaac.Move
 
-                call update_sprites
+                call Update_sprites
 
                 ld hl, Isaac.y
                 ld b, (hl)
@@ -122,7 +122,7 @@ BlinkDo:        ld a, (bg)
                 ret
 
 DebugLine:
-                ret
+                ;ret
                 push bc
                 out (254), a
                 ld b, 12

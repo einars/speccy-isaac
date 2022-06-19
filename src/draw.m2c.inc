@@ -1,3 +1,5 @@
+; double-column masked draw routine
+
 ma_impl         macro
                 ; mask: C B C'
                 ; sprite: E D E'

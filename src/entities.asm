@@ -302,12 +302,12 @@ hittest_sprites:
 
 n_sprites       db 0
 
-update_sprites:
+Update_sprites:
                 xor a
                 ld (n_sprites), a
                 call map_entities
 
-update_sprite:
+.update_sprite
                 ld hl, n_sprites
                 inc (hl)
                 ld hl, (ix + spr_update)
@@ -316,9 +316,7 @@ update_sprite:
 .smc            call 0
 
                 inc a ; sprite_death
-                jz .handle_death
-
-                ret
+                ret nz
 .handle_death:
                 xor a
 
@@ -337,7 +335,7 @@ dematerialize_sprite:
                 jp nz, .custom
                 ld bc, (ix + spr_prev_pos)
                 ld hl, (ix + spr_sprite)
-                jp restore_mask
+                jp Draw.Mask.Restore
 .custom         
                 ld hl, (ix + spr_sprite)
                 ld (.call + 1), hl
@@ -355,32 +353,29 @@ materialize_sprite:
                 and Custom_draw
                 jp nz, materialize_sprite_custom
 
-.no_skip
-                ld a, (ix + spr_x)
-                sub (ix + spr_prev_x)
-                jnz .changed
-                
+                ;ld a, (ix + spr_x)
+                ;sub (ix + spr_prev_x)
+                ;jnz .changed
+                ;
 .no_change_x
-                ld a, (ix + spr_y)
-                cp (ix + spr_prev_y)
-                jp nz, .changed
+                ;ld a, (ix + spr_y)
+                ;cp (ix + spr_prev_y)
+                ;jp z, .draw ; no mask restore
 
                 ; draw occassionally
-
-                jp .draw
+                ;jp .draw
 
 .changed
-                ld a, Color.white
                 ld bc, (ix + spr_prev_pos)
                 ld hl, (ix + spr_sprite)
-                call restore_mask
+                call Draw.Mask.Restore
 
 
 .draw
                 ld bc, (ix + spr_pos)
                 ld (ix + spr_prev_pos), bc
                 ld hl, (ix + spr_sprite)
-                jp sprite_draw
+                jp Draw.Sprite
 
 materialize_sprite_custom:
                 ld bc, (ix + spr_prev_pos)
