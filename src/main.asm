@@ -25,6 +25,7 @@ Start:          jr 1f
                 ld a, Color.black
                 out (254), a
 
+                call text.Debug
 
                 ; shold always be first
                 ld bc, 0x3545
@@ -154,6 +155,7 @@ tick:           db 0
                 include "isaac.asm"
                 include "draw.asm"
                 include "keyboard.asm"
+                include "text.asm"
 
                 include "entities.asm"
 

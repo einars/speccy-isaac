@@ -1,5 +1,11 @@
                 module Util
 
+; PQ — internal isaac viewbox coordinates,
+; 0 - top left of isaac viewbox
+; typically, 
+;    B=Q, ie Y, vertical coord
+;    C = P, ie X, horizontal coord
+
 PQ_of_BPQ:
                 ; A - pq byte
                 ; out: BC - pq
@@ -20,7 +26,7 @@ PQ_of_BPQ:
 
 XY_of_PQ:
                 ; BC - pq
-                ; out: BC - screen coordinates (not addr)
+                ; out: BC - screen coordinates (not addr!)
 
                 ld a, b
                 inc a

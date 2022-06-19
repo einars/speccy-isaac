@@ -11,7 +11,7 @@ Build:
                 ld hl, Offscreen
                 ld de, room
                 ld a, l
-                add (32 * Room.TopReserve)
+                add 32 * Room.TopReserve
                 ld l, a
 
                 ld c, Room.H
@@ -146,9 +146,23 @@ draw_room_tile:
 SetAttributes:
                 ld hl, 0x5800
 
-                ld a, Bg.black + Color.white
-                ld b, 32 * (Room.TopReserve - 1)
+                assert Room.TopReserve = 4
+                ;; ld b, 32 * (Room.TopReserve - 1)
+                ;; call fill
+
+
+                ld a, Bg.black + Color.red
+                ld b, 32
                 call fill
+
+                ld a, Bg.black + Color.yellow + Color.bright
+                ld b, 32
+                call fill
+
+                ld a, Bg.black + Color.white + Color.bright
+                ld b, 32
+                call fill
+
 
                 ; avoid cleaning the single line the isaac's head pops out
                 ld a, Bg.black + Color.white + Color.bright

@@ -7,4 +7,9 @@ breakpoint_addr () {
   grep breakpoint ./build/isaac.sym | awk '{ print $3 }'
 }
 
-fuse ./build/isaac.sna --debugger-command="break $(breakpoint_addr)"
+breakpoint=$(breakpoint_addr)
+if [ "$breakpoint" == "" ]; then
+  fuse ./build/isaac.sna
+else
+  fuse ./build/isaac.sna --debugger-command="break $(breakpoint_addr)"
+fi
