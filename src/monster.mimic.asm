@@ -4,8 +4,8 @@ Appear:         ; BC - coordinates
                 ld de, nm_mimic_f0
                 ld hl, Mimic.Update
                 ld a, s_monster
-                call appear
-                ld (ix + spr_ticks), a
+                call Entity.Appear
+                ld (ix + spr_ticks), 12
                 ld (ix + spr_health), 7
                 xor a
                 ld (ix + sd0), a
@@ -16,7 +16,8 @@ Appear:         ; BC - coordinates
 
 
 Update:
-                call entity_tick
+                call Entity.Tick
+
                 inc (ix + sd3)
                 ld a, (ix + sd3)
                 and 7
@@ -26,11 +27,11 @@ Update:
                 and 1
                 ld (ix + sd0), a
                 jz 1f
-                ld hl, mimic_f0
+                ld hl, nm_mimic_f0
                 ld (ix + spr_sprite), hl
                 jr 2f
 
-1               ld hl, mimic_f1
+1               ld hl, nm_mimic_f1
                 ld (ix + spr_sprite), hl
 2
                 ld a, (ix + sd1) ; distance to run
@@ -42,7 +43,7 @@ Update:
 
                 ld h, (ix + sd2)
                 ld a, 1
-                call move_in_cardinal_direction
+                call Entity.Move_in_cardinal_direction
                 jz .moved
 
 .choose_new_direction

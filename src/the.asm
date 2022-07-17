@@ -43,6 +43,8 @@ Bg:
                 display "top:           ",/A, $
                 display "everything:    ",/A, ($ - Start)
                 display "---"
+                display "spritelist: ",/A, (spritelist)
+                display "draw routines: ",/D, (Sprite.TraceEnd - Sprite.TraceStart)
                 display "alphabet gfx:  ",/D, (text.Alphabet.TraceEnd - text.Alphabet.TraceStart)
                 display "code:          ",/D, (EntitiesStart - Start), " (alphabet gfx included)"
                 display "free at least: ",/D, (0xc000 - $)

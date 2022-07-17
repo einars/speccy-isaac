@@ -1,4 +1,5 @@
 ; double-column masked draw routine
+                module Masked_double
 
 ma_impl         macro
                 ; mask: C B A
@@ -52,14 +53,26 @@ mb_impl         macro
                 LineInc_HL
                 endm
 
-Draw_masked_double:
-                ; HL - sprite data (actual mask+sprite, without height-byte)
-                ; DE - screen address
-                ; B - height
-                ; C - bit offset
+Draw:
+                ; BC = XY of sprite
+                ; HL = sprite
 
                 ; on return:
                 ; everything messed up
+
+                ld a, c
+                sub 7
+                ld c, a
+                ld a, b
+                sub (hl)
+                inc a
+                ld b, a
+
+                call Util.Scr_of_XY
+
+                ld c, a
+                ld b, (hl)
+                inc hl
 
                 ld a, c
                 add c
@@ -304,3 +317,4 @@ m7
                 djnz 1b
                 jp mret
 
+                endmodule

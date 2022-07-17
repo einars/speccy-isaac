@@ -1,10 +1,10 @@
                 module Spider
 
 Appear:         ; BC - coordinates
-                ld de, spider_f0
+                ld de, nm_spider_f0
                 ld hl, Spider.Update
                 ld a, s_monster
-                call appear
+                call Entity.Appear
                 xor a
                 ld (ix + spr_health), 3
                 ld (ix + sd0), a ; frame, 1/0
@@ -15,7 +15,7 @@ Appear:         ; BC - coordinates
 
 
 Update:
-                call entity_tick
+                call Entity.Tick
                 ret z
 
                 inc (ix + sd1) ; increase leg frame switcher
@@ -27,9 +27,9 @@ Update:
                 and 1
                 ld (ix + sd0), a
                 ld (ix + sd1), 0
-                ld hl, spider_f0
+                ld hl, nm_spider_f0
                 jz .o
-                ld hl, spider_f1
+                ld hl, nm_spider_f1
 .o              ld (ix + spr_sprite), hl
 
 .legs_done

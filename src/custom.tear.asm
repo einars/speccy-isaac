@@ -22,7 +22,7 @@ Spawn
                 ld de, Tear.Draw
                 ld hl, Tear.Update
                 ld a, s_isaac_tear
-                call appear
+                call Entity.Appear
 
                 ld a, (Isaac.facing)
                 ld (ix + sd0), a
@@ -37,7 +37,7 @@ n_tears_on_screen:
 .count          ld a, 0
                 ret
 .tears_count_impl
-                call map_entities_no_isaac
+                call Entity.Map_no_isaac
                 ld a, (ix)
                 cp s_isaac_tear
                 ret nz
@@ -144,14 +144,13 @@ Draw:
 Update:
                 ld h, (ix + sd0)
                 ld a, 2
-                ;call move_in_cardinal_direction
-                call move_in_cardinal_direction
+                call Entity.Move_in_cardinal_direction
                 jnz .die ; hit the wall
-                call ht_enemy
+                call Entity.Hittest_monsters
                 ret z
                 ; i die and the enemy gets hit as well
                 ld a, (ix + sd0) ; direction
-                call enemy_hit
+                call Entity.When_monster_hit
 .die
                 ld a, sprite_death
                 ret

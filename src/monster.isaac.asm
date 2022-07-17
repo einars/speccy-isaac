@@ -1,35 +1,66 @@
                 module Isaac
+Appear:
+                ; BC - coordinates of isaac
 
-pos equ spritelist + spr_pos
-x equ spritelist + spr_x
-y equ spritelist + spr_y
+                ld a, c
+                ld (Isaac.x), a
+                ld a, b
+                ld (Isaac.y), a
 
-;isaac_pos
-;isaac_x db 0
-;isaac_y db 0
+                ld de, isaac_down_f0
+                ld hl, Isaac.Update
+                ld a, s_isaac
+                call Entity.Appear
 
-speed db 1
+                ld (ix + sd0), 0 ; frame, 1 vs 0
+                ld (ix + sd1), 0 ; frame counter
+                ret
 
-; it would've been better if these would live in spritelist at spd0..spdx
-facing db LEFT
-step db 0
-step_counter db 0
-step_max db 5
+spl_isaac
+                dw isaac_up_f0
+                dw isaac_up_f1
+                dw isaac_up_f0
+                dw isaac_up_f2
+                dw isaac_down_f0
+                dw isaac_down_f1
+                dw isaac_down_f0
+                dw isaac_down_f2
+                dw isaac_left_f0
+                dw isaac_left_f1
+                dw isaac_left_f0
+                dw isaac_left_f2
+                dw isaac_right_f0
+                dw isaac_right_f1
+                dw isaac_right_f0
+                dw isaac_right_f2
 
-tear_limit db 3
+Update:
+                ld hl, Isaac.step
+                ld a, (Isaac.facing)
+                rlca
+                rlca
+                add (hl) ; facing * 4 + step
+                rlca ; x2 (list of words)
+                ld hl, spl_isaac
+                Add_HL_A
+                ld a, (hl)
+                inc hl
+                ld h, (hl)
+                ld l, a
 
-fire_timer db 0
-fire_frequency db 21
-firing db 0
-
-
-
-
+                ld (ix + spr_sprite), hl
+                ;ld a, (Isaac.x)
+                ;ld (ix + spr_x), a
+                ;ld a, (Isaac.y)
+                ;ld (ix + spr_y), a
+                xor a
+                ret
 
 OnHit:
                 ld a, Color.red
                 ;out (254), a
                 ret
+
 
 tmp_junk db 0
 
@@ -61,6 +92,9 @@ Move:
                 jp .post_fire
 
 .fire_d
+                ld a, (keyboard.fire_direction)
+                ld (Isaac.facing), a
+
                 ld a, (Isaac.fire_timer)
                 or a
                 jnz .post_fire
@@ -68,8 +102,6 @@ Move:
                 ld a, (Isaac.fire_frequency)
                 ld (Isaac.fire_timer), a
                 
-                ld a, (keyboard.fire_direction)
-                ld (Isaac.facing), a
                 call Tear.Spawn
                 jp .post_fire
 
@@ -215,5 +247,29 @@ ApplyMovement:
                 
 
 
-                endmodule
+pos  equ spritelist + spr_pos
+x    equ spritelist + spr_x
+y    equ spritelist + spr_y
 
+;isaac_pos
+;isaac_x db 0
+;isaac_y db 0
+
+speed db 1
+
+; it would've been better if these would live in spritelist at spd0..spdx
+facing db LEFT
+step db 0
+step_counter db 0
+step_max db 5
+
+tear_limit db 3
+
+fire_timer db 0
+fire_frequency db 21
+firing db 0
+
+
+
+
+                endmodule

@@ -29,15 +29,15 @@ Start:          jr 1f
 
                 ; shold always be first
                 ld bc, 0x3545
-                call isaac_appear
+                call Isaac.Appear
 
 
-                ;call Scenes.Isaacs2
-                call Scenes.Isaacs3
-                ;call Scenes.Isaacs1
-                ;call Scenes.Isaacs3
-                call Scenes.Spiders3
-                ;call Scenes.Spiders2
+                ;call Scenes.Mimic2
+                ; call Scenes.Mimic3
+                call Scenes.Mimic2
+                call Scenes.Mimic3
+                call Scenes.Spider3
+                call Scenes.Spider2
 
                 ei
                 halt
@@ -51,7 +51,7 @@ Start:          jr 1f
                 ;call LoadIndicator.FrameStart
 
                 di
-                call draw_sprites_chaotic
+                call Entity.Draw_all_chaotic
                 ;call draw_sprites_all
 
                 ld a, Color.green
@@ -98,14 +98,14 @@ random:
 Logic:
                 call Isaac.Move
 
-                call Update_sprites
+                call Entity.Update_all
 
                 ld hl, Isaac.y
                 ld b, (hl)
                 ld hl, Isaac.x
                 ld c, (hl)
                 ld hl, Isaac.OnHit
-                call hittest_sprites
+                call Entity.Run_isaac_hittest
                 ret
 
 bg              db 0
@@ -158,17 +158,17 @@ InterruptRoutine:
 tick:           db 0
 
                 include "loadindicator.asm"
-                include "isaac.asm"
                 include "sprite.asm"
                 include "keyboard.asm"
                 include "text.asm"
 
 EntitiesStart:  db 0
 
-                include "entities.asm"
+                include "entity.asm"
 
                 include "monster.spider.asm"
                 include "monster.mimic.asm"
+                include "monster.isaac.asm"
 
                 include "gen.sprites.inc"
                 include "sprites.experimental.inc"

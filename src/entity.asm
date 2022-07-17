@@ -1,6 +1,5 @@
 
 
-max_sprites     equ 32
 
 
 // sample sprite layout for moving things around
@@ -9,9 +8,14 @@ map_type db 0
 map_x db 0
 map_y db 0
 map_sprite dw 0
+
+map_t db 0
+map_ticks db 0
+
 map_health db 0
 map_prev_x db 0
 map_prev_y db 0
+map_prev_sprite dw 0
 map_update dw 0
 map_sd0 db 0
 map_sd1 db 0
@@ -19,9 +23,10 @@ map_sd2 db 0
 map_sd3 db 0
 map_sd4 db 0
 map_sd5 db 0
+;map_sd4 db 0
+;map_sd5 db 0
 sprite_length equ $ - map_base
 
-                assert (sprite_length == 16), The sprite area must be exactly 16
                 // some fields are accessed linearily
                 assert ((map_type - map_base) == 0), Do not move entity type around
                 assert ((map_x - map_base) == 1), Do not move entity position around
@@ -37,7 +42,10 @@ spr_health      equ map_health - map_base
 spr_prev_x      equ map_prev_x - map_base
 spr_prev_y      equ map_prev_y - map_base
 spr_prev_pos    equ spr_prev_x
+spr_prev_sprite equ map_prev_sprite - map_base
 spr_update      equ map_update - map_base
+spr_t           equ map_t - map_base
+spr_ticks       equ map_ticks - map_base
 sd0             equ map_sd0 - map_base
 sd1             equ map_sd1 - map_base
 sd2             equ map_sd2 - map_base
@@ -46,8 +54,6 @@ sd4             equ map_sd4 - map_base
 sd5             equ map_sd5 - map_base
 
 
-spr_t           equ sprite_length - 2
-spr_ticks       equ sprite_length - 1
 tick_threshold  equ 12
  ; custom tick counter for updates more seldom than every frame
  ; use by calling entity_tick.
@@ -56,8 +62,6 @@ tick_threshold  equ 12
  ;  - 6   - every second frame
  ;  - 4   - every third frame
  ; etc
-
-spr_length      equ 16 ; sometimes important, search for spr_length
 
 sprite_death  equ 0xff
 
@@ -69,8 +73,10 @@ s_monster       equ 1
 s_isaac_tear    equ (0x02 or Custom_draw or Every_frame)
 s_isaac         equ (0x0f or Every_frame)
 
+                module Entity
 
-appear:
+
+Appear:
                 ; A - spr_type
                 ; BC - at what pos
                 ; DE - pointer to sprite
@@ -102,6 +108,7 @@ appear:
                 ld (ix + spr_pos), bc
                 ld (ix + spr_prev_pos), bc
                 ld (ix + spr_sprite), de
+                ld (ix + spr_prev_sprite), de
                 ld (ix + spr_update), hl
                 ret
 
@@ -111,14 +118,14 @@ appear:
                 ;ld (ix + spr_length), 255
                 jp 1b
 
-map_entities_no_isaac:
+Map_no_isaac:
                 pop hl
-                ld (map_entities.smc + 1), hl
+                ld (Map.smc + 1), hl
                 ld ix, spritelist + spr_length ; by convention, isaac is first
-                jp map_entities.reentry
+                jp Map.reentry
 
 
-map_entities:
+Map:
                 ; stack — function to call for all sprites
                 ; IX will get the sprite pointer
                 pop hl
@@ -140,7 +147,7 @@ map_entities:
 
 
 
-map_entities_noix:
+Map_noix:
                 ; stack — function to call for all sprites
                 ;      IX will get the sprite pointer
                 ;      Do not touch the alt. regs there thx
@@ -163,7 +170,7 @@ map_entities_noix:
                 Add_HL_A
                 jp 1b
 
-entity_tick:
+Tick:
                 ; returns:
                 ; Z = skip this turn
                 ; NZ = do your thing
@@ -185,13 +192,13 @@ entity_tick:
 draw_sprites_all:
                 ld a, 7
                 call DebugLine
-                call map_entities
-                call materialize_sprite
+                call Map
+                call Entity.Materialize
                 ld a, Color.red
                 call DebugLine
                 ret
 
-draw_sprites_chaotic:
+Draw_all_chaotic:
 .sprites_per_frame equ 2
 
                 call .draw_important_stuff
@@ -219,7 +226,7 @@ draw_sprites_chaotic:
 
                 ld a, Color.white
                 out (254), a
-                call materialize_sprite
+                call Entity.Materialize
                 ld a, Color.black
                 out (254), a
 
@@ -245,19 +252,19 @@ draw_sprites_chaotic:
 
 .draw_important_stuff:
                 ; isaac and his tears are drawn every frame
-                call map_entities_noix
+                call Map_noix
                 ld a, (hl)
                 and Every_frame
                 ret z
 .mat            push hl
                 pop ix
-                call materialize_sprite
+                call Entity.Materialize
 
                 ret
 
 
 
-hittest_sprites:
+Run_isaac_hittest:
                 ; bc - (isaac) coords
                 ; hl - on hit success
 
@@ -266,7 +273,7 @@ hittest_sprites:
                 ld h, b
                 ld (.bc + 1), hl
 
-                call map_entities_no_isaac
+                call Map_no_isaac
 
                 ld a, (ix + spr_x)
 .bc             ld bc, 0
@@ -299,10 +306,10 @@ hittest_sprites:
 
 n_sprites       db 0
 
-Update_sprites:
+Update_all:
                 xor a
                 ld (n_sprites), a
-                call map_entities
+                call Map
 
 .update_sprite
                 ld hl, n_sprites
@@ -317,21 +324,16 @@ Update_sprites:
 .handle_death:
                 xor a
 
-                ; dematerialize_sprite
-                ;call dematerialize_sprite
-                ;ret
-
-dematerialize_sprite:
+Dematerialize:
                 ; IX = sprite
                 ld a, (ix)
-
-                ld (ix + 0), a ; mark entity as dead
 
                 ld (ix + 0), 0 ; mark entity as dead
                 and Custom_draw
                 jp nz, .custom
                 ld bc, (ix + spr_prev_pos)
-                ld hl, (ix + spr_sprite)
+                ld hl, (ix + spr_prev_sprite)
+                ;ld hl, (ix + spr_sprite)
                 jp Sprite.Undraw
 .custom
                 ld hl, (ix + spr_sprite)
@@ -342,34 +344,21 @@ dematerialize_sprite:
 
 
 
-materialize_sprite:
-
+Materialize:
                 ; IX = HL = sprite
-
-
                 ld a, (hl)
                 and Custom_draw
                 jp nz, materialize_sprite_custom
 
-                ld a, (ix + spr_x)
-                sub (ix + spr_prev_x)
-                jnz .changed
-
-.no_change_x
-                ld a, (ix + spr_y)
-                cp (ix + spr_prev_y)
-                jp z, .draw ; no mask restore
-
-.changed
                 ld bc, (ix + spr_prev_pos)
-                ld hl, (ix + spr_sprite)
+                ld hl, (ix + spr_prev_sprite)
                 call Sprite.Undraw
 
 
-.draw
                 ld bc, (ix + spr_pos)
-                ld (ix + spr_prev_pos), bc
                 ld hl, (ix + spr_sprite)
+                ld (ix + spr_prev_pos), bc
+                ld (ix + spr_prev_sprite), hl
                 jp Sprite.Draw
 
 materialize_sprite_custom:
@@ -387,7 +376,7 @@ materialize_sprite_custom:
 
 
 
-move_in_cardinal_direction:
+Move_in_cardinal_direction:
                 ; ix = sprite
                 ; h = direction (UP / DOWN / LEFT / RIGHT
                 ; a = amount
@@ -427,7 +416,7 @@ move_in_cardinal_direction:
                 ret
 
 
-ht_enemy
+Hittest_monsters:
                 ; bc - coordinates
                 push de
                 ld hl, bc
@@ -493,67 +482,10 @@ ht_enemy
 
 
 
-isaac_update:
-                ld hl, Isaac.step
-                ld a, (Isaac.facing)
-                rlca
-                rlca
-                add (hl) ; facing * 4 + step
-                rlca ; x2 (list of words)
-                ld hl, spl_isaac
-                Add_HL_A
-                ld a, (hl)
-                inc hl
-                ld h, (hl)
-                ld l, a
-
-                ld (ix + spr_sprite), hl
-                ;ld a, (Isaac.x)
-                ;ld (ix + spr_x), a
-                ;ld a, (Isaac.y)
-                ;ld (ix + spr_y), a
-                xor a
-                ret
 
 
 
-
-spl_isaac
-                dw isaac_up_f0
-                dw isaac_up_f1
-                dw isaac_up_f0
-                dw isaac_up_f2
-                dw isaac_down_f0
-                dw isaac_down_f1
-                dw isaac_down_f0
-                dw isaac_down_f2
-                dw isaac_left_f0
-                dw isaac_left_f1
-                dw isaac_left_f0
-                dw isaac_left_f2
-                dw isaac_right_f0
-                dw isaac_right_f1
-                dw isaac_right_f0
-                dw isaac_right_f2
-
-
-isaac_appear:   ; BC - coordinates of isaac
-
-                ld a, c
-                ld (Isaac.x), a
-                ld a, b
-                ld (Isaac.y), a
-
-                ld de, isaac_down_f0
-                ld hl, isaac_update
-                ld a, s_isaac
-                call appear
-
-                ld (ix + sd0), 0 ; frame, 1 vs 0
-                ld (ix + sd1), 0 ; frame counter
-                ret
-
-enemy_hit:
+When_monster_hit:
                 ; A - direction from which it was hit
                 ld (.dir + 1), a
                 push ix
@@ -575,16 +507,22 @@ enemy_hit:
 
 .dir            ld h, 0
                 ld a, 8
-                call move_in_cardinal_direction
+                call Move_in_cardinal_direction
 
                 jp .fin
 
-.demat          call dematerialize_sprite
+.demat          call Dematerialize
                 ld a, Color.red
                 call Blink
 .fin
                 pop ix
                 ret
 
+                endmodule
+
+
+spr_length      equ 32 ; sometimes important, search for spr_length
+max_sprites     equ 32
                 align 256
 spritelist:     ds (max_sprites * spr_length), 255
+

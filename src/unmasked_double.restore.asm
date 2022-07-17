@@ -1,20 +1,20 @@
-md_edc_impl     macro
-                ; MASK: E D C
-                ld a, b ; store B into A'
-                ex af, af
+ud_restore       macro
+                ; inverse mask: E D C
+                ld a, b
+                ld (.smc + 1), a
 
                 set 7, h
                 ld a, (hl)
+                and e
+                ld b, a
+
                 res 7, h
 
+
+                ld a, (hl)
                 cpl
                 or e
                 cpl
-
-                ld b, a
-
-                ld a, (hl)
-                and e
                 or b
                 ld (hl), a
 
@@ -22,15 +22,14 @@ md_edc_impl     macro
 
                 set 7, h
                 ld a, (hl)
+                and d
+                ld b, a
+
                 res 7, h
+                ld a, (hl)
                 cpl
                 or d
                 cpl
-
-                ld b, a
-
-                ld a, (hl)
-                and d
                 or b
                 ld (hl), a
 
@@ -38,15 +37,14 @@ md_edc_impl     macro
 
                 set 7, h
                 ld a, (hl)
+                and c
+                ld b, a
+
                 res 7, h
+                ld a, (hl)
                 cpl
                 or c
                 cpl
-
-                ld b, a
-
-                ld a, (hl)
-                and c
                 or b
                 ld (hl), a
 
@@ -54,16 +52,52 @@ md_edc_impl     macro
                 dec l
                 
                 LineInc_HL
-                ex af, af
-                ld b, a
+.smc            ld b, 0
 
                 endm
-                module Masked_double
+
+                module Unmasked_double
+TurboRestore:
+                ; fast restore, three chars wide brutal
+                ; looks ugly on overap, though
+                ld a, c
+                sub 7
+                ld c, a
+                ld a, b
+                sub (hl)
+                ld b, a
+                call Util.Scr_of_XY
+                ld c, a
+                ld b, (hl)
+                ex hl, de
+
+1
+                ld e, l
+                ld a, h
+                or 0xc0
+                ld d, a
+                ld a, (de)
+                ld (hl), a
+                inc e
+                inc l
+                ld a, (de)
+                ld (hl), a
+                inc e
+                inc l
+                ld a, (de)
+                ld (hl), a
+                dec l
+                dec l
+                LineInc_HL
+                djnz 1b
+                ret
+
+
 
 
 Restore:
-                inc b
-                jp Sprite.Unmasked_double.TurboRestore
+                jp TurboRestore
+
                 ; BC = XY of sprite
                 ; HL = sprite
                 ; restores area taken by sprite w/offscreen
@@ -72,15 +106,10 @@ Restore:
                 ld c, a
                 ld a, b
                 sub (hl)
-                inc a
                 ld b, a
 
                 call Util.Scr_of_XY
 
-                ;; restore only pixels under mask
-                ;; pretty and proper, yet slow and complicated
-                ;; tried to just restore 3 chars of offscreen — it is fast — but 
-                ;; tends to be v. ugly when thes sprites overlap
                 ld c, a
                 ld b, (hl)
 
@@ -111,45 +140,10 @@ Restore:
                 jp dc6
                 jp dc7
 
-
 dc0:            
 1               pop de ; mask
-
-                ; MASK: E-D
-                set 7, h
-
-                ld a, (hl)
-                cpl
-                or e
-                cpl
-                ld c, a
-
-                res 7, h
-                ld a, (hl)
-                and e
-                or c
-                ld (hl), a
-
-                set 7, h
-                inc l
-
-                ld a, (hl)
-                cpl
-                or d
-                cpl
-                ld c, a
-
-                res 7, h
-                ld a, (hl)
-                and d
-                or c
-                ld (hl), a
-
-                dec l
-                
-                LineInc_HL
-
-                pop de ; crap
+                ld c, 0
+                ud_restore
 
                 djnz 1b
                 jp dcret
@@ -157,16 +151,15 @@ dc0:
 dc1:            
 1               pop de ; mask
 
-                ld c, 255
-                scf
+                xor a
                 dup 1
                   rr e
                   rr d
-                  rr c
+                  rra
                 edup
+                ld c, a
 
-                md_edc_impl
-                pop de ; crap
+                ud_restore
 
                 djnz 1b
                 jp dcret
@@ -174,33 +167,31 @@ dc1:
 dc2:            
 1               pop de ; mask
 
-                ld c, 255
-                scf
+                xor a
                 dup 2
                   rr e
                   rr d
-                  rr c
+                  rra
                 edup
+                ld c, a
 
-                md_edc_impl
-                pop de ; crap
+                ud_restore
 
                 djnz 1b
                 jp dcret
 
 dc3:            
-1               pop de ; mask
+1               pop de
 
-                ld c, 255
-                scf
+                xor a
                 dup 3
                   rr e
                   rr d
-                  rr c
+                  rra
                 edup
+                ld c, a
 
-                md_edc_impl
-                pop de ; crap
+                ud_restore
 
                 djnz 1b
                 jp dcret
@@ -208,16 +199,15 @@ dc3:
 dc4:            
 1               pop de ; mask
 
-                ld c, 255
-                scf
+                xor a
                 dup 4
                   rr e
                   rr d
-                  rr c
+                  rra
                 edup
+                ld c, a
 
-                md_edc_impl
-                pop de ; crap
+                ud_restore
 
                 djnz 1b
 ;                jp dcret
@@ -227,62 +217,59 @@ dcret           ld sp, 0
                 ret
 
 dc5:            
-1               pop de ; mask
+1               pop de
 
                 ld c, d
                 ld d, e
-                ld e, 255
-                scf
+                xor a
                 dup 3
                   rl c
                   rl d
-                  rl e
+                  rla
                 edup
 
-                md_edc_impl
+                ld e, a
+                ud_restore
 
-                pop de ; crap
 
                 djnz 1b
                 jp dcret
 
 dc6:            
-1               pop de ; mask
+1               pop de
                 ld c, d
                 ld d, e
-                ld e, 255
-                scf
+                xor a
                 dup 2
                   rl c
                   rl d
-                  rl e
+                  rla
                 edup
 
-                md_edc_impl
+                ld e, a
+                ud_restore
 
-                pop de ; crap
 
                 djnz 1b
                 jp dcret
 
 dc7:            
-1               pop de ; mask
+1               pop de
 
                 ld c, d
                 ld d, e
-                ld e, 255
-                scf
+                xor a
                 dup 1
                   rl c
                   rl d
-                  rl e
+                  rla
                 edup
 
-                md_edc_impl
-
-                pop de ; crap
+                ld e, a
+                ud_restore
 
                 djnz 1b
                 jp dcret
 
                 endmodule
+

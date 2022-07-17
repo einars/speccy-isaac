@@ -1,74 +1,53 @@
                 module Scenes
 
-Isaacs:
-                ld bc, 0x3080
-                call Mimic.Appear
-Isaacs7:
+Mimic7:
 
                 ld bc, 0x4071
                 call Mimic.Appear
-Isaacs6:
+Mimic6:
 
                 ld bc, 0x5082
                 call Mimic.Appear
-Isaacs5:
+Mimic5:
 
                 ld bc, 0x6093
                 call Mimic.Appear
-Isaacs4:
+Mimic4:
 
                 ld bc, 0x70a4
                 call Mimic.Appear
-Isaacs3:
+Mimic3:
 
                 ld bc, 0x80b5
                 call Mimic.Appear
 
-Isaacs2:
+Mimic2:
 
                 ld bc, 0x90c6
                 call Mimic.Appear
 
-Isaac
-Isaacs1
+Mimic1:
+Mimic:
                 ld bc, 0xa0d7
                 call Mimic.Appear
                 ret
 
 
-;Spiders:
-;
-;                ld hl, spider_init
-;                ld bc, 0x5530
-;                call Spider.Appear
-;
-;                ld hl, spider_init
-;                ld bc, 0x5530
-;                call Spider.Appear
-;
-;                ld hl, spider_init
-;                ld bc, 0x6530
-;                call Spider.Appear
-;
-;                ld hl, spider_init
-;                ld bc, 0x7530
-;                call Spider.Appear
-;
-Spiders5
+Spider5
                 ld bc, 0x8530
                 call Spider.Appear
-Spiders4
+Spider4
                 ld bc, 0x7060
                 call Spider.Appear
-Spiders3
+Spider3
                 ld bc, 0x7070
                 call Spider.Appear
 
-Spiders2
+Spider2
                 ld bc, 0x7080
                 call Spider.Appear
 
-Spiders1
+Spider1
 Spider
                 ld bc, 0x7090
                 call Spider.Appear
