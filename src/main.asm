@@ -32,12 +32,14 @@ Start:          jr 1f
                 call Isaac.Appear
 
 
-                ;call Scenes.Mimic2
-                ; call Scenes.Mimic3
-                call Scenes.Mimic2
-                call Scenes.Mimic3
-                call Scenes.Spider3
-                call Scenes.Spider2
+                call Scenes.Mimic
+                call Scenes.Mimic
+
+                call Scenes.Spider
+                call Scenes.Spider
+
+                call Scenes.Fly
+                call Scenes.Fly
 
                 ei
                 halt
@@ -79,6 +81,9 @@ Start:          jr 1f
 
 seed            dw 1245
 random:        
+                ; kills de
+                ; result in hl
+                push de
                 ld de, (seed)
                 ld a, d
                 ld h, e
@@ -93,6 +98,8 @@ random:
                 jnc 1f
                 inc hl
 1               ld (seed), hl
+                pop de
+                ld a, l
                 ret
 
 Logic:
@@ -127,8 +134,12 @@ BlinkDo:        ld a, (bg)
                 ld (bg), a 
                 ret
 
+DebugBorder:
+                ret
+                out (254), a
+                ret
 DebugLine:
-                ;ret
+                ret
                 push bc
                 out (254), a
                 ld b, 12
@@ -169,10 +180,12 @@ EntitiesStart:  db 0
                 include "monster.spider.asm"
                 include "monster.mimic.asm"
                 include "monster.isaac.asm"
+                include "monster.fly.asm"
 
                 include "gen.sprites.inc"
                 include "sprites.experimental.inc"
                 include "custom.tear.asm"
+                include "custom.poof.asm"
 
 EntitiesEnd:    db 0
 

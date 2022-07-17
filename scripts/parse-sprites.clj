@@ -103,7 +103,7 @@
                           (mapv
                            (fn [[pix mask]] (column-to-string pix mask))
                            (partition-all 2 (interleave pixels masks)))))]
-      (format "%s:\tdb (Sprite.Flags.double_column | Sprite.Flags.masked)\n%s\n                db 0" label asm)))) ; end flag
+      (format "%s:\tdb (Sprite.Flags.double_column | Sprite.Flags.masked)\n%s" label asm)))) ; end flag
 
 (defn materialize [sprites f]
   (spit f (str/join "\n\n" (map sprite-to-string sprites))))

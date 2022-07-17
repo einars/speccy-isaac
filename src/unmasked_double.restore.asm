@@ -96,7 +96,7 @@ TurboRestore:
 
 
 Restore:
-                jp TurboRestore
+                ;jp TurboRestore
 
                 ; BC = XY of sprite
                 ; HL = sprite

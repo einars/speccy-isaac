@@ -62,8 +62,9 @@ md_edc_impl     macro
 
 
 Restore:
-                inc b
-                jp Sprite.Unmasked_double.TurboRestore
+                ;inc b
+                ;jp Sprite.Unmasked_double.TurboRestore
+
                 ; BC = XY of sprite
                 ; HL = sprite
                 ; restores area taken by sprite w/offscreen

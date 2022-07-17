@@ -37,8 +37,8 @@ n_tears_on_screen:
 .count          ld a, 0
                 ret
 .tears_count_impl
-                call Entity.Map_no_isaac
-                ld a, (ix)
+                call Entity.Map
+                ld a, (hl)
                 cp s_isaac_tear
                 ret nz
                 ld hl, .count + 1
@@ -66,21 +66,23 @@ adjust_for_head:
                 ret
 
                 align 8
-.adjustments    db  0, -10; up
+.adjustments    db  0, 0; up
                 db  0,  1 ; down
-                db -5,  -10 ; left
-                db  5,  -10 ; right
+                db -5,  0; left
+                db  5,  0; right
                 
+height_adjustment equ 10
 
 
 Draw:
                 ; BC - coordinates
-                ;ld bc, (ix + spr_pos)
                 ; A = flag. 0 = clear, 1 = draw
+
                 or a
                 jz .clear
 
                 ld a, b
+                sub Tear.height_adjustment
                 and 0xfe ; ensure bullet is in a single char
                 ld b, a
 
@@ -104,6 +106,7 @@ Draw:
                 ret
 .clear
                 ld a, b
+                sub Tear.height_adjustment
                 and 0xfe ; ensure bullet is in a single char
                 ld b, a
 
@@ -146,7 +149,7 @@ Update:
                 ld a, 2
                 call Entity.Move_in_cardinal_direction
                 jnz .die ; hit the wall
-                call Entity.Hittest_monsters
+                call Hittest_monsters
                 ret z
                 ; i die and the enemy gets hit as well
                 ld a, (ix + sd0) ; direction
@@ -154,6 +157,77 @@ Update:
 .die
                 ld a, sprite_death
                 ret
+
+
+area_around_base equ 12
+Hittest_monsters:
+                ; bc - coordinates
+                push de
+                ld hl, bc
+                ld (.bc + 1), hl
+
+                ld hl, spritelist + spr_length
+.loop
+                ld a, (hl)
+                cp 255
+                jz .nothing_hit
+                cp s_monster
+                jnz .next
+
+                inc hl
+                ld a, (hl) ; x
+.bc             ld bc, 0
+                ; 10 pixels wide area around base
+                add area_around_base / 2
+                cp c
+                jc .no_hit_dec1
+                sub area_around_base
+                cp c
+                jnc .no_hit_dec1
+
+                ; y pixels high
+                inc hl
+                ld a, (hl) ; y
+                cp b
+                jc .no_hit_dec2
+
+                ex af, af'
+                push hl
+                inc hl
+                ld a, (hl)
+                inc hl
+                ld h, (hl)
+                ld l, a
+                inc hl
+                ld d, (hl) ; A = actual sprite height
+                pop hl
+                ex af, af'
+
+                sub d
+                cp b
+                jnc .no_hit_dec2
+
+                ; have hit!
+                dec hl
+                dec hl
+                xor a
+                dec a
+                pop de
+                ret
+
+.no_hit_dec2    dec hl
+.no_hit_dec1    dec hl
+.next           ld bc, spr_length
+                add hl, bc
+                jp .loop
+
+.nothing_hit    xor a
+                pop de
+                ret
+
+
+
+
 
                 align 8
 sprites:

@@ -68,9 +68,11 @@ sprite_death  equ 0xff
 Custom_draw   equ 0x80
 Every_frame   equ 0x40
 
+s_tag_mask      equ 0x0f
 s_nothing       equ 0
 s_monster       equ 1
 s_isaac_tear    equ (0x02 or Custom_draw or Every_frame)
+s_decoration    equ (3 or Every_frame)
 s_isaac         equ (0x0f or Every_frame)
 
                 module Entity
@@ -118,7 +120,7 @@ Appear:
                 ;ld (ix + spr_length), 255
                 jp 1b
 
-Map_no_isaac:
+Map_monsters:
                 pop hl
                 ld (Map.smc + 1), hl
                 ld ix, spritelist + spr_length ; by convention, isaac is first
@@ -127,30 +129,7 @@ Map_no_isaac:
 
 Map:
                 ; stack — function to call for all sprites
-                ; IX will get the sprite pointer
-                pop hl
-                ld (.smc + 1), hl
-                ld ix, spritelist
-.reentry
-1               ld a, (ix)
-
-                inc a
-                ret z
-                dec a
-                jz .skip_this
-.all_ok
-.smc            call 0000
-.skip_this
-                ld bc, spr_length
-                add ix, bc
-                jr 1b
-
-
-
-Map_noix:
-                ; stack — function to call for all sprites
-                ;      IX will get the sprite pointer
-                ;      Do not touch the alt. regs there thx
+                ;      HL will get the sprite pointer
                 pop hl
                 ld (.smc + 1), hl
                 ld hl, spritelist
@@ -193,6 +172,7 @@ draw_sprites_all:
                 ld a, 7
                 call DebugLine
                 call Map
+                ld ix, hl
                 call Entity.Materialize
                 ld a, Color.red
                 call DebugLine
@@ -225,10 +205,10 @@ Draw_all_chaotic:
                 pop ix
 
                 ld a, Color.white
-                out (254), a
+                call DebugBorder
                 call Entity.Materialize
                 ld a, Color.black
-                out (254), a
+                call DebugBorder
 
                 pop hl
                 pop bc
@@ -252,13 +232,19 @@ Draw_all_chaotic:
 
 .draw_important_stuff:
                 ; isaac and his tears are drawn every frame
-                call Map_noix
+                call Map
                 ld a, (hl)
                 and Every_frame
                 ret z
-.mat            push hl
-                pop ix
+.mat            ld ix, hl
+
+                ld a, Color.magenta
+                call DebugBorder
+
                 call Entity.Materialize
+
+                ld a, Color.black
+                call DebugBorder
 
                 ret
 
@@ -273,7 +259,7 @@ Run_isaac_hittest:
                 ld h, b
                 ld (.bc + 1), hl
 
-                call Map_no_isaac
+                call Map_monsters
 
                 ld a, (ix + spr_x)
 .bc             ld bc, 0
@@ -311,6 +297,8 @@ Update_all:
                 ld (n_sprites), a
                 call Map
 
+                ld ix, hl
+
 .update_sprite
                 ld hl, n_sprites
                 inc (hl)
@@ -321,8 +309,7 @@ Update_all:
 
                 inc a ; sprite_death
                 ret nz
-.handle_death:
-                xor a
+.handle_death   ; fall-through to dematerialize
 
 Dematerialize:
                 ; IX = sprite
@@ -333,8 +320,8 @@ Dematerialize:
                 jp nz, .custom
                 ld bc, (ix + spr_prev_pos)
                 ld hl, (ix + spr_prev_sprite)
-                ;ld hl, (ix + spr_sprite)
                 jp Sprite.Undraw
+
 .custom
                 ld hl, (ix + spr_sprite)
                 ld (.call + 1), hl
@@ -416,74 +403,6 @@ Move_in_cardinal_direction:
                 ret
 
 
-Hittest_monsters:
-                ; bc - coordinates
-                push de
-                ld hl, bc
-                ld (.bc + 1), hl
-
-                ld hl, spritelist + spr_length
-.loop
-                ld a, (hl)
-                cp 255
-                jz .nothing_hit
-                cp s_monster
-                jnz .next
-
-                inc hl
-                ld a, (hl) ; x
-.bc             ld bc, 0
-                ; 10 pixels wide area around base
-                add 5
-                cp c
-                jc .no_hit_dec1
-                sub 10
-                cp c
-                jnc .no_hit_dec1
-
-                ; 8 pixels high
-                inc hl
-                ld a, (hl) ; y
-                cp b
-                jc .no_hit_dec2
-
-                ex af, af'
-                push hl
-                inc hl
-                ld a, (hl)
-                inc hl
-                ld h, (hl)
-                ld l, a
-                ld d, (hl) ; A = actual sprite height
-                pop hl
-                ex af, af'
-
-                sub d
-                cp b
-                jnc .no_hit_dec2
-
-                ; have hit!
-                dec hl
-                dec hl
-                xor a
-                dec a
-                pop de
-                ret
-
-.no_hit_dec2    dec hl
-.no_hit_dec1    dec hl
-.next           ld bc, spr_length
-                add hl, bc
-                jp .loop
-
-.nothing_hit    xor a
-                pop de
-                ret
-
-
-
-
-
 
 When_monster_hit:
                 ; A - direction from which it was hit
@@ -514,7 +433,11 @@ When_monster_hit:
 .demat          call Dematerialize
                 ld a, Color.red
                 call Blink
+
+                ld bc, (ix + spr_pos)
+                call Poof.Appear
 .fin
+
                 pop ix
                 ret
 

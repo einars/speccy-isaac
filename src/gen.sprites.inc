@@ -20,7 +20,6 @@ isaac_down_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b01000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b01000000
-                db 0
 
 isaac_down_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -44,7 +43,6 @@ isaac_down_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b00000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
-                db 0
 
 isaac_down_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -68,7 +66,6 @@ isaac_down_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000000, 0b11000000
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
-                db 0
 
 isaac_up_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -92,7 +89,6 @@ isaac_up_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b01000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b01000000
-                db 0
 
 isaac_up_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -116,7 +112,6 @@ isaac_up_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b00000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
-                db 0
 
 isaac_up_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -140,7 +135,6 @@ isaac_up_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000000, 0b11000000
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
-                db 0
 
 isaac_left_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -164,7 +158,6 @@ isaac_left_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b01000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b01000000
-                db 0
 
 isaac_left_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -188,7 +181,6 @@ isaac_left_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b00000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
-                db 0
 
 isaac_left_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -212,7 +204,6 @@ isaac_left_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000000, 0b11000000
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
-                db 0
 
 isaac_right_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -236,7 +227,6 @@ isaac_right_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b01000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b01000000
-                db 0
 
 isaac_right_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -260,7 +250,6 @@ isaac_right_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b00000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
-                db 0
 
 isaac_right_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -284,7 +273,6 @@ isaac_right_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000000, 0b11000000
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
-                db 0
 
 spider_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 7
@@ -295,7 +283,6 @@ spider_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b00000000, 0b00000001, 0b00101011, 0b10101000
                 db 0b00000000, 0b00000001, 0b00000010, 0b10000000
                 db 0b11100000, 0b00001111, 0b00000000, 0b00000000
-                db 0
 
 spider_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 7
@@ -306,7 +293,6 @@ spider_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b00000000, 0b00000001, 0b01001010, 0b10100100
                 db 0b00000000, 0b00000001, 0b00001000, 0b00100000
                 db 0b11100000, 0b00001111, 0b00000000, 0b00000000
-                db 0
 
 tile_stone_001:	db 16
             db 0b00111110, 0b11111000
@@ -349,7 +335,6 @@ mimic_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000011, 0b00000000
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
-                db 0
 
 mimic_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
@@ -373,4 +358,3 @@ mimic_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 0b11110000, 0b00001111, 0b00000101, 0b11100000
                 db 0b11110000, 0b00001111, 0b00000000, 0b11000000
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
-                db 0

@@ -62,3 +62,46 @@ nm_spider_f1:	db (Sprite.Flags.double_column | Sprite.Flags.unmasked)
                 db 0b00100111, 0b11001000
                 db 0b01001010, 0b10100100
                 db 0b00001000, 0b00100000
+
+nm_fly_f0:
+                db (Sprite.Flags.double_column | Sprite.Flags.unmasked)
+                db 7
+                dg -------- --------
+                dg -------- --------
+                dg ------X- -X------
+                dg -----X-X X-X-----
+                dg ------XX XX------
+                dg -------X X-------
+                dg -------- --------
+nm_fly_f1:
+                db (Sprite.Flags.double_column | Sprite.Flags.unmasked)
+                db 7
+                dg -------- --------
+                dg ------X- -X------
+                dg -----X-X X-X-----
+                dg -----X-X X-X-----
+                dg ------XX XX------
+                dg -------X X-------
+                dg -------- --------
+
+nm_poof_f0:
+                db (Sprite.Flags.double_column | Sprite.Flags.unmasked)
+                db 7
+                dg -------- --------
+                dg ----x--- ---x----
+                dg -----x-- --x-----
+                dg -------- ------x-
+                dg x--xx--- ---x----
+                dg ------x- --------
+                dg -----x-- -----x--
+
+nm_poof_f1:
+                db (Sprite.Flags.double_column | Sprite.Flags.unmasked)
+                db 7
+                dg ---x---- -------x
+                dg -------- ----x---
+                dg ----x--- --------
+                dg -------- --------
+                dg -x------ ------x-
+                dg -------- --------
+                dg --x----- --------
