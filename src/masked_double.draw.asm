@@ -52,7 +52,7 @@ mb_impl         macro
                 LineInc_HL
                 endm
 
-double_column_masked:
+Draw_masked_double:
                 ; HL - sprite data (actual mask+sprite, without height-byte)
                 ; DE - screen address
                 ; B - height

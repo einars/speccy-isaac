@@ -1,4 +1,4 @@
-isaac_down_f0:
+isaac_down_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -22,7 +22,7 @@ isaac_down_f0:
                 db 0b11111000, 0b00011111, 0b00000011, 0b01000000
                 db 0
 
-isaac_down_f1:
+isaac_down_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -46,7 +46,7 @@ isaac_down_f1:
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
                 db 0
 
-isaac_down_f2:
+isaac_down_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -70,7 +70,7 @@ isaac_down_f2:
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
                 db 0
 
-isaac_up_f0:
+isaac_up_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -94,7 +94,7 @@ isaac_up_f0:
                 db 0b11111000, 0b00011111, 0b00000011, 0b01000000
                 db 0
 
-isaac_up_f1:
+isaac_up_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -118,7 +118,7 @@ isaac_up_f1:
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
                 db 0
 
-isaac_up_f2:
+isaac_up_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -142,7 +142,7 @@ isaac_up_f2:
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
                 db 0
 
-isaac_left_f0:
+isaac_left_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -166,7 +166,7 @@ isaac_left_f0:
                 db 0b11111000, 0b00011111, 0b00000011, 0b01000000
                 db 0
 
-isaac_left_f1:
+isaac_left_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -190,7 +190,7 @@ isaac_left_f1:
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
                 db 0
 
-isaac_left_f2:
+isaac_left_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -214,7 +214,7 @@ isaac_left_f2:
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
                 db 0
 
-isaac_right_f0:
+isaac_right_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -238,7 +238,7 @@ isaac_right_f0:
                 db 0b11111000, 0b00011111, 0b00000011, 0b01000000
                 db 0
 
-isaac_right_f1:
+isaac_right_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -262,7 +262,7 @@ isaac_right_f1:
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
                 db 0
 
-isaac_right_f2:
+isaac_right_f2:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -286,7 +286,7 @@ isaac_right_f2:
                 db 0b11111000, 0b00011111, 0b00000000, 0b11000000
                 db 0
 
-spider_f0:
+spider_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 7
                 db 0b11100011, 0b10001111, 0b00000000, 0b00000000
                 db 0b10000000, 0b00000011, 0b00001000, 0b00100000
@@ -297,7 +297,7 @@ spider_f0:
                 db 0b11100000, 0b00001111, 0b00000000, 0b00000000
                 db 0
 
-spider_f1:
+spider_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 7
                 db 0b11100011, 0b10001111, 0b00000000, 0b00000000
                 db 0b10000000, 0b00000011, 0b00001000, 0b00100000
@@ -308,7 +308,7 @@ spider_f1:
                 db 0b11100000, 0b00001111, 0b00000000, 0b00000000
                 db 0
 
-tile_stone_001: db 16
+tile_stone_001:	db 16
             db 0b00111110, 0b11111000
             db 0b01000000, 0b10000100
             db 0b10000000, 0b10000110
@@ -325,9 +325,9 @@ tile_stone_001: db 16
             db 0b10101101, 0b01010100
             db 0b01111111, 0b11111010
             db 0b00000000, 0b00000000
-          db 0
 
-mimic_f0:
+
+mimic_f0:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000
@@ -351,7 +351,7 @@ mimic_f0:
                 db 0b11111000, 0b00011111, 0b00000011, 0b00000000
                 db 0
 
-mimic_f1:
+mimic_f1:	db (Sprite.Flags.double_column | Sprite.Flags.masked)
                 db 20
                 db 0b11111000, 0b00011111, 0b00000000, 0b00000000
                 db 0b11100000, 0b00000111, 0b00000011, 0b11000000

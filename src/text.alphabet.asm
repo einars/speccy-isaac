@@ -16,6 +16,9 @@ unimplemented   macro
 ;   [ ] heart symbols
 ;   [ ] numbers
 ;   [ ] minor punctuation: dash, times, exclam, question
+
+TraceStart:
+
 Base:
 Space:
                 ; handled magically in text.get_letter.space
@@ -478,5 +481,7 @@ CustomComma:
                 dg --------
                 dg -X------
                 dg X-------
+
+TraceEnd:       equ $ - 1
                 endmodule
 

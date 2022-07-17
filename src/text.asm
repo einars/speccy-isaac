@@ -15,7 +15,7 @@ Debug:
 
 text_debug_0    db "WOW, ALPHABET ACTUALLY WORKS!", 0
 text_debug_1    db "DOES THIS MEAN THAT THIS PROJECT IS NOT DEAD?", 0
-text_debug_2    db "YES, PROBABLY. LAST CHANGES: 2022-06-19", 0
+text_debug_2    db "YES, PROBABLY. LAST CHANGES: 2022-07-17", 0
 
 
 Write:

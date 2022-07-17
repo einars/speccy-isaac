@@ -1,4 +1,3 @@
-                module Mask
 edc_impl        macro
                 ; MASK: E D C
                 ld a, b ; store B into A'
@@ -61,7 +60,7 @@ edc_impl        macro
                 endm
 
 
-Restore:
+Restore_masked_double:
                 ; BC = XY of sprite
                 ; HL = sprite
                 ; restores area taken by sprite w/offscreen
@@ -282,9 +281,4 @@ dc7:
 
                 djnz 1b
                 jp dcret
-
-
-                endmodule
-
-
 

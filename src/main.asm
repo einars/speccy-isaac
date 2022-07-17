@@ -36,7 +36,7 @@ Start:          jr 1f
                 call Scenes.Isaacs3
                 ;call Scenes.Isaacs1
                 ;call Scenes.Isaacs3
-                ;; call Scenes.Spiders3
+                call Scenes.Spiders3
                 ;call Scenes.Spiders2
 
                 ei
@@ -44,13 +44,15 @@ Start:          jr 1f
 
 .again          
 
+                ;ld a, Color.yellow
+                ;call DebugLine
+
                 call BlinkDo
                 ;call LoadIndicator.FrameStart
 
                 di
                 call draw_sprites_chaotic
                 ;call draw_sprites_all
-                ei
 
                 ld a, Color.green
                 call DebugLine
@@ -60,6 +62,10 @@ Start:          jr 1f
 
                 call Logic ; out of interrupt, end of screen
 
+                ld a, Color.magenta
+                call DebugLine
+
+                ei
                 halt
 
 
@@ -153,16 +159,22 @@ tick:           db 0
 
                 include "loadindicator.asm"
                 include "isaac.asm"
-                include "draw.asm"
+                include "sprite.asm"
                 include "keyboard.asm"
                 include "text.asm"
 
+EntitiesStart:  db 0
+
                 include "entities.asm"
 
-                include "generated-sprites.asm"
-                include "custom.tear.asm"
                 include "monster.spider.asm"
+                include "monster.mimic.asm"
 
+                include "gen.sprites.inc"
+                include "sprites.experimental.inc"
+                include "custom.tear.asm"
+
+EntitiesEnd:    db 0
 
                 include "room.asm"
                 include "util.asm"

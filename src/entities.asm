@@ -120,8 +120,7 @@ map_entities_no_isaac:
 
 map_entities:
                 ; stack — function to call for all sprites
-                ;      IX will get the sprite pointer
-                ;      Do not touch the alt. regs there thx
+                ; IX will get the sprite pointer
                 pop hl
                 ld (.smc + 1), hl
                 ld ix, spritelist
@@ -160,9 +159,9 @@ map_entities_noix:
 .smc            call 0000
                 pop hl
 .skip_this
-                ld bc, spr_length
-                add hl, bc
-                jr 1b
+                ld a, spr_length                 ; [7 .. 7]
+                Add_HL_A
+                jp 1b
 
 entity_tick:
                 ; returns:
@@ -193,7 +192,7 @@ draw_sprites_all:
                 ret
 
 draw_sprites_chaotic:
-.sprites_per_frame equ 1
+.sprites_per_frame equ 2
 
                 call .draw_important_stuff
 
@@ -333,7 +332,7 @@ dematerialize_sprite:
                 jp nz, .custom
                 ld bc, (ix + spr_prev_pos)
                 ld hl, (ix + spr_sprite)
-                jp Draw.Mask.Restore
+                jp Sprite.Undraw
 .custom
                 ld hl, (ix + spr_sprite)
                 ld (.call + 1), hl
@@ -348,7 +347,7 @@ materialize_sprite:
                 ; IX = HL = sprite
 
 
-                ld a, (ix)
+                ld a, (hl)
                 and Custom_draw
                 jp nz, materialize_sprite_custom
 
@@ -364,14 +363,14 @@ materialize_sprite:
 .changed
                 ld bc, (ix + spr_prev_pos)
                 ld hl, (ix + spr_sprite)
-                call Draw.Mask.Restore
+                call Sprite.Undraw
 
 
 .draw
                 ld bc, (ix + spr_pos)
                 ld (ix + spr_prev_pos), bc
                 ld hl, (ix + spr_sprite)
-                jp Draw.Sprite
+                jp Sprite.Draw
 
 materialize_sprite_custom:
                 ld bc, (ix + spr_prev_pos)
@@ -552,66 +551,6 @@ isaac_appear:   ; BC - coordinates of isaac
 
                 ld (ix + sd0), 0 ; frame, 1 vs 0
                 ld (ix + sd1), 0 ; frame counter
-                ret
-
-mimic_update:
-                call entity_tick
-                inc (ix + sd3)
-                ld a, (ix + sd3)
-                and 7
-                jnz 2f ; .no_leg_update
-                ld a, (ix + sd0)
-                inc a
-                and 1
-                ld (ix + sd0), a
-                jz 1f
-                ld hl, mimic_f0
-                ld (ix + spr_sprite), hl
-                jr 2f
-
-1               ld hl, mimic_f1
-                ld (ix + spr_sprite), hl
-2
-                ld a, (ix + sd1) ; distance to run
-                or a
-                jz .choose_new_direction
-
-                dec a
-                ld (ix + sd1), a
-
-                ld h, (ix + sd2)
-                ld a, 1
-                call move_in_cardinal_direction
-                jz .moved
-
-.choose_new_direction
-
-                call random
-                ld b, a
-                and 63
-                ld (ix + sd1), a ; distance to run
-                ld a, b
-                and 3
-                ld (ix + sd2), a ; direction
-
-.moved
-                xor a
-                ret
-
-
-
-mimic_appear:   ; BC - coordinates of isaac
-                ld de, mimic_f0
-                ld hl, mimic_update
-                ld a, s_monster
-                call appear
-                ld (ix + spr_ticks), a
-                ld (ix + spr_health), 7
-                xor a
-                ld (ix + sd0), a
-                ld (ix + sd1), a
-                ld (ix + sd2), a
-                ld (ix + sd3), a
                 ret
 
 enemy_hit:

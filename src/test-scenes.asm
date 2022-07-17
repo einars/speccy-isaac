@@ -2,37 +2,37 @@
 
 Isaacs:
                 ld bc, 0x3080
-                call mimic_appear
+                call Mimic.Appear
 Isaacs7:
 
                 ld bc, 0x4071
-                call mimic_appear
+                call Mimic.Appear
 Isaacs6:
 
                 ld bc, 0x5082
-                call mimic_appear
+                call Mimic.Appear
 Isaacs5:
 
                 ld bc, 0x6093
-                call mimic_appear
+                call Mimic.Appear
 Isaacs4:
 
                 ld bc, 0x70a4
-                call mimic_appear
+                call Mimic.Appear
 Isaacs3:
 
                 ld bc, 0x80b5
-                call mimic_appear
+                call Mimic.Appear
 
 Isaacs2:
 
                 ld bc, 0x90c6
-                call mimic_appear
+                call Mimic.Appear
 
 Isaac
 Isaacs1
                 ld bc, 0xa0d7
-                call mimic_appear
+                call Mimic.Appear
                 ret
 
 

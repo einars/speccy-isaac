@@ -8,6 +8,9 @@ RIGHT equ 3
 FIRE_M equ 4 ; movement direction
 FIRE_D equ 5 ; directional fire
 
+Mask:
+.on equ  0x00
+.off equ 0x80
 
 
 Color:
@@ -36,6 +39,10 @@ Bg:
 
 
                 display "start:         ",/A, Start
+                display "monsters:      ",/A, EntitiesStart, "...",/A, EntitiesEnd, " (", /A, (EntitiesEnd - EntitiesStart), ")"
                 display "top:           ",/A, $
                 display "everything:    ",/A, ($ - Start)
-                display "free at least: ",/A, (0xc000 - $)
+                display "---"
+                display "alphabet gfx:  ",/D, (text.Alphabet.TraceEnd - text.Alphabet.TraceStart)
+                display "code:          ",/D, (EntitiesStart - Start), " (alphabet gfx included)"
+                display "free at least: ",/D, (0xc000 - $)

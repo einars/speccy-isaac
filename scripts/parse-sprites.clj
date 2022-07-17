@@ -81,7 +81,7 @@
                            (binary-s pb)))
                  p1
                  p2)]
-    (format "%s: db %d\n%s\n          db 0"
+    (format "%s:\tdb %d\n%s\n"
             label
             (count (first pixels))
             (str/join "\n" asm))))
@@ -103,7 +103,7 @@
                           (mapv
                            (fn [[pix mask]] (column-to-string pix mask))
                            (partition-all 2 (interleave pixels masks)))))]
-      (format "%s:\n%s\n                db 0" label asm)))) ; end flag
+      (format "%s:\tdb (Sprite.Flags.double_column | Sprite.Flags.masked)\n%s\n                db 0" label asm)))) ; end flag
 
 (defn materialize [sprites f]
   (spit f (str/join "\n\n" (map sprite-to-string sprites))))
@@ -114,4 +114,4 @@
    (map read-sprite)))
 
 (materialize (read-sprites "/proj/isaac/src/sprites.txt")
-             "/proj/isaac/src/generated-sprites.asm")
+             "/proj/isaac/src/gen.sprites.inc")
